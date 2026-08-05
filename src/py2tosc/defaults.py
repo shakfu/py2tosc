@@ -1,0 +1,207 @@
+"""Default property sets for each control type.
+
+These mirror the properties TouchOSC writes for a newly created control, using
+the camelCase keys of the file format. They were cross-checked against a layout
+saved by TouchOSC 1.5.2.262; anything TouchOSC omits when empty -- `name`, `tag`
+and `script` -- is omitted here too.
+
+See <https://hexler.net/touchosc/manual/script-properties-and-values>.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+from .enums import ControlType
+
+__all__ = ["allowed_properties", "defaults_for"]
+
+_COMMON: dict[str, Any] = {
+    "background": True,
+    "color": (0.25, 0.25, 0.25, 1.0),
+    "cornerRadius": 0.0,
+    "frame": (0, 0, 100, 100),
+    "grabFocus": True,
+    "interactive": True,
+    "locked": False,
+    "orientation": 0,
+    "outline": True,
+    "outlineStyle": 1,
+    "pointerPriority": 0,
+    "shape": 1,
+    "visible": True,
+}
+
+_GRID_LINES: dict[str, Any] = {
+    "grid": True,
+    "gridColor": (0.0, 0.0, 0.0, 0.25),
+    "gridSteps": 10,
+}
+
+_RESPONSE: dict[str, Any] = {
+    "response": 0,
+    "responseFactor": 100,
+}
+
+_CURSOR: dict[str, Any] = {
+    "cursor": True,
+    "cursorDisplay": 0,
+}
+
+_LINES: dict[str, Any] = {
+    "lines": True,
+    "linesDisplay": 0,
+}
+
+_TEXT: dict[str, Any] = {
+    "font": 0,
+    "textAlignH": 2,
+    "textAlignV": 2,
+    "textColor": (1.0, 1.0, 1.0, 1.0),
+    "textSize": 14,
+}
+
+_XY: dict[str, Any] = {
+    "gridColor": (0.0, 0.0, 0.0, 0.25),
+    "gridX": True,
+    "gridY": True,
+    "gridStepsX": 10,
+    "gridStepsY": 10,
+    "lockX": False,
+    "lockY": False,
+}
+
+_CONTAINER: dict[str, Any] = {
+    "grabFocus": False,
+    "outlineStyle": 0,
+}
+
+_BY_TYPE: dict[ControlType, dict[str, Any]] = {
+    ControlType.BOX: {},
+    ControlType.BUTTON: {
+        "buttonType": 0,
+        "press": True,
+        "release": True,
+        "valuePosition": False,
+    },
+    ControlType.LABEL: {**_TEXT, "textClip": True, "textLength": 0},
+    ControlType.TEXT: {**_TEXT, "textClip": True, "textWrap": True},
+    ControlType.FADER: {
+        **_RESPONSE,
+        **_GRID_LINES,
+        **_CURSOR,
+        "bar": True,
+        "barDisplay": 0,
+    },
+    ControlType.XY: {**_RESPONSE, **_CURSOR, **_LINES, **_XY},
+    ControlType.RADIAL: {
+        **_RESPONSE,
+        **_GRID_LINES,
+        **_CURSOR,
+        "outlineStyle": 0,
+        "inverted": False,
+        "centered": False,
+    },
+    ControlType.ENCODER: {**_RESPONSE, **_GRID_LINES, **_CURSOR, "outlineStyle": 0},
+    ControlType.RADAR: {**_CURSOR, **_LINES, **_XY},
+    ControlType.RADIO: {"steps": 5, "radioType": 0},
+    ControlType.GROUP: {**_CONTAINER},
+    ControlType.GRID: {
+        "grabFocus": False,
+        "exclusive": False,
+        "gridNaming": 0,
+        "gridOrder": 0,
+        "gridStart": 0,
+        "gridType": 4,
+        "gridX": 2,
+        "gridY": 2,
+    },
+    ControlType.PAGER: {
+        **_CONTAINER,
+        "tabLabels": True,
+        "tabbar": True,
+        "tabbarDoubleTap": False,
+        "tabbarSize": 40,
+        "textSizeOff": 14,
+        "textSizeOn": 14,
+    },
+}
+
+#: Values a freshly created control of each type starts with.
+_VALUES_BY_TYPE: dict[ControlType, tuple[tuple[str, Any], ...]] = {
+    ControlType.BOX: (("touch", False),),
+    ControlType.BUTTON: (("x", 0.0), ("touch", False)),
+    ControlType.LABEL: (("text", ""), ("touch", False)),
+    ControlType.TEXT: (("text", ""), ("touch", False)),
+    ControlType.FADER: (("x", 0.0), ("touch", False)),
+    ControlType.XY: (("x", 0.0), ("y", 0.0), ("touch", False)),
+    ControlType.RADIAL: (("x", 0.0), ("touch", False)),
+    ControlType.ENCODER: (("x", 0.0), ("y", 0.0), ("touch", False)),
+    ControlType.RADAR: (("x", 0.0), ("y", 0.0), ("touch", False)),
+    ControlType.RADIO: (("x", 0.0), ("touch", False)),
+    ControlType.GROUP: (("touch", False),),
+    ControlType.GRID: (("touch", False),),
+    ControlType.PAGER: (("page", 0.0), ("touch", False)),
+}
+
+
+def defaults_for(control_type: ControlType) -> dict[str, Any]:
+    """Return the default properties for a control type.
+
+    Args:
+        control_type: The type to look up.
+
+    Returns:
+        A fresh dict of camelCase key to Python value, safe to mutate.
+    """
+    return {**_COMMON, **_BY_TYPE.get(control_type, {})}
+
+
+def default_values_for(control_type: ControlType) -> tuple[tuple[str, Any], ...]:
+    """Return the `(key, default)` pairs a new control of this type starts with.
+
+    Args:
+        control_type: The type to look up.
+
+    Returns:
+        A tuple of key and starting value pairs.
+    """
+    return _VALUES_BY_TYPE.get(control_type, (("touch", False),))
+
+
+#: Properties TouchOSC omits when empty, which py2tosc leaves to the caller
+#: rather than inventing. They are valid on any control.
+CALLER_SUPPLIED = frozenset({"name", "tag", "script"})
+
+#: Properties a control type accepts but does not start with, so they are valid
+#: without being defaults. Derived from layouts the editor wrote: a `centered`
+#: fader is a real thing the editor produces, and a GROUP acting as a PAGER's
+#: page carries that page's tab styling.
+_ALSO_ALLOWED: dict[ControlType, frozenset[str]] = {
+    ControlType.FADER: frozenset({"centered"}),
+    ControlType.GROUP: frozenset(
+        {"tabColorOff", "tabColorOn", "tabLabel", "textColorOff", "textColorOn"}
+    ),
+}
+
+
+def allowed_properties(control_type: ControlType) -> frozenset[str]:
+    """Every property key that belongs on this control type.
+
+    Wider than [`defaults_for`][py2tosc.defaults.defaults_for]: a key can be
+    valid for a type without the editor writing it on every instance. Used by
+    [`validate`][py2tosc.validate] to tell a misplaced format property from a
+    deliberate custom one.
+
+    Args:
+        control_type: The type to look up.
+
+    Returns:
+        The type's default keys, the three the caller supplies, and any the
+        editor is known to write for that type.
+    """
+    return (
+        frozenset(defaults_for(control_type))
+        | CALLER_SUPPLIED
+        | _ALSO_ALLOWED.get(control_type, frozenset())
+    )

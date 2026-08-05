@@ -1,0 +1,29 @@
+__pycache__/
+*.py[cod]
+
+# builds
+dist/
+build/
+*.egg-info/
+site/
+
+# environments
+.venv/
+venv/
+
+# tests and coverage
+.*_cache/
+.coverage
+htmlcov/
+*.prof
+
+# docs
+site/
+
+# editors and os
+.vscode/
+.idea/
+.DS_Store
+
+# reviews
+REVIEW.md

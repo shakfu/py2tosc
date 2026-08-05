@@ -1,0 +1,87 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# A branch pushed to twice in quick succession does not need a result for the
+# commit that was already replaced. Runs on main are left alone so every commit
+# that lands keeps its own result.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # py2tosc is pure Python with no runtime dependencies, so there is nothing an
+  # OS matrix would exercise that one runner does not. The interpreter version
+  # is a different matter: every version in the matrix is one the classifiers in
+  # pyproject.toml promise, and each is a separate promise to keep.
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9
+        with:
+          enable-cache: true
+
+      - name: Run tests
+        run: uv run --python ${{ matrix.python-version }} --no-default-groups --group dev pytest -q
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9
+      - run: uv run --no-default-groups --group dev mypy
+
+  # `make lint` and `make format` rewrite files in place; here the same rules
+  # run read-only so a violation fails rather than being silently fixed.
+  # Scoped to src/ to match the Makefile: tests/ deliberately uses idioms ruff
+  # objects to, such as a bare attribute access to prove it raises.
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9
+      - run: uv run --no-default-groups --group dev ruff check src/
+      - run: uv run --no-default-groups --group dev ruff format --check src/
+
+  # Nothing deploys the docs automatically, so this is purely a correctness
+  # check: --strict fails on a dead link or a moved snippet path before the
+  # breakage reaches whoever next runs `make docs-deploy`.
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9
+      - run: uv run --no-default-groups --group docs mkdocs build --strict
+
+  # Publishing happens from a laptop via `make publish`, so this is the only
+  # automated look at the artefacts. It mirrors `make dist-check` and adds an
+  # install into a clean environment.
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9
+      - run: uv build
+
+      - name: Validate the distribution metadata
+        run: uv run --no-default-groups --group dev twine check --strict dist/*
+
+      - name: Import from the built wheel
+        run: |
+          uv venv /tmp/check
+          uv pip install --python /tmp/check/bin/python dist/*.whl
+          /tmp/check/bin/python -c "import py2tosc; print(py2tosc.__version__)"

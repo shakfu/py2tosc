@@ -1,0 +1,8 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Test fixtures are compared byte for byte against output the TouchOSC editor
+# produced. Line ending conversion on checkout would break those comparisons,
+# so keep these exactly as committed.
+*.tosc binary
+*.xml -text

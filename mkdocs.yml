@@ -1,0 +1,105 @@
+site_name: py2tosc
+site_description: Generate and edit TouchOSC layouts from Python.
+site_url: https://shakfu.github.io/py2tosc/
+repo_url: https://github.com/shakfu/py2tosc
+repo_name: shakfu/py2tosc
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - content.code.copy
+    - content.code.annotate
+    - search.suggest
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: deep orange
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: deep orange
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            docstring_section_style: table
+            show_root_heading: true
+            show_root_full_path: false
+            show_source: true
+            show_signature_annotations: true
+            separate_signature: true
+            members_order: source
+            filters: ["!^_"]
+            heading_level: 2
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: [.]
+      # Fail the build if an embedded demo moves, rather than rendering the
+      # literal --8<-- line into the page.
+      check_paths: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Guide:
+      - Controls and properties: guide/controls.md
+      - Messages: guide/messages.md
+      - Layouts: guide/layouts.md
+      - The .tosc format: guide/format.md
+      - Custom properties: guide/custom-properties.md
+      - Validation: guide/validation.md
+  - Demos:
+      - Overview: demos/index.md
+      - Custom property: demos/custom-property.md
+      - Copy scripts: demos/copy-scripts.md
+      - Faders from JSON: demos/from-json.md
+      - Image converter: demos/image-converter.md
+      - Numpad: demos/numpad.md
+      - Reaper to TouchOSC: demos/reaper.md
+  - API reference:
+      - Documents: api/document.md
+      - Controls: api/control.md
+      - Properties: api/properties.md
+      - Values and messages: api/messages.md
+      - Layouts: api/layout.md
+      - Enumerations: api/enums.md
+      - Validation: api/validate.md
+  - Coming from tosclib: migrating.md
+  - Changelog: changelog.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/shakfu/py2tosc
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/py2tosc/

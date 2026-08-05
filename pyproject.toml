@@ -1,0 +1,72 @@
+[project]
+name = "py2tosc"
+version = "0.1.0"
+description = "Generate and edit TouchOSC layouts from Python."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Shakeeb Alireza" }]
+keywords = ["touchosc", "osc", "midi", "tosc", "hexler"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Typing :: Typed",
+]
+
+# py2tosc has no runtime dependencies. It needs nothing beyond the standard
+# library, which is the point of dropping numpy in 1.0.
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/shakfu/py2tosc"
+Documentation = "https://shakfu.github.io/py2tosc"
+Repository = "https://github.com/shakfu/py2tosc"
+Issues = "https://github.com/shakfu/py2tosc/issues"
+
+[build-system]
+requires = ["uv_build>=0.12.1,<0.13"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "mypy>=1.11",
+    # Only the image converter demo needs this, but the demo is tested.
+    "pillow>=10.0",
+    "ruff>=0.16.1",
+    "twine>=7.0.0",
+]
+docs = [
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.26",
+]
+
+[tool.uv.build-backend]
+# Ship the changelog in the sdist alongside README and LICENSE.
+source-include = ["CHANGELOG.md"]
+
+[tool.uv]
+# Both groups are installed by a bare `uv sync`, so `make docs` and `make test`
+# work without having to name a group.
+default-groups = ["dev", "docs"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-W error::DeprecationWarning"
+
+[tool.mypy]
+python_version = "3.10"
+packages = ["py2tosc"]
+strict_optional = true
+warn_unused_ignores = true

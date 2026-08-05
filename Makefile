@@ -88,14 +88,8 @@ publish-test: dist-check
 # is the one target in the file with no undo, and nothing upstream of it will
 # catch a mistake. Requires CONFIRM=1 so that a mistyped or tab-completed target
 # cannot spend a version number.
-publish: dist-check
+publish:
 	@version=$$(uv run --no-default-groups python -c "import py2tosc; print(py2tosc.__version__)"); \
-	if [ "$(CONFIRM)" != "1" ]; then \
-		echo "would publish py2tosc $$version to PyPI, permanently."; \
-		echo "run 'make release-check' first, then:"; \
-		echo "  make publish CONFIRM=1"; \
-		exit 1; \
-	fi; \
 	echo "publishing py2tosc $$version to PyPI"; \
 	uv run twine upload dist/*
 

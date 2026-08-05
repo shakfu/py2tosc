@@ -11,8 +11,7 @@ help:
 	@echo "docs-serve  serve the documentation with live reload"
 	@echo "docs-deploy build the docs and push them to the gh-pages branch"
 	@echo "build       build the wheel and sdist into dist/"
-	@echo "dist-check  rebuild dist/ and validate the artefacts with twine"
-	@echo "publish-test  upload dist/ to TestPyPI"
+	@echo "check 	   validate the artefacts with twine"
 	@echo "publish     upload dist/ to PyPI"
 	@echo "release-check  verify the tree is ready to tag and release"
 	@echo "tag         create the vX.Y.Z tag for the declared version"
@@ -53,13 +52,12 @@ docs-deploy:
 
 build:
 	@uv build
+	@uv run twine check --strict dist/*
 
 # `uv build` adds to dist/ without clearing it, so a wheel left over from an
 # earlier version would be checked and uploaded alongside the current one.
 # Always rebuild from an empty dist/ before validating or publishing.
-dist-check:
-	@rm -rf dist
-	@uv build
+check:
 	@uv run twine check --strict dist/*
 
 # Releases are made by hand, so this is the gate: nothing in CI re-checks the

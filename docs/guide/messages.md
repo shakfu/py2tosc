@@ -117,9 +117,11 @@ from py2tosc import LocalMessage
 
 readout = doc.find("readout")
 fader.messages.append(
-    LocalMessage(value="x", dst_type="FLOAT", dst_var="text", dst_id=readout.id)
+    LocalMessage(value="x", dst_type="VALUE", dst_var="text", dst_id=readout.id)
 )
 ```
+
+`dst_type` says what kind of thing is being written on the destination, so it takes `VALUE` or `PROPERTY` -- not a conversion. `conversion` is the separate field that decides the type the content is converted to on the way.
 
 ```
 <local>
@@ -177,3 +179,26 @@ OscMessage(triggers=[Trigger(var="touch", condition="RISE")])
 ```python
 OscMessage(connections="1000000000")   # first connection only
 ```
+
+## Shorter ways to say the same thing
+
+The dataclasses above mirror the file format, so they say everything and assume nothing. That is right for reading a file someone else wrote and long-winded for writing one, where a single idea can cost four objects and a dozen positional arguments.
+
+[`py2tosc.ui`](../api/ui.md) builds the same dataclasses from a shorter description. Addresses take an f-string-like template, and both ends of a local binding are described with the same handful of constructors:
+
+```python
+from py2tosc import ui
+
+fader.messages.append(ui.osc("/synth/{parent.name}/{name}"))
+fader.messages.append(ui.midi_cc(74))
+button.messages.append(ui.connect(readout, source=ui.prop("name"), to="text", on="RISE"))
+```
+
+The same four source constructors describe an OSC argument, a MIDI slot and either end of a local binding, so a byte can be drawn from the control rather than written out. A keyboard whose buttons name their own notes needs one line and no numbering:
+
+```python
+for key in keyboard:
+    key.messages.append(ui.midi_note(ui.prop("name")))
+```
+
+Nothing there reaches a file that a hand-written `OscMessage` could not, and the two styles mix freely. The module is unstable below 1.0.

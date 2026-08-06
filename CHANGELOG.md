@@ -2,6 +2,20 @@
 
 Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses [semantic versioning](https://semver.org/spec/v2.0.0.html) -- while the version is below 1.0, a minor bump may break the API.
 
+## [Unreleased]
+
+### Added
+
+- `py2tosc.ui`, message combinators that build the existing dataclasses from a shorter description. `osc("/synth/{parent.name}/{name}")` expands an f-string-like address into partials, `midi_cc` and `midi_note` cover the two common MIDI bindings, and `connect` replaces the seven keyword arguments a `LocalMessage` needs with a source and a target described by the same `value`, `const`, `prop` and `index` constructors used for OSC arguments. Nothing it builds can reach a file that a hand-written message could not. The module is unstable while the version is below 1.0; see the [API reference](https://shakfu.github.io/py2tosc/api/ui/).
+
+- `midi_cc` and `midi_note` take a partial as well as a number for the note, the controller and the channel, so `midi_note(prop("name"))` gives a keyboard whose buttons name their own notes instead of being numbered one at a time. `const` and `prop` gained a `scale` to match, since a MIDI slot draws its fixed byte from the range rather than from the key.
+
+- `ALL_CONNECTIONS` and `ALL_GAMEPADS` are exported, having previously been reachable only by importing `py2tosc.messages` directly.
+
+### Fixed
+
+- The messages guide taught `dst_type="FLOAT"` on a `LocalMessage`, which is a `Conversion` value in a field that takes a `PartialType`. `dst_type` says what kind of thing is written on the destination, so it takes `VALUE` or `PROPERTY`; nothing catches the mistake, since the field is annotated as a bare `str` and `validate` has no rule for it.
+
 ## [0.1.0]
 
 First release: py2tosc is a rewrite of [tosclib](https://github.com/AlbertoV5/tosclib) 0.3.5 by Alberto Valdez; the entries below describe what changed relative to it. Scripts written against tosclib will not run against py2tosc, and there are no compatibility shims. See [Coming from tosclib](https://shakfu.github.io/py2tosc/migrating/) for a name by name mapping.

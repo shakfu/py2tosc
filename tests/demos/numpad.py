@@ -15,7 +15,7 @@ digit and clamps the total.
 import sys
 
 import py2tosc
-from py2tosc import Control, LocalMessage, Trigger, Value, layout
+from py2tosc import Control, LocalMessage, Value, layout, ui
 
 GRADIENT = ("#404040", "#804040")
 KEYS = ("7", "4", "1", "8", "5", "2", "9", "6", "3")
@@ -72,15 +72,7 @@ def key(cell: Control, caption: str, *, inset: float = 0.0) -> Control:
 
 def sends_name_to(readout: Control) -> LocalMessage:
     """A binding that sends the pressing control's name to the readout's text."""
-    return LocalMessage(
-        triggers=[Trigger("x", "RISE")],
-        type="PROPERTY",
-        conversion="STRING",
-        value="name",
-        dst_type="VALUE",
-        dst_var="text",
-        dst_id=readout.id,
-    )
+    return ui.connect(readout, source=ui.prop("name"), to="text", on="RISE")
 
 
 def build() -> py2tosc.Document:
@@ -124,36 +116,12 @@ def build() -> py2tosc.Document:
 
     # CLR resets the running total and blanks the readout.
     key(clear_cell, "CLR").messages += [
-        LocalMessage(
-            triggers=[Trigger("x", "RISE")],
-            type="CONSTANT",
-            conversion="STRING",
-            value="0",
-            dst_type="PROPERTY",
-            dst_var="sum",
-            dst_id=readout.id,
-        ),
-        LocalMessage(
-            triggers=[Trigger("x", "FALL")],
-            type="CONSTANT",
-            conversion="STRING",
-            value="",
-            dst_type="VALUE",
-            dst_var="text",
-            dst_id=readout.id,
-        ),
+        ui.connect(readout, source=ui.const("0"), to=ui.prop("sum"), on="RISE"),
+        ui.connect(readout, source=ui.const(""), to="text", on="FALL"),
     ]
 
     key(del_cell, "DEL").messages.append(
-        LocalMessage(
-            triggers=[Trigger("x", "FALL")],
-            type="CONSTANT",
-            conversion="STRING",
-            value="",
-            dst_type="VALUE",
-            dst_var="text",
-            dst_id=readout.id,
-        )
+        ui.connect(readout, source=ui.const(""), to="text", on="FALL")
     )
 
     return doc

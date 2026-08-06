@@ -91,6 +91,7 @@ nav:
       - Controls: api/control.md
       - Properties: api/properties.md
       - Values and messages: api/messages.md
+      - Message combinators: api/ui.md
       - Layouts: api/layout.md
       - Enumerations: api/enums.md
       - Validation: api/validate.md

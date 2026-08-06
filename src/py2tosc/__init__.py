@@ -13,7 +13,7 @@ This project has no relation to Hexler, the developer of TouchOSC. Back up your
 layouts before editing them with third party tools.
 """
 
-from . import layout
+from . import layout, ui
 from .control import (
     Control,
     box,
@@ -40,6 +40,8 @@ from .enums import (
     TriggerCondition,
 )
 from .messages import (
+    ALL_CONNECTIONS,
+    ALL_GAMEPADS,
     GamepadMessage,
     LocalMessage,
     Message,
@@ -62,6 +64,8 @@ __version__ = "0.1.0"
 # Sorted rather than grouped by topic, because RUF022 asks for it and the
 # grouping lives in the API reference instead. See docs/api/.
 __all__ = [
+    "ALL_CONNECTIONS",
+    "ALL_GAMEPADS",
     "Color",
     "Control",
     "ControlType",
@@ -105,6 +109,7 @@ __all__ = [
     "text",
     "to_color",
     "to_frame",
+    "ui",
     "validate",
     "xy",
 ]

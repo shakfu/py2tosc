@@ -12,6 +12,8 @@ from dataclasses import dataclass, field
 from .enums import Conversion, MidiType, PartialType, TriggerCondition
 
 __all__ = [
+    "ALL_CONNECTIONS",
+    "ALL_GAMEPADS",
     "GamepadMessage",
     "LocalMessage",
     "Message",

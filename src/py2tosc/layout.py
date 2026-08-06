@@ -12,8 +12,10 @@ faders = py2tosc.layout.row(panel, "FADER", sizes=8, colors=("#264653", "#e76f51
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Sequence
+from collections.abc import Sequence
 
+from ._geometry import ratios as _ratios
+from ._geometry import spans as _spans
 from .control import Control
 from .enums import ControlType
 from .properties import Color, to_color
@@ -48,35 +50,6 @@ def gradient(start: object, end: object, count: int) -> list[Color]:
         Color(*(a + (b - a) * (i * step) for a, b in zip(first, last)))
         for i in range(count)
     ]
-
-
-def _ratios(sizes: int | Sequence[float]) -> list[float]:
-    values = [1.0] * sizes if isinstance(sizes, int) else [float(s) for s in sizes]
-    if not values:
-        raise ValueError("sizes must describe at least one slot")
-    total = sum(values)
-    if total <= 0:
-        raise ValueError("sizes must add up to a positive number")
-    return [v / total for v in values]
-
-
-def _spans(length: float, ratios: Iterable[float]) -> list[tuple[int, int]]:
-    """Split `length` into offset and size pairs.
-
-    Each slot ends exactly where the next begins, so rounding never opens a gap
-    or an overlap, and the last slot always reaches the end of `length`.
-
-    The length may be fractional, since a frame can be, but the slots are whole
-    numbers: a layout with crisp edges is worth more than one that inherits a
-    parent's sub-pixel offset.
-    """
-    spans = []
-    offset = 0.0
-    for ratio in ratios:
-        start = round(offset)
-        offset += length * ratio
-        spans.append((start, round(offset) - start))
-    return spans
 
 
 def _build(

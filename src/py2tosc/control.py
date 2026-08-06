@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any
 
 from .defaults import default_values_for, defaults_for
 from .enums import ControlType
-from .messages import Message, Value
+from .messages import LocalMessage, Message, Value
 from .properties import Color, Frame, Property, to_camel, to_color, to_frame
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -35,6 +35,23 @@ __all__ = [
 _RESERVED = frozenset(
     {"control_type", "id", "properties", "values", "messages", "children"}
 )
+
+
+def _rewire(root: Control, remapped: dict[str, str]) -> None:
+    """Point local messages at the copies rather than at the originals.
+
+    A `LocalMessage` addresses its destination by node id, so reminting ids
+    without this leaves a duplicated subtree driving the subtree it was copied
+    from -- silently, since the id it holds still resolves.
+
+    Only ids in `remapped` are rewritten. A destination outside the copied
+    subtree is a deliberate reference to a control the copy does not own, and
+    it survives unchanged.
+    """
+    for control in root.walk():
+        for message in control.messages:
+            if isinstance(message, LocalMessage) and message.dst_id in remapped:
+                message.dst_id = remapped[message.dst_id]
 
 
 class Control:
@@ -263,6 +280,12 @@ class Control:
     def copy(self, *, new_ids: bool = True, **overrides: Any) -> Control:
         """Duplicate this control and everything beneath it.
 
+        Local messages are re-pointed at the copy: a binding whose destination
+        lies inside the duplicated subtree follows the copy of that
+        destination, so a wired module can be duplicated and keep working. A
+        binding pointing outside the subtree is left alone, since that is a
+        deliberate reference to a control the copy does not own.
+
         Args:
             new_ids: Give the copy and its descendants fresh ids. Leave this on
                 unless you are deliberately writing a layout with duplicates --
@@ -274,8 +297,11 @@ class Control:
         """
         clone = deepcopy(self)
         if new_ids:
+            remapped = {}
             for control in clone.walk():
-                object.__setattr__(control, "id", str(uuid.uuid4()))
+                remapped[control.id] = str(uuid.uuid4())
+                object.__setattr__(control, "id", remapped[control.id])
+            _rewire(clone, remapped)
         for key, value in overrides.items():
             clone.set(key, value)
         return clone

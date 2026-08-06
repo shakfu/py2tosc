@@ -77,3 +77,37 @@ for index, fader in enumerate(layout.row(panel, "FADER", sizes=8)):
     fader.name = f"ch{index + 1}"
     fader.messages.append(py2tosc.OscMessage())
 ```
+
+## Describing a layout instead of applying one
+
+The functions above size children the moment they create them, which needs a parent that already has a frame. That forces a layout to be built outside in, one control type at a time, and it cannot express a label sitting on a button at all.
+
+[`py2tosc.ui`](../api/ui.md) takes the other approach: the combinators record an arrangement and assign frames later, so a layout can be written from the inside out.
+
+```python
+from py2tosc import ui
+
+doc = py2tosc.Document(root=ui.column(
+    ui.row(py2tosc.label(name="readout"), py2tosc.button(name="send")),
+    ui.grid(*keys, columns=3, gap=4, pad=8),
+    sizes=(1, 3),
+    frame=(0, 0, 500, 800),
+))
+doc.resolve()
+```
+
+Each combinator returns the group it made rather than the children, so the result goes wherever a control goes and nesting is ordinary function composition -- `row(column(a, b), c)`. A row can hold a fader and a label, since it takes controls rather than a control type.
+
+`ui.stack` overlays its children, each filling the group. That is the button-with-a-label idiom, and it is the reason the numpad demo needs a helper of its own.
+
+### Resolving
+
+Nothing has a frame until `resolve` runs. It walks the tree from the top, because a layout can only divide a frame it knows, and a parent decides its children's frames outright -- a control inside a layout does not keep a frame it was built with. To place something by hand, leave it out of a layout group.
+
+Saving never resolves on its own: writing a file must not change the tree. A layout that was never resolved is reported by [validation](validation.md), because an unset frame reads back as `(0, 0, 0, 0)` rather than raising, so the mistake is otherwise invisible.
+
+### Gaps and padding
+
+`gap` is the space between slots; `pad` is the inset before the first and after the last. `pad` takes a number, a `(horizontal, vertical)` pair, or `(left, top, right, bottom)`. `gap` takes a number or a pair -- it sits between slots, so it has no four-sided form.
+
+Both are whole pixels, and the arithmetic is exact: each slot ends exactly `gap` before the next begins, and the last reaches the content edge. A layout whose padding and gaps do not fit raises rather than silently producing zero-width controls.

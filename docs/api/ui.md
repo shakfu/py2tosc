@@ -31,3 +31,17 @@ The same four constructors describe an OSC argument, a MIDI slot and either end 
 ::: py2tosc.ui.midi_note
 
 ::: py2tosc.ui.connect
+
+## Layout
+
+These describe an arrangement instead of applying one. Each returns a `GROUP` holding its children, so the result goes wherever a control goes and layouts nest by ordinary composition. Frames are assigned later, by `resolve`.
+
+::: py2tosc.ui.row
+
+::: py2tosc.ui.column
+
+::: py2tosc.ui.grid
+
+::: py2tosc.ui.stack
+
+::: py2tosc.ui.resolve

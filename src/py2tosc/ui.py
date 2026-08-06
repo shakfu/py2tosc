@@ -1,4 +1,4 @@
-"""Combinators for building messages, above the raw dataclasses.
+"""Combinators for messages and layout, above the raw dataclasses.
 
 The message dataclasses mirror the file format, so they say everything and
 assume nothing. That is right for a binding to someone else's format and wrong
@@ -14,18 +14,36 @@ fader.messages.append(ui.midi_cc(74))
 button.messages.append(ui.connect(readout, source=ui.prop("name"), to="text"))
 ```
 
+The layout combinators take the same view of `py2tosc.layout`, which sizes
+children as it creates them and so has to be driven outside in. These describe
+an arrangement and assign frames later, which lets one be written inside out:
+
+```python
+panel = ui.column(
+    ui.row(readout, send),
+    ui.grid(*keys, columns=3, gap=4),
+    sizes=(1, 3),
+    frame=(0, 0, 500, 800),
+)
+ui.resolve(panel)
+```
+
 Nothing here adds vocabulary the format lacks, and nothing here can reach a
-file that a hand-built `OscMessage` could not. The module is separate from the
-core because it encodes opinions about how bindings are best described, and
+file that a hand-built `OscMessage` could not -- the arrangement rides on a
+private attribute the codec cannot see. The module is separate from the core
+because it encodes opinions about how interfaces are best composed, and
 opinions age faster than a file format does. It is unstable below 1.0.
 """
 
 from __future__ import annotations
 
 from collections.abc import Sequence
+from typing import Any
 
+from ._geometry import COLUMN, GRID, ROW, STACK, Layout, to_gap, to_pad
+from ._geometry import resolve as _resolve
 from .control import Control
-from .enums import Conversion, MidiType, PartialType, TriggerCondition
+from .enums import ControlType, Conversion, MidiType, PartialType, TriggerCondition
 from .messages import (
     ALL_CONNECTIONS,
     LocalMessage,
@@ -38,14 +56,19 @@ from .messages import (
 )
 
 __all__ = [
+    "column",
     "connect",
     "const",
+    "grid",
     "index",
     "midi_cc",
     "midi_note",
     "osc",
     "path",
     "prop",
+    "resolve",
+    "row",
+    "stack",
     "value",
 ]
 
@@ -526,3 +549,148 @@ def connect(
         dst_var=target.value,
         dst_id=dst if isinstance(dst, str) else dst.id,
     )
+
+
+# -- layout ------------------------------------------------------------------
+
+
+def _arranged(
+    spec: Layout, children: Sequence[Control], props: dict[str, Any]
+) -> Control:
+    group = Control(ControlType.GROUP, children=list(children), **props)
+    group._layout = spec
+    return group
+
+
+def row(
+    *children: Control,
+    sizes: int | Sequence[float] | None = None,
+    gap: float | Sequence[float] = 0,
+    pad: float | Sequence[float] = 0,
+    **props: Any,
+) -> Control:
+    """Arrange controls left to right inside a group.
+
+    The group is returned rather than the children, so the result goes wherever
+    a control goes and layouts nest by ordinary composition:
+
+    ```python
+    row(column(meter, label), fader, sizes=(1, 3))
+    ```
+
+    No frames are assigned here. The arrangement is recorded and applied by
+    [`resolve`][py2tosc.ui.resolve] once the frame at the top is known, which is
+    what lets a layout be described from the inside out.
+
+    Args:
+        *children: The controls to arrange, in order.
+        sizes: Relative widths, one per child. Omitted, they share equally.
+        gap: Space between children, in pixels.
+        pad: Inset around the whole row -- a number, a `(horizontal, vertical)`
+            pair, or `(left, top, right, bottom)`.
+        **props: Properties to set on the group, such as `name` or `color`.
+
+    Returns:
+        A `GROUP` holding the children, waiting to be resolved.
+    """
+    return _arranged(
+        Layout(ROW, sizes=sizes, gap=to_gap(gap), pad=to_pad(pad)), children, props
+    )
+
+
+def column(
+    *children: Control,
+    sizes: int | Sequence[float] | None = None,
+    gap: float | Sequence[float] = 0,
+    pad: float | Sequence[float] = 0,
+    **props: Any,
+) -> Control:
+    """Arrange controls top to bottom inside a group.
+
+    Args:
+        *children: The controls to arrange, in order.
+        sizes: Relative heights, one per child. Omitted, they share equally.
+        gap: Space between children, in pixels.
+        pad: Inset around the whole column.
+        **props: Properties to set on the group.
+
+    Returns:
+        A `GROUP` holding the children, waiting to be resolved.
+    """
+    return _arranged(
+        Layout(COLUMN, sizes=sizes, gap=to_gap(gap), pad=to_pad(pad)), children, props
+    )
+
+
+def grid(
+    *children: Control,
+    columns: int = 4,
+    rows: int | None = None,
+    gap: float | Sequence[float] = 0,
+    pad: float | Sequence[float] = 0,
+    **props: Any,
+) -> Control:
+    """Tile controls in a grid, filling row by row.
+
+    Args:
+        *children: The controls to arrange, in row-major order.
+        columns: How many columns.
+        rows: How many rows, or `None` to take just enough for the children.
+        gap: Space between cells, in pixels.
+        pad: Inset around the whole grid.
+        **props: Properties to set on the group.
+
+    Returns:
+        A `GROUP` holding the children, waiting to be resolved.
+    """
+    return _arranged(
+        Layout(GRID, columns=columns, rows=rows, gap=to_gap(gap), pad=to_pad(pad)),
+        children,
+        props,
+    )
+
+
+def stack(
+    *children: Control,
+    pad: float | Sequence[float] = 0,
+    **props: Any,
+) -> Control:
+    """Overlay controls, each filling the group.
+
+    A label sitting on a button is the commonest idiom in TouchOSC and the one
+    the eager layout functions cannot express at all, since they divide a frame
+    rather than share it. The last child is on top.
+
+    Args:
+        *children: The controls to overlay, back to front.
+        pad: Inset applied to every child.
+        **props: Properties to set on the group.
+
+    Returns:
+        A `GROUP` holding the children, waiting to be resolved.
+    """
+    return _arranged(Layout(STACK, pad=to_pad(pad)), children, props)
+
+
+def resolve(control: Control, frame: Sequence[float] | None = None) -> Control:
+    """Assign frames to everything the layout combinators described.
+
+    Placement runs top down, because a layout can only divide a frame it knows.
+    A parent decides its children's frames outright: a control inside a layout
+    does not keep a frame it was built with. To place something by hand, leave
+    it out of a layout group, or put it in a [`stack`][py2tosc.ui.stack].
+
+    [`Document.resolve`][py2tosc.Document.resolve] calls this against the root.
+
+    Args:
+        control: The control to place, along with everything beneath it.
+        frame: The frame to give `control`. Omitted, it keeps the one it has.
+
+    Returns:
+        `control`, placed.
+
+    Raises:
+        ValueError: If a layout cannot fit its children into the space it has,
+            or if `sizes` does not match the number of children.
+    """
+    return _resolve(control, frame)

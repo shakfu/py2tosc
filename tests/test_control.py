@@ -133,6 +133,51 @@ def test_copy_can_keep_ids_and_override_properties():
     assert clone.name == "b"
 
 
+def _wired_panel():
+    """A readout and a button wired to it, the shape a copied module has."""
+    readout = py2tosc.label(name="readout")
+    button = py2tosc.button(name="key")
+    button.messages.append(py2tosc.LocalMessage(dst_var="text", dst_id=readout.id))
+    return py2tosc.group(name="panel", children=[readout, button])
+
+
+def test_copy_repoints_local_messages_at_the_copy():
+    """Reminting ids without this leaves the clone driving the original.
+
+    The id it kept still resolves, so nothing looks wrong: the duplicated
+    module simply writes into the module it was copied from.
+    """
+    panel = _wired_panel()
+    clone = panel.copy()
+    new_readout, new_button = clone.children
+
+    assert new_button.messages[0].dst_id == new_readout.id
+    assert new_button.messages[0].dst_id != panel.children[0].id
+
+
+def test_copy_leaves_the_original_wiring_alone():
+    panel = _wired_panel()
+    readout, button = panel.children
+    panel.copy()
+    assert button.messages[0].dst_id == readout.id
+
+
+def test_copy_preserves_a_destination_outside_the_subtree():
+    """An outward binding is a deliberate reference, not a stale id."""
+    outside = py2tosc.label(name="outside")
+    button = py2tosc.button(name="key")
+    button.messages.append(py2tosc.LocalMessage(dst_var="text", dst_id=outside.id))
+
+    clone = py2tosc.group(name="panel", children=[button]).copy()
+    assert clone.children[0].messages[0].dst_id == outside.id
+
+
+def test_copy_without_new_ids_changes_no_wiring():
+    panel = _wired_panel()
+    clone = panel.copy(new_ids=False)
+    assert clone.children[1].messages[0].dst_id == panel.children[0].id
+
+
 def test_default_values_match_the_control_type():
     assert [v.key for v in py2tosc.fader().values] == ["x", "touch"]
     assert [v.key for v in py2tosc.label().values] == ["text", "touch"]

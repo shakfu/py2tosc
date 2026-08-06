@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING
 from .control import Control
 from .defaults import allowed_properties, default_values_for
 from .enums import ControlType
-from .messages import GamepadMessage
+from .messages import GamepadMessage, LocalMessage
 from .properties import KNOWN_TYPES
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -93,7 +93,9 @@ def _path(trail: list[str]) -> str:
     return "/".join(trail) or "<root>"
 
 
-def _check_control(control: Control, trail: list[str]) -> Iterator[Issue]:
+def _check_control(
+    control: Control, trail: list[str], known_ids: frozenset[str]
+) -> Iterator[Issue]:
     here = _path(trail)
     kind = control.control_type
     allowed = allowed_properties(kind)
@@ -145,6 +147,37 @@ def _check_control(control: Control, trail: list[str]) -> Iterator[Issue]:
         # means it is not a mistake.
         if isinstance(message, GamepadMessage) and not message.target_var:
             yield Issue(WARNING, here, "GamepadMessage has no target_var to write to")
+        # A LocalMessage addresses its destination by node id, and a stale one
+        # still looks valid: the message is simply never delivered. Reminting
+        # ids without re-pointing the bindings is the usual way to get here.
+        #
+        # An empty dst_id is left alone. That is a binding the user added and
+        # has not filled in yet, and the editor writes them -- five times
+        # across the corpus -- so it is a normal intermediate state rather than
+        # a mistake. Only a destination that names something is checked.
+        if (
+            isinstance(message, LocalMessage)
+            and message.dst_id
+            and message.dst_id not in known_ids
+        ):
+            yield Issue(
+                WARNING,
+                here,
+                f"LocalMessage is addressed to node id {message.dst_id!r}, "
+                f"which no control in this layout has",
+            )
+
+    # A layout that was never resolved is invisible in the output: an unset
+    # frame reads back as (0, 0, 0, 0) rather than raising, so the children are
+    # written wherever they happened to be built and the file looks fine.
+    spec = getattr(control, "_layout", None)
+    if spec is not None and not spec.resolved:
+        yield Issue(
+            WARNING,
+            here,
+            f"{spec.kind} layout was never resolved; call Document.resolve() "
+            f"so its {len(control.children)} children are given frames",
+        )
 
     if control.children and kind not in CONTAINERS:
         yield Issue(
@@ -165,7 +198,9 @@ def _check_control(control: Control, trail: list[str]) -> Iterator[Issue]:
 
     for child in control.children:
         yield from _check_control(
-            child, [*trail, child.get("name") or f"<{child.control_type.value}>"]
+            child,
+            [*trail, child.get("name") or f"<{child.control_type.value}>"],
+            known_ids,
         )
 
 
@@ -177,6 +212,11 @@ def validate(target: Control | Document) -> list[Issue]:
             [`Control`][py2tosc.Control]; a control is checked along with
             everything beneath it.
 
+    Local message destinations are resolved against `target` and nothing above
+    it, so validating a subtree that is wired to a control outside itself
+    reports a destination it cannot see. Validate the whole
+    [`Document`][py2tosc.Document] to avoid that.
+
     Returns:
         Every finding, errors first, then in tree order. An empty list means
         nothing was found -- it is not a guarantee the layout opens.
@@ -184,7 +224,8 @@ def validate(target: Control | Document) -> list[Issue]:
     root = target if isinstance(target, Control) else target.root
     name = str(root.get("name") or "<root>")
 
-    issues = list(_check_control(root, [name]))
+    known_ids = frozenset(control.id for control in root.walk())
+    issues = list(_check_control(root, [name], known_ids))
 
     # Node ids must be unique across the whole layout, so this cannot be done
     # per control.

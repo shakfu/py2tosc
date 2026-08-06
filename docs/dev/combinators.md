@@ -1,6 +1,6 @@
 # High-level helpers and combinators
 
-**Status:** Tier 1 implemented in `py2tosc.ui`. Tiers 2 and 3 are still a design sketch, and the API is unstable below 1.0.
+**Status:** Tiers 1 and 2 implemented in `py2tosc.ui`. Tier 3 is still a design sketch, and the API is unstable below 1.0.
 
 The problem statement below is kept in its original present tense and describes the state before Tier 1 landed; the sections after it record what was built and what the corpus forced to change along the way.
 
@@ -278,6 +278,18 @@ Semantics that need deciding and then documenting:
 
 `_ratios` and `_spans` in `layout.py` already do the arithmetic. The resolution pass should call them rather than growing a second implementation, which probably means promoting them to a shared internal module.
 
+They moved to `_geometry`, which also holds the `Layout` spec, the frame arithmetic and `resolve`. Putting them there rather than in `ui` was not only about sharing: `validate` needs to read a spec and `Document` needs to run the pass, and having either import the unstable opinionated layer would invert exactly the layering this document argues for. `layout.py` imports the two helpers back under their old private names and is otherwise untouched.
+
+### What the implementation changed
+
+- **`gap` has no four-sided form.** The sketch said `gap` and `pad` both take an int, a pair or a four-tuple. Padding surrounds a region and has four sides; a gap sits *between* slots and has two. `gap` takes an int or a `(horizontal, vertical)` pair, and rejects anything longer.
+
+- **Resolution walks the whole tree.** The sketch said controls without a `_layout` are leaves and are left alone. That would strand a combinator group nested inside a hand-placed one, which is a normal thing to build. `resolve` recurses everywhere and only *assigns* frames where there is a spec.
+
+- **The content edge is rounded before the division, not after.** The first version computed the available length, divided it, then shifted each slot by the padding. On a fractional frame that pushes the last slot a pixel past its parent, because `round` was being applied to a span that no longer started at zero. Rounding `length - pad` first makes the invariant exact again. The parametrised invariant test caught this immediately, which is the argument for writing it first.
+
+- **A layout that does not fit raises.** Silently clamping to zero produces a file full of zero-sized controls, which is the failure mode the unresolved-layout warning exists to catch; there is no reason to have a second way of reaching it.
+
 ## Tier 3: idioms
 
 Thin wrappers over the two tiers above, worth adding only once they are settled.
@@ -305,6 +317,8 @@ def inset(control: Control, amount: float) -> Control
 
 **Should `connect` accept a destination name?** Not in Tier 1. It would make Tier 1 depend on a resolution pass that does not exist yet, and Tier 1 is meant to stand alone. Revisit with Tier 2, where a tree-walking pass already exists to hang it on.
 
+Most of the motivation for it has since gone, though. The build-order constraint was the visible complaint; the actual defect underneath was that `Control.copy(new_ids=True)` reminted ids without re-pointing the bindings, so duplicating a wired subtree produced a clone driving the original -- silently, because the stale id still resolved. `copy` now rewrites destinations that fall inside the copied subtree, and `validate` warns on one that resolves to nothing. What is left is an ordering inconvenience rather than a correctness problem, which is a much weaker case for resolving names late.
+
 **Should `save` resolve automatically?** No. Writing a file must not mutate the tree -- that is the round-tripping claim applied to the object model rather than the bytes. `Document.resolve()` stays explicit.
 
 **Does `validate` need a rule for an unresolved `_layout`?** Yes, as a warning, shipped with Tier 2. `Control.frame` returns `Frame(0, 0, 0, 0)` for an unset frame rather than raising, so an unresolved layout otherwise fails silently and produces a file full of zero-sized controls.
@@ -320,6 +334,8 @@ def inset(control: Control, amount: float) -> Control
 3. Tier 3, only once the first two have been used for something real.
 
 Step 1 is worth doing on its own merits and does not commit us to steps 2 or 3.
+
+Tier 3 is still open. `labelled` is `stack` plus a non-interactive `LABEL`, and `inset` is `stack` with a fractional `pad`, so both are now a few lines each -- but neither has been asked for by anything real yet, which was the condition for building them. The numpad's `key()` helper is the obvious first customer, and rewriting the demo against Tier 2 is the way to find out whether the wrappers earn their place or `stack` is already enough.
 
 ### Proving the rewrite changes nothing
 

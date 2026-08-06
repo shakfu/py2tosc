@@ -82,7 +82,7 @@ def test_osc_path_and_arguments():
 
 def test_local_message_field_order():
     f = py2tosc.fader()
-    f.messages.append(LocalMessage(dst_var="x", dst_id="abc", dst_type="FLOAT"))
+    f.messages.append(LocalMessage(dst_var="x", dst_id="abc", dst_type="VALUE"))
     block = re.search(r"<local>.*?</local>", render(f), re.S).group()
     tags = re.findall(r"<(\w+)>", block)
 

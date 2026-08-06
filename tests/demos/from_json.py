@@ -9,21 +9,14 @@ import json
 import sys
 
 import py2tosc
-from py2tosc import OscMessage, Partial, layout
+from py2tosc import OscMessage, layout, ui
 
 LIMIT = 10
 
 
 def parameter_message() -> OscMessage:
     """An OSC address built from the parent's name and the control's own."""
-    return OscMessage(
-        path=[
-            Partial("CONSTANT", "STRING", "/"),
-            Partial("PROPERTY", "STRING", "parent.name"),
-            Partial("CONSTANT", "STRING", "/"),
-            Partial("PROPERTY", "STRING", "name"),
-        ]
-    )
+    return ui.osc("/{parent.name}/{name}")
 
 
 def main(json_path: str, output_path: str) -> None:

@@ -36,17 +36,35 @@ def test_no_real_layout_produces_an_error(path):
     assert not found, f"{path.name}: {[str(i) for i in found]}"
 
 
+#: The one editor-written file that warns, and what it is allowed to say. The
+#: layout genuinely holds a dead LOCAL binding: the destination id appears
+#: exactly once in the file, inside `dstID`, and its v1 timestamp is later than
+#: either control in the layout -- so the destination was deleted, or the
+#: message was pasted in from somewhere else. The editor does not garbage
+#: collect the binding, which is why the rule fires here without being wrong.
+KNOWN_WARNINGS = {"msgs.tosc": "a75407ae-da3a-11ec-b68f-2cf05d85548b"}
+
+
 @pytest.mark.parametrize("path", EDITOR_WRITTEN, ids=lambda p: p.name)
 def test_editor_written_layouts_are_almost_warning_free(path):
-    """The editor's own output must produce no warnings at all.
+    """The editor's own output must produce no warnings it has not earned.
 
     This is the standard that keeps the rules honest: a validator that fires on
-    a file TouchOSC wrote is reporting its own ignorance. It has caught real
-    gaps three times -- `centered` on FADER, page styling on GROUP, and
+    a file TouchOSC wrote is usually reporting its own ignorance. It has caught
+    real gaps three times -- `centered` on FADER, page styling on GROUP, and
     `gridColor`/`textWrap` when a 1.5.2 sample covering every control type
     joined the corpus.
+
+    The single exception is named rather than tolerated, so a rule that starts
+    firing on anything else still fails here.
     """
-    assert len(warnings(py2tosc.load(path).validate())) == 0
+    found = warnings(py2tosc.load(path).validate())
+    expected = KNOWN_WARNINGS.get(path.name)
+    if expected is None:
+        assert found == []
+    else:
+        assert len(found) == 1
+        assert expected in found[0].message
 
 
 def test_gamepad_connections_use_the_narrower_field():
@@ -59,16 +77,23 @@ def test_gamepad_connections_use_the_narrower_field():
     assert any("connections is 10 characters" in i.message for i in found)
 
 
-def test_the_whole_corpus_produces_one_known_warning():
+def test_the_whole_corpus_produces_two_known_warnings():
+    """Both findings are real defects in the files, not gaps in the rules."""
     total = [i for p in CORPUS for i in py2tosc.load(p).validate()]
     assert errors(total) == []
 
     found = warnings(total)
-    assert len(found) == 1
+    assert len(found) == 2
+    messages = sorted(i.message for i in found)
+
+    # A dead LOCAL binding in msgs.tosc, addressed to a control the file does
+    # not contain. See KNOWN_WARNINGS above.
+    assert "LocalMessage is addressed to node id" in messages[0]
+
     # o_custom.tosc was written by tosclib 0.3.x's image demo, which gave a BOX
     # a value key of "r". The editor never does that.
-    assert "value 'r'" in found[0].message
-    assert "BOX" in found[0].message
+    assert "value 'r'" in messages[1]
+    assert "BOX" in messages[1]
 
 
 # -- what a clean layout looks like ------------------------------------------
@@ -203,6 +228,53 @@ def test_a_gamepad_binding_with_no_target_warns():
 
     found = warnings(fader.validate())
     assert any("target_var" in i.message for i in found)
+
+
+def test_a_local_binding_addressed_nowhere_warns():
+    """A stale destination id is invisible otherwise: the message just dies.
+
+    Nothing about the message is malformed, so without this the layout looks
+    clean and the binding silently never fires.
+    """
+    button = py2tosc.button(name="key")
+    button.messages.append(py2tosc.LocalMessage(dst_var="text", dst_id="gone"))
+    panel = py2tosc.group(name="panel", children=[button])
+
+    found = warnings(panel.validate())
+    assert len(found) == 1
+    assert "'gone'" in found[0].message
+
+
+def test_a_local_binding_with_no_destination_yet_is_left_alone():
+    """The editor writes half-configured bindings; five are in the corpus.
+
+    An empty `dst_id` is a binding the user has not finished, which is a normal
+    intermediate state rather than a defect.
+    """
+    button = py2tosc.button(name="key")
+    button.messages.append(py2tosc.LocalMessage(dst_var="text", dst_id=""))
+    assert warnings(button.validate()) == []
+
+
+def test_a_local_binding_within_the_tree_is_clean():
+    readout = py2tosc.label(name="readout")
+    button = py2tosc.button(name="key")
+    button.messages.append(py2tosc.LocalMessage(dst_var="text", dst_id=readout.id))
+
+    panel = py2tosc.group(name="panel", children=[readout, button])
+    assert panel.validate() == []
+
+
+def test_a_copied_subtree_still_validates():
+    """The rule and `Control.copy` have to agree, or duplicating a module warns."""
+    readout = py2tosc.label(name="readout")
+    button = py2tosc.button(name="key")
+    button.messages.append(py2tosc.LocalMessage(dst_var="text", dst_id=readout.id))
+    panel = py2tosc.group(name="panel", children=[readout, button])
+
+    doc = py2tosc.Document(root=py2tosc.group(name="root", children=[panel]))
+    doc.add(panel.copy())
+    assert doc.validate() == []
 
 
 # -- shape of the result -----------------------------------------------------

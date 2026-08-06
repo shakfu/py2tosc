@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from os import PathLike
 from typing import TYPE_CHECKING, Any
 
+from ._geometry import resolve
 from .codec import from_xml, to_xml
 from .control import Control, group
 from .enums import ControlType
@@ -98,6 +99,26 @@ class Document:
             This document, so calls can be chained.
         """
         self.root.add(*controls)
+        return self
+
+    def resolve(self) -> Document:
+        """Assign frames to everything the layout combinators described.
+
+        The combinators in `py2tosc.ui` record an arrangement without sizing
+        anything, since a layout can only divide a frame it knows. This is the
+        pass that hands the root's frame down the tree.
+
+        Saving never does this on its own: writing a file must not change the
+        tree. A layout that was never resolved is reported by
+        [`validate`][py2tosc.validate].
+
+        Returns:
+            This document, so calls can be chained.
+
+        Raises:
+            ValueError: If a layout cannot fit its children into its space.
+        """
+        resolve(self.root)
         return self
 
     def validate(self) -> list[Issue]:

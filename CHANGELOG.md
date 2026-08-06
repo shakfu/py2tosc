@@ -12,7 +12,15 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
 
 - `ALL_CONNECTIONS` and `ALL_GAMEPADS` are exported, having previously been reachable only by importing `py2tosc.messages` directly.
 
+- Layout combinators in `py2tosc.ui`: `row`, `column`, `grid` and `stack` describe an arrangement without sizing anything, and `resolve` assigns frames once the frame at the top is known. Each returns the group it built rather than the children, so layouts nest by ordinary composition -- `row(column(a, b), c)` -- a row can hold a fader and a label rather than one control type, and `stack` expresses the button-with-a-label idiom the eager functions cannot. `gap` and `pad` are supported throughout, with exact arithmetic: each slot ends exactly `gap` before the next begins and the last reaches the content edge. `Document.resolve()` runs the pass against the root. `py2tosc.layout` is unchanged.
+
+- `validate` warns when a control carries a layout that was never resolved. An unset frame reads back as `(0, 0, 0, 0)` rather than raising, so the mistake would otherwise reach the file as a group of zero-sized controls. Saving deliberately does not resolve on its own: writing a file must not change the tree.
+
+- `validate` warns when a `LocalMessage` is addressed to a node id no control in the layout has. A stale destination is otherwise invisible: nothing about the message is malformed, so the binding simply never fires. A destination that is still blank is left alone, since the editor writes those while a binding is part way through being set up.
+
 ### Fixed
+
+- `Control.copy(new_ids=True)` left local messages pointing at the originals. Duplicating a wired subtree -- the obvious use of `copy`, and how a second numpad gets built -- produced a clone whose controls drove the subtree it was copied from, silently, because the id it held still resolved. Destinations inside the copied subtree now follow the copy; destinations outside it are left alone, since those are deliberate references to controls the copy does not own.
 
 - The messages guide taught `dst_type="FLOAT"` on a `LocalMessage`, which is a `Conversion` value in a field that takes a `PartialType`. `dst_type` says what kind of thing is written on the destination, so it takes `VALUE` or `PROPERTY`; nothing catches the mistake, since the field is annotated as a bare `str` and `validate` has no rule for it.
 

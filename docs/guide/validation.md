@@ -34,6 +34,13 @@ a `message`. Errors sort first.
 - a `connections` string that is not 5 or 10 characters wide
 - a `PAGER` page that is not a `GROUP`
 - a gamepad binding with no target
+- a local binding addressed to a node id no control in the layout has
+
+That last one is worth knowing about, because a stale destination is otherwise
+invisible: nothing about the message is malformed, so the layout looks clean and
+the binding simply never fires. A binding whose destination is still blank is
+left alone -- that is one the editor writes while you are part way through
+setting it up.
 
 A **custom** property -- a key the format does not define at all -- is never
 flagged. That is the distinction the check turns on: `textSize` on a `BOX` is a

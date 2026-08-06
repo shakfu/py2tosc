@@ -45,3 +45,11 @@ These describe an arrangement instead of applying one. Each returns a `GROUP` ho
 ::: py2tosc.ui.stack
 
 ::: py2tosc.ui.resolve
+
+## Idioms
+
+Thin wrappers over the two layers above.
+
+::: py2tosc.ui.labelled
+
+::: py2tosc.ui.inset

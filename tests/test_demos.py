@@ -165,15 +165,111 @@ def test_numpad(tmp_path):
     assert readout.get("max") == "127"
     assert "onValueChanged" in readout.script
 
-    # the ten digits plus CLR and DEL all drive the readout, nothing else
+    # the ten digits, CLR, DEL and SEND drive the readout; the readout itself
+    # carries the OSC binding, and nothing else carries anything
     wired = {c.name for c in doc.walk() if c.messages}
-    assert wired == {*"0123456789", "CLR", "DEL"}
+    assert wired == {*"0123456789", "CLR", "DEL", "SEND", "valueLabel"}
     assert all(
         m.dst_id == readout.id
         for c in doc.walk()
         for m in c.messages
         if isinstance(m, py2tosc.LocalMessage)
     )
+
+
+def test_every_numpad_key_is_wired_identically(tmp_path):
+    """Each key sends its own name and the script decides what that means.
+
+    Worth pinning, because the alternative is what this demo used to do: CLR
+    and DEL carried bespoke messages that wrote a constant somewhere, and DEL's
+    was a silent no-op that no test noticed. Uniform wiring makes a key that
+    does nothing visible here rather than only in TouchOSC.
+    """
+    out = tmp_path / "numpad.tosc"
+    run("numpad.py", out)
+    doc = py2tosc.load(out)
+
+    def shape(control):
+        message = control.messages[0]
+        trigger = message.triggers[0]
+        return (
+            message.type,
+            message.value,
+            message.dst_type,
+            message.dst_var,
+            trigger.var,
+            trigger.condition,
+        )
+
+    keys = [c for c in doc.walk() if c.messages and c.name != "valueLabel"]
+    assert [len(c.messages) for c in keys] == [1] * 13
+
+    typing = [c for c in keys if c.name != "SEND"]
+    assert {shape(c)[:1] + shape(c)[2:] for c in typing} == {
+        ("CONSTANT", "VALUE", "text", "x", "RISE")
+    }
+
+    # Each key sends its own caption, marked so it cannot be read as a total.
+    assert {c.messages[0].value for c in typing} == {
+        f"#{c}" for c in [*"0123456789", "CLR", "DEL"]
+    }
+
+    # CLR and DEL mean nothing unless the script names them.
+    script = doc.find("valueLabel").script
+    assert '"CLR"' in script and '"DEL"' in script
+
+
+def test_a_numpad_key_never_sends_what_the_readout_already_shows(tmp_path):
+    """The repeat-keypress defect, pinned.
+
+    Keys land on the very value the readout displays, and TouchOSC reports a
+    value only when it changes. Sending a bare caption meant that pressing 7
+    while the readout showed 7 was not a change, so the key did nothing. The
+    marker keeps a keypress and a total disjoint, whatever the total is.
+    """
+    out = tmp_path / "numpad.tosc"
+    run("numpad.py", out)
+    doc = py2tosc.load(out)
+
+    sent = {
+        m.value
+        for c in doc.walk()
+        for m in c.messages
+        if isinstance(m, py2tosc.LocalMessage) and m.dst_var == "text"
+    }
+    assert sent, "no key writes the readout's text"
+
+    # A total is always digits, so nothing a key sends can ever equal one.
+    assert all(not value.lstrip("-").isdigit() for value in sent)
+
+
+def test_numpad_send_pushes_the_total_over_osc(tmp_path):
+    """SEND cannot carry the binding: an OSC argument reads its own control.
+
+    So SEND touches the readout and the readout sends. The corpus agrees on
+    both halves -- a `text` argument is always VALUE/STRING (892 of 892), and
+    `touch` RISE is an attested OSC trigger.
+    """
+    out = tmp_path / "numpad.tosc"
+    run("numpad.py", out)
+    doc = py2tosc.load(out)
+    readout = doc.find("valueLabel")
+
+    send = next(c for c in doc.walk() if c.name == "SEND" and c.messages)
+    assert send.messages[0].dst_var == "touch"
+    assert send.messages[0].dst_id == readout.id
+
+    # ANY, not RISE: the pulse has to fall back on release, or a second press
+    # writes the 1 that is already there and never re-triggers the send.
+    assert [(t.var, t.condition) for t in send.messages[0].triggers] == [("x", "ANY")]
+
+    osc = next(m for m in readout.messages if isinstance(m, py2tosc.OscMessage))
+    assert [(p.type, p.value) for p in osc.path] == [("CONSTANT", "/numpad/value")]
+    assert [(p.type, p.conversion, p.value) for p in osc.arguments] == [
+        ("VALUE", "STRING", "text")
+    ]
+    assert [(t.var, t.condition) for t in osc.triggers] == [("touch", "RISE")]
+    assert osc.send and not osc.receive
 
 
 def test_numpad_output_is_a_clean_layout(tmp_path):

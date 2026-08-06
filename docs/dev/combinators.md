@@ -1,6 +1,6 @@
 # High-level helpers and combinators
 
-**Status:** Tiers 1 and 2 implemented in `py2tosc.ui`. Tier 3 is still a design sketch, and the API is unstable below 1.0.
+**Status:** implemented in `py2tosc.ui`. The API is unstable below 1.0.
 
 The problem statement below is kept in its original present tense and describes the state before Tier 1 landed; the sections after it record what was built and what the corpus forced to change along the way.
 
@@ -301,6 +301,22 @@ def inset(control: Control, amount: float) -> Control
 
 `labelled` is `stack` plus a non-interactive `LABEL`, which is the whole of the numpad's `key()`.
 
+### Why `inset` could not wait
+
+Both were meant to be optional, added only once something real had asked for them. Rewriting the numpad against Tier 2 asked immediately, and for a reason the sketch had not anticipated: **`pad` cannot express the numpad's key at all.**
+
+Two separate problems, both in the one line the demo was already hand-rolling.
+
+- **`pad` insets every child alike.** A key wants its caption padded and the button beneath it filling the cell. A group-level inset cannot say that.
+
+- **`pad` is in pixels and the inset is a fraction.** The whole premise of Tier 2 is that no size is known until the frame arrives from above, so a proportional inset cannot be converted at the call.
+
+The obvious composition, `stack(button, stack(caption, pad=...))`, fails on the second point and costs a group per key on the first -- nine of them on the numpad, a fifth of the layout.
+
+So an inset belongs to a *control*, not to a group: `_inset` is a fraction stored on the control and applied by `resolve` to the frame its parent computed. Applying it to the computed frame rather than to the control's current one keeps `resolve` idempotent, which matters because nothing stops it being called twice.
+
+That makes `inset` the load-bearing half of Tier 3 and `labelled` the convenience on top, which is the reverse of what this section assumed.
+
 ## Rejected alternatives
 
 **A parallel lazy `Node` tree.** Pure, and testable without a `Document`, but it means two tree types, and the combinators would not apply to loaded layouts because `load()` yields `Control`s. Given that editing existing files is half the point of the library, that asymmetry is disqualifying.
@@ -335,7 +351,21 @@ Most of the motivation for it has since gone, though. The build-order constraint
 
 Step 1 is worth doing on its own merits and does not commit us to steps 2 or 3.
 
-Tier 3 is still open. `labelled` is `stack` plus a non-interactive `LABEL`, and `inset` is `stack` with a fractional `pad`, so both are now a few lines each -- but neither has been asked for by anything real yet, which was the condition for building them. The numpad's `key()` helper is the obvious first customer, and rewriting the demo against Tier 2 is the way to find out whether the wrappers earn their place or `stack` is already enough.
+### What the second numpad rewrite showed
+
+Rewriting the demo against Tiers 2 and 3 produced a document differing from the original in **9 numbers out of 6928 lines**, all of them the `x` of a key caption, all moving from 16 to 17. The control count is unchanged at 45.
+
+That difference is a fix. The hand-rolled formula was `int(w * inset)` for the offset and `int(w * (1 - 2 * inset))` for the width, which on a 167-wide cell leaves 16 pixels on the left and 18 on the right. `inset` computes both margins from the same rounding, so the caption is centred.
+
+The line count did **not** improve: 141 to 166. Worth being plain about, since the Tier 1 rewrite was justified on exactly that measure. What changed is elsewhere:
+
+- **No frame arithmetic in the demo at all.** `cell.frame` unpacking and the four-term `pad` tuple are gone, and with them the only place the demo could get centring wrong.
+
+- **The structure reads as the structure.** `column(row(...), grid(...), row(...))` nests the way the layout does, instead of a sequence of statements that mutate a tree built from the outside in.
+
+- **Colours have to be computed up front.** Three `layout.gradient` calls where the eager API had `colors=GRADIENT` on each function. This is not a gap worth closing: the demo tints each cell's button and caption with the cell's own colour, so the colour is needed at child-construction time regardless of who assigns it. A `colors=` on `ui.row` would not have helped.
+
+The verdict on the wrappers: `stack` alone was not enough, and the reason had nothing to do with convenience -- see above.
 
 ### Proving the rewrite changes nothing
 

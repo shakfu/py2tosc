@@ -307,3 +307,98 @@ def test_saving_does_not_resolve():
     doc = py2tosc.Document(root=ui.row(py2tosc.fader(), frame=(0, 0, 100, 100)))
     doc.dumps()
     assert len(doc.validate()) == 1
+
+
+# -- idioms ------------------------------------------------------------------
+
+
+def test_inset_shrinks_a_control_within_the_frame_it_is_given():
+    """An inset is a fraction, because a deferred layout has no pixels yet.
+
+    `pad` cannot say this: the size to take a fraction of is not known until
+    the frame comes down from above.
+    """
+    fader = ui.inset(py2tosc.fader(), 0.1)
+    ui.resolve(ui.row(fader), (0, 0, 200, 100))
+    assert tuple(int(v) for v in fader.frame) == (20, 10, 160, 80)
+
+
+def test_inset_applies_to_one_child_and_not_its_siblings():
+    """The thing `stack(pad=...)` cannot express, and a key caption needs."""
+    button = py2tosc.button()
+    caption = ui.inset(py2tosc.label(), 0.25)
+    ui.resolve(ui.stack(button, caption), (0, 0, 80, 40))
+    assert tuple(int(v) for v in button.frame) == (0, 0, 80, 40)
+    assert tuple(int(v) for v in caption.frame) == (20, 10, 40, 20)
+
+
+def test_inset_leaves_margins_equal():
+    """The numpad hand-rolled this as int(w * inset) and int(w * (1 - 2 * inset)),
+    which puts 16 pixels on the left of a 167-wide cell and 18 on the right."""
+    caption = ui.inset(py2tosc.label(), 0.1)
+    ui.resolve(ui.row(caption), (0, 0, 167, 100))
+    x, _, w, _ = (int(v) for v in caption.frame)
+    assert x == 167 - x - w
+
+
+def test_resolving_twice_does_not_shrink_an_inset_control_twice():
+    """The inset applies to the frame a parent computed, not to the current one."""
+    fader = ui.inset(py2tosc.fader(), 0.1)
+    strip = ui.row(fader)
+    ui.resolve(strip, (0, 0, 200, 100))
+    once = tuple(fader.frame)
+    ui.resolve(strip, (0, 0, 200, 100))
+    assert tuple(fader.frame) == once
+
+
+@pytest.mark.parametrize(
+    ("amount", "expected"),
+    [
+        (0.1, (10, 10, 80, 80)),
+        ((0.1, 0.2), (10, 20, 80, 60)),
+        ((0, 0, 0.5, 0), (0, 0, 50, 100)),
+    ],
+)
+def test_inset_accepts_one_two_or_four_fractions(amount, expected):
+    control = ui.inset(py2tosc.fader(), amount)
+    ui.resolve(ui.row(control), (0, 0, 100, 100))
+    assert tuple(int(v) for v in control.frame) == expected
+
+
+def test_an_inset_larger_than_the_frame_raises():
+    control = ui.inset(py2tosc.fader(), 0.6)
+    with pytest.raises(ValueError, match="does not fit"):
+        ui.resolve(ui.row(control), (0, 0, 100, 100))
+
+
+def test_labelled_lays_a_caption_over_a_control():
+    button = py2tosc.button(name="key", color="#264653")
+    cell = ui.labelled(button, "7")
+    ui.resolve(cell, (0, 0, 80, 40))
+
+    assert [c.control_type.value for c in cell] == ["BUTTON", "LABEL"]
+    caption = cell[1]
+    assert caption.name == "7"
+    assert caption.interactive is False
+    assert caption.background is False
+    assert caption.color == button.color
+    assert [v.default for v in caption.values if v.key == "text"] == ["7"]
+
+
+def test_labelled_insets_only_the_caption():
+    button = py2tosc.button()
+    cell = ui.labelled(button, "7", inset=0.25)
+    ui.resolve(cell, (0, 0, 80, 40))
+    assert tuple(int(v) for v in cell[0].frame) == (0, 0, 80, 40)
+    assert tuple(int(v) for v in cell[1].frame) == (20, 10, 40, 20)
+
+
+def test_labelled_costs_no_extra_control_when_inset():
+    """An inset rides on the control, so padding a caption adds no group.
+
+    Expressing it as a nested stack would cost one group per key, which on the
+    numpad's nine digits is a fifth of the layout.
+    """
+    plain = ui.labelled(py2tosc.button(), "7")
+    padded = ui.labelled(py2tosc.button(), "7", inset=0.1)
+    assert len(list(plain.walk())) == len(list(padded.walk())) == 3

@@ -116,6 +116,43 @@ def to_gap(value: float | Sequence[float]) -> tuple[int, int]:
     raise ValueError("gap takes a number or a (horizontal, vertical) pair")
 
 
+def to_inset(value: float | Sequence[float]) -> tuple[float, float, float, float]:
+    """Normalise an inset to fractions, as left, top, right and bottom.
+
+    Padding is in pixels, which a deferred layout cannot use for anything
+    proportional: the size to take a fraction of is not known until the frame
+    comes down from above. An inset is kept as a fraction and applied then.
+    """
+    if isinstance(value, (int, float)):
+        return (float(value),) * 4
+    parts = tuple(float(v) for v in value)
+    if len(parts) == 2:
+        return (parts[0], parts[1], parts[0], parts[1])
+    if len(parts) == 4:
+        return parts
+    raise ValueError(
+        "inset takes a number, a (horizontal, vertical) pair, or four numbers"
+    )
+
+
+def inset_frame(control: Control, frame: Frame) -> Frame:
+    """Shrink a frame by the control's own inset, if it carries one.
+
+    Applied to the frame a parent computed rather than to the control's current
+    frame, so resolving twice gives the same answer as resolving once.
+    """
+    amount = getattr(control, "_inset", None)
+    if amount is None:
+        return frame
+    left, top, right, bottom = amount
+    x, y, w, h = frame
+    dx, dw = round(w * left), round(w * left) + round(w * right)
+    dy, dh = round(h * top), round(h * top) + round(h * bottom)
+    if w - dw < 0 or h - dh < 0:
+        raise ValueError(f"an inset of {amount} does not fit in {frame}")
+    return Frame(x + dx, y + dy, w - dw, h - dh)
+
+
 @dataclass
 class Layout:
     """How a group arranges its children, recorded until frames can be assigned.
@@ -219,5 +256,5 @@ def resolve(control: Control, frame: Sequence[float] | None = None) -> Control:
     if control.children:
         frames = child_frames(spec, control.frame, len(control.children))
         for child, child_frame in zip(control.children, frames):
-            resolve(child, child_frame)
+            resolve(child, inset_frame(child, child_frame))
     return control

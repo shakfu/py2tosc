@@ -40,7 +40,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Any
 
-from ._geometry import COLUMN, GRID, ROW, STACK, Layout, to_gap, to_pad
+from ._geometry import COLUMN, GRID, ROW, STACK, Layout, to_gap, to_inset, to_pad
 from ._geometry import resolve as _resolve
 from .control import Control
 from .enums import ControlType, Conversion, MidiType, PartialType, TriggerCondition
@@ -53,6 +53,7 @@ from .messages import (
     OscMessage,
     Partial,
     Trigger,
+    Value,
 )
 
 __all__ = [
@@ -61,6 +62,8 @@ __all__ = [
     "const",
     "grid",
     "index",
+    "inset",
+    "labelled",
     "midi_cc",
     "midi_note",
     "osc",
@@ -694,3 +697,74 @@ def resolve(control: Control, frame: Sequence[float] | None = None) -> Control:
             or if `sizes` does not match the number of children.
     """
     return _resolve(control, frame)
+
+
+# -- idioms ------------------------------------------------------------------
+
+
+def inset(control: Control, amount: float | Sequence[float]) -> Control:
+    """Shrink a control within the frame its layout gives it.
+
+    Padding is in pixels, which is no use for anything proportional in a
+    deferred layout: the size to take a fraction of is not known until the
+    frame comes down from above. An inset is a fraction, applied then.
+
+    Unlike a group's `pad`, this belongs to one control, so a `stack` can inset
+    its label without insetting the button underneath -- which is what the
+    caption on a key needs, and the one thing `pad` cannot say.
+
+    ```python
+    stack(button, inset(caption, 0.1))
+    ```
+
+    Args:
+        control: The control to inset. It is modified and returned, so this
+            reads as a wrapper without building a group to be one.
+        amount: A fraction of the frame -- a number, a
+            `(horizontal, vertical)` pair, or `(left, top, right, bottom)`.
+
+    Returns:
+        `control`.
+    """
+    control._inset = to_inset(amount)
+    return control
+
+
+def labelled(
+    control: Control,
+    text: str,
+    *,
+    size: float = 48,
+    inset: float | Sequence[float] = 0.0,
+    **props: Any,
+) -> Control:
+    """A control with a caption laid over it.
+
+    The label is not interactive and has no background, so the control beneath
+    receives the touch and shows through. It takes the control's colour and its
+    name is the caption, which is what a local message sends when the control
+    is pressed.
+
+    Args:
+        control: The control to caption.
+        text: The caption, which is also the label's name.
+        size: Text size.
+        inset: A fraction of the frame to inset the caption by, for padding.
+            The control underneath is not inset.
+        **props: Properties to set on the group holding the two.
+
+    Returns:
+        A `GROUP` holding the control and its caption, waiting to be resolved.
+    """
+    caption = Control(
+        ControlType.LABEL,
+        name=text,
+        color=control.color,
+        background=False,
+        interactive=False,
+        text_size=size,
+        values=[Value("text", default=text), Value("touch", default=False)],
+    )
+    if inset:
+        caption._inset = to_inset(inset)
+    return stack(control, caption, **props)

@@ -111,3 +111,21 @@ Saving never resolves on its own: writing a file must not change the tree. A lay
 `gap` is the space between slots; `pad` is the inset before the first and after the last. `pad` takes a number, a `(horizontal, vertical)` pair, or `(left, top, right, bottom)`. `gap` takes a number or a pair -- it sits between slots, so it has no four-sided form.
 
 Both are whole pixels, and the arithmetic is exact: each slot ends exactly `gap` before the next begins, and the last reaches the content edge. A layout whose padding and gaps do not fit raises rather than silently producing zero-width controls.
+
+### Captions and insets
+
+A label sitting on a button is the commonest control idiom in TouchOSC, and `ui.labelled` is the whole of it:
+
+```python
+key = ui.labelled(py2tosc.button(name="7"), "7", inset=0.1)
+```
+
+The caption is not interactive and has no background, so the button beneath receives the touch and shows through. It takes the button's colour, and its name is the caption -- which is what a local message sends when the key is pressed.
+
+`inset` is a fraction rather than a pixel count, because a deferred layout has no pixels to work from: the size to take a fraction of is not known until the frame arrives from above. `ui.inset` applies one to any single control, which is the one thing a group's `pad` cannot say -- `pad` insets every child alike, and a key wants its caption padded but not the button underneath.
+
+```python
+ui.stack(button, ui.inset(caption, 0.1))
+```
+
+The inset belongs to the control rather than to a wrapper group, so padding a caption costs no extra node.

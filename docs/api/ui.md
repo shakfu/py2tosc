@@ -44,6 +44,8 @@ These describe an arrangement instead of applying one. Each returns a `GROUP` ho
 
 ::: py2tosc.ui.stack
 
+::: py2tosc.ui.pager
+
 ::: py2tosc.ui.resolve
 
 ## Idioms

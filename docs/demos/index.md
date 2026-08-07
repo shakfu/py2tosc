@@ -7,6 +7,7 @@ Working programs, each in `tests/demos/` in the repository. They take their path
 | [Custom property](custom-property.md) | Storing configuration TouchOSC will keep and expose to Lua |
 | [Copy scripts](copy-scripts.md) | Pushing one Lua script onto many controls |
 | [Faders from JSON](from-json.md) | Building a layout from external data, with OSC addresses |
+| [Control surface](control-surface.md) | The same idea in full: paged, labelled, MIDI and OSC |
 | [Image converter](image-converter.md) | Generating thousands of controls programmatically |
 | [Numpad](numpad.md) | Nested layouts, Lua scripts and LOCAL message wiring |
 | [Reaper to TouchOSC](reaper.md) | Driving the whole thing from a DAW |

@@ -129,3 +129,17 @@ ui.stack(button, ui.inset(caption, 0.1))
 ```
 
 The inset belongs to the control rather than to a wrapper group, so padding a caption costs no extra node.
+
+### Pages
+
+`ui.pager` is `stack` on a `PAGER` rather than a `GROUP`: a pager shows one page at a time and switches between them itself, so every page fills it.
+
+```python
+ui.pager(
+    ui.grid(*first_twelve, columns=4, name="1-12"),
+    ui.grid(*next_twelve, columns=4, name="13-24"),
+    frame=(0, 0, 1024, 768),
+)
+```
+
+Pages should be groups, which the other combinators already return, and a page's name is its tab label. A page that is not a group is reported by [validation](validation.md) rather than refused, since TouchOSC tolerates it.

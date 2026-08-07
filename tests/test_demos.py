@@ -31,6 +31,7 @@ def run(script: str, *args) -> subprocess.CompletedProcess:
 def test_every_demo_script_is_covered():
     """A new demo must come with a test, or this fails."""
     covered = {
+        "control_surface.py",
         "custom_property.py",
         "copy_scripts.py",
         "from_json.py",
@@ -89,7 +90,7 @@ def test_copy_scripts_reports_a_missing_control(tmp_path):
 
 def test_from_json(tmp_path):
     out = tmp_path / "fromjson.tosc"
-    result = run("from_json.py", DATA / "Pro-C 2 (FabFilter).json", out)
+    result = run("from_json.py", DATA / "pro_c_2_fabfilter.json", out)
 
     assert "Threshold" in result.stdout
 
@@ -276,3 +277,148 @@ def test_numpad_output_is_a_clean_layout(tmp_path):
     out = tmp_path / "numpad.tosc"
     run("numpad.py", out)
     assert py2tosc.load(out).validate() == []
+
+
+def _control_surface():
+    """Import the demo, so its parts can be exercised without a subprocess."""
+    sys.path.insert(0, str(DEMOS))
+    import control_surface
+
+    return control_surface
+
+
+def test_control_surface(tmp_path):
+    """A whole interface generated from a parameter list, nothing hand-placed."""
+    out = tmp_path / "surface.tosc"
+    result = run("control_surface.py", DATA / "pro_c_2_fabfilter.json", out)
+    assert "54 parameters -> 5 pages" in result.stdout
+
+    doc = py2tosc.load(out)
+    assert doc.root.control_type is py2tosc.ControlType.PAGER
+    assert [p.name for p in doc.root] == ["1-12", "13-24", "25-36", "37-48", "49-54"]
+
+    # every page shares one frame, sitting below the tab bar rather than under it
+    bar = doc.root.get("tabbarSize")
+    assert {tuple(p.frame) for p in doc.root} == {
+        (0.0, bar, doc.root.frame.w, doc.root.frame.h - bar)
+    }
+    assert [p.get("tabLabel") for p in doc.root] == [p.name for p in doc.root]
+    assert all(c.frame.w > 0 and c.frame.h > 0 for c in doc.walk())
+
+    faders = doc.find_all(type="FADER")
+    assert len(faders) == 54
+    assert len(doc.find_all(type="LABEL")) == 54
+
+
+def test_control_surface_output_is_a_clean_layout(tmp_path):
+    out = tmp_path / "surface.tosc"
+    run("control_surface.py", DATA / "pro_c_2_fabfilter.json", out)
+    assert py2tosc.load(out).validate() == []
+
+
+def test_control_surface_names_are_addressable(tmp_path):
+    """Names reach the wire, so they must be unique and OSC-legal.
+
+    The real data forces both: it repeats `Bypass` and `Internal`, and every
+    multi-word name contains spaces, which an OSC address cannot.
+    """
+    out = tmp_path / "surface.tosc"
+    run("control_surface.py", DATA / "pro_c_2_fabfilter.json", out)
+    doc = py2tosc.load(out)
+
+    names = [f.name for f in doc.find_all(type="FADER")]
+    assert len(set(names)) == len(names) == 54
+    reserved = set(" #*,?[]{}/")
+    assert not [n for n in names if set(n) & reserved]
+
+    # the caption keeps the text a person reads
+    captions = {v.default for c in doc.find_all(type="LABEL") for v in c.values}
+    assert "Side Chain High Frequency" in captions
+
+
+def test_control_surface_numbers_ccs_by_position_not_parameter_index(tmp_path):
+    """The plugin's own indices run to 182, past what a CC can carry.
+
+    An index is a host identifier, not a controller number, so using it would
+    make `midi_cc` raise on two thirds of this file.
+    """
+    import json
+
+    parameters = json.loads((DATA / "pro_c_2_fabfilter.json").read_text())
+    assert max(p["index"] for p in parameters) > 127
+
+    out = tmp_path / "surface.tosc"
+    run("control_surface.py", DATA / "pro_c_2_fabfilter.json", out)
+    doc = py2tosc.load(out)
+
+    ccs = [
+        m.message.data1
+        for c in doc.walk()
+        for m in c.messages
+        if isinstance(m, py2tosc.MidiMessage)
+    ]
+    assert sorted(ccs) == list(range(54))
+
+
+def test_control_surface_drops_midi_past_the_cc_range():
+    """A plugin with more than 128 parameters still gets an OSC binding."""
+    surface = _control_surface()
+    doc = surface.build([f"p{n}" for n in range(130)], "big")
+
+    faders = doc.find_all(type="FADER")
+    assert len(faders) == 130
+    midi = [
+        c.name
+        for c in faders
+        if any(isinstance(m, py2tosc.MidiMessage) for m in c.messages)
+    ]
+    assert len(midi) == surface.CC_LIMIT
+    assert all(
+        any(isinstance(m, py2tosc.OscMessage) for m in c.messages) for c in faders
+    )
+
+
+def test_control_surface_slug_is_stable_and_legal():
+    surface = _control_surface()
+    assert surface.slug("Side Chain High Frequency") == "sideChainHighFrequency"
+    assert surface.slug("pro_c_2_fabfilter") == "proC2Fabfilter"
+    assert surface.slug("!!!") == "parameter"
+    assert surface.unique(["a", "b", "a", "a"]) == ["a", "b", "a2", "a3"]
+
+
+def test_control_surface_takes_an_osc_prefix(tmp_path):
+    """The namespace is an argument, not a consequence of the filename.
+
+    Deriving it from the file is convenient and fragile: renaming the data
+    moves every address, which is exactly what happened once already.
+    """
+    out = tmp_path / "surface.tosc"
+    run("control_surface.py", DATA / "pro_c_2_fabfilter.json", out, "Synth/Bank 1")
+    doc = py2tosc.load(out)
+
+    osc = next(
+        m
+        for m in doc.find_all(type="FADER")[0].messages
+        if isinstance(m, py2tosc.OscMessage)
+    )
+    assert [(p.type, p.value) for p in osc.path] == [
+        ("CONSTANT", "/synth/bank1/"),
+        ("PROPERTY", "name"),
+    ]
+    # a control name cannot hold a path, so the layout takes the last segment
+    assert doc.root.name == "bank1"
+
+
+def test_control_surface_falls_back_to_the_filename(tmp_path):
+    out = tmp_path / "surface.tosc"
+    run("control_surface.py", DATA / "pro_c_2_fabfilter.json", out)
+    doc = py2tosc.load(out)
+    assert doc.root.name == "proC2Fabfilter"
+
+
+def test_control_surface_namespace_is_osc_safe():
+    surface = _control_surface()
+    assert surface.namespace("Synth/Bank 1") == "synth/bank1"
+    assert surface.namespace("/leading/and/trailing/") == "leading/and/trailing"
+    assert surface.namespace("  ") == ""
+    assert surface.namespace("") == ""

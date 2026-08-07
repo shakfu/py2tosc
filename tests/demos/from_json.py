@@ -2,7 +2,7 @@
 
 Each fader is named after its parameter and sends to /<group>/<fader>.
 
-    python tests/demos/from_json.py "tests/data/Pro-C 2 (FabFilter).json" out.tosc
+    python tests/demos/from_json.py tests/data/pro_c_2_fabfilter.json out.tosc
 """
 
 import json

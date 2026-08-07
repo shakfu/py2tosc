@@ -24,6 +24,7 @@ ROW = "row"
 COLUMN = "column"
 GRID = "grid"
 STACK = "stack"
+PAGES = "pages"
 
 
 def ratios(sizes: int | Sequence[float]) -> list[float]:
@@ -179,17 +180,28 @@ class Layout:
     resolved: bool = False
 
 
-def child_frames(spec: Layout, frame: Frame, count: int) -> list[Frame]:
-    """The frames `spec` gives to `count` children inside `frame`.
+def child_frames(spec: Layout, control: Control, count: int) -> list[Frame]:
+    """The frames `spec` gives to `count` children of `control`.
 
     Frames are relative to the parent, which is what the format stores.
+
+    The control is passed rather than only its frame because a pager has to read
+    its own tab bar to know how much room is actually left for a page.
     """
+    frame = control.frame
     _, _, width, height = frame
     left, top, right, bottom = spec.pad
     across, down = spec.gap
 
-    if spec.kind == STACK:
-        filled = Frame(left, top, width - left - right, height - top - bottom)
+    if spec.kind in (STACK, PAGES):
+        # A pager draws its tab bar across the top and gives its pages what is
+        # left, so a page sized to the whole frame would sit underneath it.
+        bar = 0
+        if spec.kind == PAGES and control.get("tabbar"):
+            bar = round(float(control.get("tabbarSize") or 0))
+        filled = Frame(
+            left, top + bar, width - left - right, height - top - bottom - bar
+        )
         if filled.w < 0 or filled.h < 0:
             raise ValueError(f"padding of {spec.pad} does not fit in {frame}")
         return [filled] * count
@@ -254,7 +266,7 @@ def resolve(control: Control, frame: Sequence[float] | None = None) -> Control:
 
     spec.resolved = True
     if control.children:
-        frames = child_frames(spec, control.frame, len(control.children))
+        frames = child_frames(spec, control, len(control.children))
         for child, child_frame in zip(control.children, frames):
             resolve(child, inset_frame(child, child_frame))
     return control

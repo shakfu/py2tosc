@@ -402,3 +402,109 @@ def test_labelled_costs_no_extra_control_when_inset():
     plain = ui.labelled(py2tosc.button(), "7")
     padded = ui.labelled(py2tosc.button(), "7", inset=0.1)
     assert len(list(plain.walk())) == len(list(padded.walk())) == 3
+
+
+# -- pagers ------------------------------------------------------------------
+
+
+def test_pager_gives_every_page_the_whole_pager():
+    """A pager shows one page at a time, so pages share rather than divide."""
+    pages = ui.pager(
+        ui.row(py2tosc.fader(), py2tosc.fader(), name="1"),
+        ui.grid(py2tosc.button(), columns=2, name="2"),
+    )
+    ui.resolve(pages, (0, 0, 800, 600))
+
+    assert pages.control_type is py2tosc.ControlType.PAGER
+    assert frames(pages) == [(0, 40, 800, 560), (0, 40, 800, 560)]
+
+
+def test_a_page_lays_its_own_contents_out():
+    """The gap this closes: a PAGER carries no layout of its own, so before
+    `pager` existed its pages kept whatever frame they were built with -- a
+    100x100 default inside an 800x600 pager, which validated clean."""
+    page = ui.row(py2tosc.fader(), py2tosc.fader(), name="1")
+    ui.resolve(ui.pager(page), (0, 0, 800, 600))
+    assert frames(page) == [(0, 0, 400, 560), (400, 0, 400, 560)]
+
+
+def test_a_pager_of_groups_validates_cleanly():
+    pages = ui.pager(ui.row(py2tosc.fader(), name="1"), frame=(0, 0, 800, 600))
+    assert py2tosc.Document(root=pages).resolve().validate() == []
+
+
+def test_a_page_that_is_not_a_group_is_reported_not_rejected():
+    """TouchOSC tolerates it, so `validate` warns rather than `pager` raising.
+
+    The one warning is about the page itself: `tabLabel` is deliberately not
+    defaulted onto a control that cannot be a page, since that would add a
+    second warning about a property the type has no use for.
+    """
+    loose = py2tosc.fader(name="loose")
+    pages = ui.pager(loose, frame=(0, 0, 800, 600))
+    found = py2tosc.Document(root=pages).resolve().validate()
+    assert len(found) == 1
+    assert "PAGER pages should be GROUP" in found[0].message
+    assert not loose.has("tabLabel")
+
+
+def test_a_pager_survives_a_round_trip_as_a_pager():
+    doc = py2tosc.Document(
+        root=ui.pager(ui.row(py2tosc.fader(name="f"), name="1"), frame=(0, 0, 80, 100))
+    )
+    doc.resolve()
+    reloaded = py2tosc.loads(doc.dumps())
+    assert reloaded.root.control_type is py2tosc.ControlType.PAGER
+    assert frames(reloaded.root) == [(0, 40, 80, 60)]
+
+
+def test_pages_sit_below_the_tab_bar():
+    """A pager draws its tabs across the top and pages get what is left.
+
+    Sizing a page to the whole pager puts it under the tabs. Confirmed against
+    `simple_mk2.tosc`, where a 320x480 pager with a 40-point tab bar holds
+    pages at (0, 40, 320, 440).
+    """
+    pages = ui.pager(ui.row(py2tosc.fader(), name="1"), name="p")
+    ui.resolve(pages, (0, 0, 320, 480))
+
+    assert pages.get("tabbar") is True and pages.get("tabbarSize") == 40
+    assert frames(pages) == [(0, 40, 320, 440)]
+
+
+def test_a_pager_without_a_tab_bar_gives_pages_everything():
+    pages = ui.pager(ui.row(py2tosc.fader(), name="1"), tabbar=False)
+    ui.resolve(pages, (0, 0, 320, 480))
+    assert frames(pages) == [(0, 0, 320, 480)]
+
+
+def test_a_taller_tab_bar_leaves_pages_less_room():
+    pages = ui.pager(ui.row(py2tosc.fader(), name="1"), tabbar_size=80)
+    ui.resolve(pages, (0, 0, 320, 480))
+    assert frames(pages) == [(0, 80, 320, 400)]
+
+
+def test_pad_applies_on_top_of_the_tab_bar():
+    pages = ui.pager(ui.row(py2tosc.fader(), name="1"), pad=10)
+    ui.resolve(pages, (0, 0, 320, 480))
+    assert frames(pages) == [(10, 50, 300, 420)]
+
+
+def test_a_page_tab_shows_its_name_by_default():
+    """`tabLabel` is a different property from `name`, and blank tabs are
+    unusable -- which is exactly what the first version of this produced."""
+    page = ui.row(py2tosc.fader(), name="1-12")
+    ui.pager(page)
+    assert page.get("tabLabel") == "1-12"
+
+
+def test_an_explicit_tab_label_is_left_alone():
+    page = ui.row(py2tosc.fader(), name="1", tab_label="FADERS")
+    ui.pager(page)
+    assert page.get("tabLabel") == "FADERS"
+
+
+def test_an_unnamed_page_gets_no_tab_label():
+    page = ui.row(py2tosc.fader())
+    ui.pager(page)
+    assert not page.has("tabLabel")

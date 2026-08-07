@@ -40,7 +40,17 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Any
 
-from ._geometry import COLUMN, GRID, ROW, STACK, Layout, to_gap, to_inset, to_pad
+from ._geometry import (
+    COLUMN,
+    GRID,
+    PAGES,
+    ROW,
+    STACK,
+    Layout,
+    to_gap,
+    to_inset,
+    to_pad,
+)
 from ._geometry import resolve as _resolve
 from .control import Control
 from .enums import ControlType, Conversion, MidiType, PartialType, TriggerCondition
@@ -67,6 +77,7 @@ __all__ = [
     "midi_cc",
     "midi_note",
     "osc",
+    "pager",
     "path",
     "prop",
     "resolve",
@@ -558,9 +569,12 @@ def connect(
 
 
 def _arranged(
-    spec: Layout, children: Sequence[Control], props: dict[str, Any]
+    spec: Layout,
+    children: Sequence[Control],
+    props: dict[str, Any],
+    control_type: ControlType = ControlType.GROUP,
 ) -> Control:
-    group = Control(ControlType.GROUP, children=list(children), **props)
+    group = Control(control_type, children=list(children), **props)
     group._layout = spec
     return group
 
@@ -768,3 +782,46 @@ def labelled(
     if inset:
         caption._inset = to_inset(inset)
     return stack(control, caption, **props)
+
+
+def pager(
+    *pages: Control,
+    pad: float | Sequence[float] = 0,
+    **props: Any,
+) -> Control:
+    """Stack groups as the pages of a `PAGER`.
+
+    A pager shows one page at a time and switches between them itself, so every
+    page gets the same frame -- the arrangement [`stack`][py2tosc.ui.stack]
+    makes, on a `PAGER` rather than a `GROUP`, and minus the tab bar. A page
+    sized to the whole pager would sit underneath the tabs, so `resolve` reads
+    the pager's own `tabbar` and `tabbar_size` and reserves that much.
+
+    Pages should be groups, which the other combinators already return:
+
+    ```python
+    pager(row(a, b, name="1"), grid(*keys, name="2"))
+    ```
+
+    The tab a page is reached by shows its `tab_label`, which is a different
+    property from its `name`. A page with a name and no label of its own is
+    given its name, since a pager whose tabs are all blank is not usable; set
+    `tab_label` on the page to say something else. A page that is not a `GROUP`
+    is reported by [`validate`][py2tosc.validate] rather than rejected here,
+    since TouchOSC tolerates it.
+
+    Args:
+        *pages: The pages, in tab order.
+        pad: Inset applied to every page, on top of the tab bar.
+        **props: Properties to set on the pager.
+
+    Returns:
+        A `PAGER` holding the pages, waiting to be resolved.
+    """
+    for page in pages:
+        # Only groups: `tabLabel` on anything else is a property that control
+        # type has no use for, which `validate` would rightly report.
+        named = page.control_type is ControlType.GROUP and page.has("name")
+        if named and not page.has("tabLabel"):
+            page.set("tabLabel", page.get("name"))
+    return _arranged(Layout(PAGES, pad=to_pad(pad)), pages, props, ControlType.PAGER)

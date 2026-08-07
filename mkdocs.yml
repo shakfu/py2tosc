@@ -1,5 +1,5 @@
 site_name: py2tosc
-site_description: Generate and edit TouchOSC layouts from Python.
+site_description: A python tool/library to generate and edit TouchOSC (.tosc) files.
 site_url: https://shakfu.github.io/py2tosc/
 repo_url: https://github.com/shakfu/py2tosc
 repo_name: shakfu/py2tosc

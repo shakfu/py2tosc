@@ -71,10 +71,12 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting started: getting-started.md
+  - Command line: cli.md
   - Guide:
       - Controls and properties: guide/controls.md
       - Messages: guide/messages.md
       - Layouts: guide/layouts.md
+      - Layout sizes: guide/sizes.md
       - The .tosc format: guide/format.md
       - Custom properties: guide/custom-properties.md
       - Validation: guide/validation.md
@@ -98,6 +100,7 @@ nav:
       - Enumerations: api/enums.md
       - Validation: api/validate.md
       - Generating Python: api/codegen.md
+      - Control surfaces: api/surface.md
   - Coming from tosclib: migrating.md
   - Changelog: changelog.md
 

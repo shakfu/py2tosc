@@ -340,3 +340,36 @@ def resolve(control: Control, frame: Sequence[float] | None = None) -> Control:
         for child, child_frame in zip(control.children, frames):
             resolve(child, inset_frame(child, child_frame))
     return control
+
+
+def resolve_pending(control: Control) -> bool:
+    """Place anything still waiting to be placed, and leave the rest alone.
+
+    Saving calls this so that a layout nobody resolved is not written out with
+    every child stacked at the origin -- a file that is structurally valid,
+    round-trips exactly, and is visibly wrong in TouchOSC.
+
+    Descends until it meets a layout that was never resolved, places that whole
+    subtree, and stops. Going no further is the point: re-running a layout that
+    was already resolved would discard a frame placed by hand inside it, which
+    an explicit `resolve` is still free to do.
+
+    Args:
+        control: The control to walk.
+
+    Returns:
+        Whether anything was placed.
+
+    Raises:
+        ValueError: If a layout cannot fit its children into the space it has.
+    """
+    spec = getattr(control, "_layout", None)
+    if spec is not None and not spec.resolved:
+        resolve(control)
+        return True
+    # Every child is walked: `any` over a generator would stop at the first
+    # subtree that needed placing and leave its siblings unplaced.
+    placed = False
+    for child in control.children:
+        placed = resolve_pending(child) or placed
+    return placed

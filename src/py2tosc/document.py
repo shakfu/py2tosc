@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from os import PathLike
 from typing import TYPE_CHECKING, Any
 
-from ._geometry import resolve
+from ._geometry import resolve, resolve_pending
 from .codec import from_xml, to_xml
 from .control import Control, group
 from .enums import ControlType
@@ -108,9 +108,11 @@ class Document:
         anything, since a layout can only divide a frame it knows. This is the
         pass that hands the root's frame down the tree.
 
-        Saving never does this on its own: writing a file must not change the
-        tree. A layout that was never resolved is reported by
-        [`validate`][py2tosc.validate].
+        Call it when you want the frames before writing anything -- to read
+        them, or to check them. Saving places whatever is still unplaced, so a
+        layout is never written out unsized, but it will not re-run a layout
+        that was already resolved. This will, which is how a tree is re-laid
+        out after its root frame changes.
 
         Returns:
             This document, so calls can be chained.
@@ -145,6 +147,12 @@ class Document:
                 errors. Off by default, because a rule in the checker being
                 wrong should not stop you writing a file.
 
+        Unlike `save`, this does not place an unresolved layout, and the
+        difference is deliberate rather than an oversight. `save` writes a file
+        for TouchOSC to open, where an unplaced layout is never what anyone
+        wanted; `dumps` is for looking at the tree, and while debugging a
+        layout the unplaced state is exactly what you need to see.
+
         Returns:
             The complete XML document.
 
@@ -178,10 +186,19 @@ class Document:
                 This is the checkpoint worth using it at: the mistake is caught
                 before the file exists, rather than when TouchOSC refuses it.
 
+        Any layout the combinators described but nobody resolved is placed
+        first, since the alternative is writing a file whose every control sits
+        at the origin -- structurally valid, byte-exact on a round trip, and
+        visibly wrong in TouchOSC. A layout that was already resolved is left
+        as it is, so a frame placed by hand inside one survives. Loading a file
+        and saving it again is unaffected: a loaded control carries no layout.
+
         Raises:
             ValidationError: If `validate` is set and the layout has errors.
                 Nothing is written.
+            ValueError: If a layout cannot fit its children into its space.
         """
+        resolve_pending(self.root)
         if validate:
             self._raise_on_errors()
         as_xml = str(path).lower().endswith(".xml")

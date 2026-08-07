@@ -104,7 +104,13 @@ Each combinator returns the group it made rather than the children, so the resul
 
 Nothing has a frame until `resolve` runs. It walks the tree from the top, because a layout can only divide a frame it knows, and a parent decides its children's frames outright -- a control inside a layout does not keep a frame it was built with. To place something by hand, leave it out of a layout group.
 
-Saving never resolves on its own: writing a file must not change the tree. A layout that was never resolved is reported by [validation](validation.md), because an unset frame reads back as `(0, 0, 0, 0)` rather than raising, so the mistake is otherwise invisible.
+Saving places anything still unplaced, so forgetting the call does not write a file with every control stacked at the origin -- an unset frame reads back as `(0, 0, 0, 0)` rather than raising, which made that mistake invisible until TouchOSC drew it. Call `resolve` yourself when you want the frames before writing: to read them, to check them, or to lay the tree out again after changing the root frame.
+
+Saving will not re-run a layout that was already resolved, which is what keeps a frame you placed by hand inside one. An explicit `resolve` will, and that is the difference between the two. A loaded layout is unaffected either way, since a control read from a file carries no layout to resolve.
+
+`dumps` deliberately does not place anything. Saving writes a file for TouchOSC to open, where an unplaced layout is never what anyone wanted; `dumps` is for looking at the tree, and while debugging a layout the unplaced state is the thing worth seeing.
+
+Since everything below it is divided from the frame at the top, that one is worth choosing deliberately -- [Layout sizes](sizes.md) covers what the corpus uses and why.
 
 ### Gaps and padding
 

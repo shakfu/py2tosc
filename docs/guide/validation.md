@@ -38,9 +38,17 @@ a `message`. Errors sort first.
 - a root node that is not a `GROUP`
 - a `GRID` holding a different number of controls than its `grid_x` and `grid_y` claim
 - a local binding writing a value or property the destination does not have
+- a layout the combinators described that nobody has resolved
 
 The last four are worth knowing about, because each describes a layout that
 loads, round-trips and looks entirely well formed while not working.
+
+The unresolved-layout warning is the odd one out, since it is not about the
+file: `save` places whatever is still unplaced, so a layout that draws this
+warning will still be written correctly. It reports the tree *in hand*, where
+an unset frame reads back as `(0, 0, 0, 0)` rather than raising -- so anything
+consulting frames before saving, this checker included, is reading coordinates
+that mean nothing yet. Call `resolve` when you want them to mean something.
 
 A stale local destination fails invisibly: nothing about the message is
 malformed, so the binding simply never fires. A binding whose destination is

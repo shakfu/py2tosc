@@ -5,53 +5,11 @@ is done, kept for the reasoning rather than the tick.
 
 ## Next
 
-- [ ] **A command line.** `pyproject.toml` declares no `[project.scripts]`, so
-  every job the library does -- inspect a layout, validate it, decompile it,
-  convert `.tosc` to `.xml` -- needs a Python script written first. That is
-  worst for `to_python`, where you have to write a script to get a script.
-
-  Four subcommands over functions that already exist and are tested:
-
-      py2tosc show mixer.tosc            # what is in it
-      py2tosc validate mixer.tosc        # non-zero exit on errors
-      py2tosc decompile mixer.tosc       # to_python, to stdout
-      py2tosc convert mixer.tosc -o mixer.xml
-
-  Smallest change with the widest reach: it makes the library usable by people
-  who will not import it, and `decompile` is the feature most likely to bring
-  someone in -- they have a `.tosc` and want to see it as code. Worth reusing
-  the demos' argparse shape so the two read alike.
-
-  Plus a fifth that generates rather than reads:
-
-      py2tosc build params.json -o surface.tosc     # MIDI and OSC per parameter
-
-  A JSON list of parameters in, a paged control surface out, each control bound
-  to a MIDI CC and an OSC address. `tests/demos/control_surface.py` already
-  does exactly this, so the work is mostly deciding what belongs in the
-  package. Three things it forces:
-
-  - **The logic has to move out of the demo.** `tests/demos/` is not shipped in
-    the wheel, so the CLI cannot import it. The surface-building code wants to
-    be a module -- somewhere alongside `ui`, or its own -- with the demo
-    reduced to a caller, so the two cannot drift.
-
-  - **The input schema becomes a public contract.** A demo can read whatever
-    the file in `tests/data/` happens to contain; a subcommand cannot. Decide
-    what a parameter is -- at minimum a name, optionally a CC number, a
-    channel, an address -- and reject anything else with a message rather than
-    a traceback. Keeping the existing `[{"index": n, "name": "..."}]` shape
-    working is the cheap default, since that is what a plugin host exports.
-
-  - **The lessons from the demo are requirements, not niceties.** A parameter
-    *index* is a host identifier and not a controller number: the sample file's
-    run to 182, well past the 127 a CC allows, so the CC comes from position.
-    Names repeat and contain spaces, neither of which an OSC address can carry,
-    so they need slugging and numbering. Both are already solved in the demo
-    and both are already tested.
-
-  Worth an `--osc-only` or `--midi-only` switch, since the reason to reach for
-  this is usually one or the other.
+- [x] **A command line.** Done: `py2tosc show|validate|decompile|convert|build`,
+  registered as a console script. The surface-building logic moved out of the
+  demo into `py2tosc.surface` so the subcommand could reach it, and its JSON
+  input is now a defined contract with messages rather than tracebacks for
+  anything else.
 
 - [ ] **Six control types are never authored by anything**: `BOX`, `ENCODER`,
   `RADAR`, `RADIAL`, `RADIO`, `TEXT`. They are read and round-tripped, never
@@ -68,11 +26,6 @@ is done, kept for the reasoning rather than the tick.
 
 ## Deliberately not yet
 
-- **1.0.** `ui` changed shape four times in two days -- the pager alone took
-  four rounds -- and it wants a few more real layouts built on it before the
-  API is promised. Nothing about the core is unsettled; it is the young layer
-  that should decide the timing.
-
 - **A gamepad demo.** `GamepadMessage` is supported, documented and tested but
   appears in no demo. Demonstrating it needs a game controller, and the tests
   already cover the format side. Left alone on purpose.
@@ -88,7 +41,7 @@ is done, kept for the reasoning rather than the tick.
   and 111 within a point.
 
   The coverage-probe framing is closed too: `to_python` emits a rebuild script
-  from any loaded document, and all 43 corpus files round-trip through their
+  from any loaded document, and all 45 corpus files round-trip through their
   own generated source. That is the construction check this task was really
   asking for, and it covers every file rather than one.
 
@@ -98,7 +51,7 @@ is done, kept for the reasoning rather than the tick.
 
 - [x] Corpus conformance sweep. Swept, and it is thinner than it looked: the
   type-level check already exists (`test_defaults_cover_every_property_the_editor_writes`),
-  and a role-level sweep over all 43 files finds exactly one rule -- a `PAGER`
+  and a role-level sweep over all 45 files finds exactly one rule -- a `PAGER`
   page needing `tabLabel` and four tab colours -- which `ui.pager` now applies.
   The geometric half was worth more: it found the tab bar orientation defect,
   and every pager page in the corpus is now reproduced exactly. Not worth

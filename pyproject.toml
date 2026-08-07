@@ -1,6 +1,6 @@
 [project]
 name = "py2tosc"
-version = "0.3.0"
+version = "0.3.1"
 description = "Generate and edit TouchOSC layouts from Python."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -60,6 +60,9 @@ source-include = ["CHANGELOG.md"]
 # Both groups are installed by a bare `uv sync`, so `make docs` and `make test`
 # work without having to name a group.
 default-groups = ["dev", "docs"]
+
+[project.scripts]
+py2tosc = "py2tosc.cli:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

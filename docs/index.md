@@ -31,27 +31,58 @@ doc.save("mixer-restyled.tosc")
 
 ## Building one from scratch
 
+[`py2tosc.ui`](api/ui.md) describes an arrangement and sizes it afterwards, so a
+layout is written from the inside out and nothing needs coordinates:
+
 ```python
 import py2tosc
-from py2tosc import layout
+from py2tosc import ui
 
-doc = py2tosc.Document.new(frame=(0, 0, 1024, 768))
+faders = [
+    py2tosc.fader(
+        name=f"ch{n}",
+        messages=[ui.osc("/mixer/{name}"), ui.midi_cc(n - 1)],
+    )
+    for n in range(1, 9)
+]
 
-strip = py2tosc.group(name="strip", frame=(0, 0, 1024, 768))
-doc.add(strip)
+doc = py2tosc.Document(root=ui.column(
+    ui.row(*faders, gap=4),
+    ui.grid("BUTTON", columns=8, rows=2, name="mutes"),
+    sizes=(3, 1),
+    pad=8,
+    gap=8,
+    frame=(0, 0, 1024, 768),
+    name="mixer",
+))
 
-for index, fader in enumerate(layout.row(strip, "FADER", sizes=8)):
-    fader.name = f"ch{index + 1}"
-    fader.messages.append(py2tosc.OscMessage())
-
+doc.resolve()   # hand the root frame down the tree, sizing everything
 doc.save("mixer.tosc")
+```
+
+The eager [`layout`](api/layout.md) functions are still there and unchanged, for
+when you would rather place children against a parent you already have.
+
+## Reading one back as code
+
+`to_python` writes a layout out as the script that would build it, which is what
+you want when the layout exists and the source does not:
+
+```python
+print(py2tosc.to_python(py2tosc.load("mixer.tosc")))
 ```
 
 ## Where to go next
 
 - [Getting started](getting-started.md) walks through loading, editing and saving a layout.
 
+- [Command line](cli.md) does most of the above without a script: inspect, check, convert and decompile a layout, or generate one from a list of parameters.
+
 - [Controls and properties](guide/controls.md) covers the property model and the `snake_case` naming.
+
+- [Layouts](guide/layouts.md) covers both arrangement APIs, and when each is the easier one.
+
+- [Message combinators](api/ui.md) shortens the bindings: an f-string-like OSC address, the two common MIDI ones, and local wiring in a line.
 
 - [The .tosc format](guide/format.md) documents the file format itself, which is useful whether or not you use this library.
 

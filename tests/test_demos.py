@@ -11,9 +11,9 @@ import subprocess
 import sys
 
 import pytest
+from _corpus import DATA, DEMOS, EXAMPLES
 
 import py2tosc
-from _corpus import DATA, DEMOS, EXAMPLES
 
 DEMO_SCRIPTS = sorted(DEMOS.glob("*.py"))
 
@@ -283,14 +283,6 @@ def test_numpad_output_is_a_clean_layout(tmp_path):
     assert py2tosc.load(out).validate() == []
 
 
-def _control_surface():
-    """Import the demo, so its parts can be exercised without a subprocess."""
-    sys.path.insert(0, str(DEMOS))
-    import control_surface
-
-    return control_surface
-
-
 def test_control_surface(tmp_path):
     """A whole interface generated from a parameter list, nothing hand-placed."""
     out = tmp_path / "surface.tosc"
@@ -345,56 +337,6 @@ def test_control_surface_names_are_addressable(tmp_path):
     assert "Side Chain High Frequency" in captions
 
 
-def test_control_surface_numbers_ccs_by_position_not_parameter_index(tmp_path):
-    """The plugin's own indices run to 182, past what a CC can carry.
-
-    An index is a host identifier, not a controller number, so using it would
-    make `midi_cc` raise on two thirds of this file.
-    """
-    import json
-
-    parameters = json.loads((DATA / "pro_c_2_fabfilter.json").read_text())
-    assert max(p["index"] for p in parameters) > 127
-
-    out = tmp_path / "surface.tosc"
-    run("control_surface.py", DATA / "pro_c_2_fabfilter.json", "-o", out)
-    doc = py2tosc.load(out)
-
-    ccs = [
-        m.message.data1
-        for c in doc.walk()
-        for m in c.messages
-        if isinstance(m, py2tosc.MidiMessage)
-    ]
-    assert sorted(ccs) == list(range(54))
-
-
-def test_control_surface_drops_midi_past_the_cc_range():
-    """A plugin with more than 128 parameters still gets an OSC binding."""
-    surface = _control_surface()
-    doc = surface.build([f"p{n}" for n in range(130)], "big")
-
-    faders = doc.find_all(type="FADER")
-    assert len(faders) == 130
-    midi = [
-        c.name
-        for c in faders
-        if any(isinstance(m, py2tosc.MidiMessage) for m in c.messages)
-    ]
-    assert len(midi) == surface.CC_LIMIT
-    assert all(
-        any(isinstance(m, py2tosc.OscMessage) for m in c.messages) for c in faders
-    )
-
-
-def test_control_surface_slug_is_stable_and_legal():
-    surface = _control_surface()
-    assert surface.slug("Side Chain High Frequency") == "sideChainHighFrequency"
-    assert surface.slug("pro_c_2_fabfilter") == "proC2Fabfilter"
-    assert surface.slug("!!!") == "parameter"
-    assert surface.unique(["a", "b", "a", "a"]) == ["a", "b", "a2", "a3"]
-
-
 def test_control_surface_takes_an_osc_prefix(tmp_path):
     """The namespace is an argument, not a consequence of the filename.
 
@@ -403,7 +345,12 @@ def test_control_surface_takes_an_osc_prefix(tmp_path):
     """
     out = tmp_path / "surface.tosc"
     run(
-        "control_surface.py", DATA / "pro_c_2_fabfilter.json", "Synth/Bank 1", "-o", out
+        "control_surface.py",
+        DATA / "pro_c_2_fabfilter.json",
+        "--prefix",
+        "Synth/Bank 1",
+        "-o",
+        out,
     )
     doc = py2tosc.load(out)
 
@@ -425,14 +372,6 @@ def test_control_surface_falls_back_to_the_filename(tmp_path):
     run("control_surface.py", DATA / "pro_c_2_fabfilter.json", "-o", out)
     doc = py2tosc.load(out)
     assert doc.root.name == "proC2Fabfilter"
-
-
-def test_control_surface_namespace_is_osc_safe():
-    surface = _control_surface()
-    assert surface.namespace("Synth/Bank 1") == "synth/bank1"
-    assert surface.namespace("/leading/and/trailing/") == "leading/and/trailing"
-    assert surface.namespace("  ") == ""
-    assert surface.namespace("") == ""
 
 
 def _absolute(doc):

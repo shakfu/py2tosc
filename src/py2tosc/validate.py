@@ -209,16 +209,18 @@ def _check_control(
             else:
                 yield from _check_destination(message, destination, here)
 
-    # A layout that was never resolved is invisible in the output: an unset
-    # frame reads back as (0, 0, 0, 0) rather than raising, so the children are
-    # written wherever they happened to be built and the file looks fine.
+    # Reported because the tree in hand is unplaced, not because the file would
+    # be: `save` places what nobody resolved. But an unset frame reads back as
+    # (0, 0, 0, 0) rather than raising, so anything reading frames before then
+    # -- this checker included -- is looking at coordinates that mean nothing.
     spec = getattr(control, "_layout", None)
     if spec is not None and not spec.resolved:
         yield Issue(
             WARNING,
             here,
-            f"{spec.kind} layout was never resolved; call Document.resolve() "
-            f"so its {len(control.children)} children are given frames",
+            f"{spec.kind} layout was never resolved, so its "
+            f"{len(control.children)} children still read as (0, 0, 0, 0); "
+            f"saving places them, or call Document.resolve() to do it now",
         )
 
     # A GRID is never empty in TouchOSC: creating one populates it, and its

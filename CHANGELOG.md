@@ -2,6 +2,42 @@
 
 Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses [semantic versioning](https://semver.org/spec/v2.0.0.html) -- while the version is below 1.0, a minor bump may break the API.
 
+## [0.3.1] - 2026-08-07
+
+### Added
+
+- A `py2tosc` command. Everything the library does is file-shaped, and none of it needed a script written first -- least of all `to_python`, where you had to write a script to get a script. Five subcommands: `show` summarises a layout and draws its tree, `validate` reports what TouchOSC will reject and exits non-zero if any of it is an error, `decompile` writes the layout out as Python, `convert` rewrites it as `.tosc` or `.xml`, and `build` generates a control surface from a list of parameters.
+
+- `py2tosc.surface`, which builds a paged surface from a parameter list. The `control_surface` demo did this already, but a demo is not shipped in the wheel and so could not back a subcommand. The demo is now a caller, so the two cannot drift.
+
+  Its input is a public contract rather than whatever happened to be in the test data: a list of names, or a list of objects where only `name` is required and `cc` and `channel` are optional. A host's `index` is ignored on purpose -- it identifies the parameter to the host and is not a controller number, and a real export's run well past the 127 a CC allows -- so controller numbers come from position unless an entry says otherwise. Names are slugged and numbered, since they contain spaces and repeat and an OSC address can carry neither. `--midi-only` and `--osc-only` leave out the other binding.
+
+  The design canvas is `--size WIDTHxHEIGHT`, and `surface.build` takes a `frame`. TouchOSC scales a layout to whatever screen opens it, so the canvas is an aspect ratio and a coordinate space rather than a pixel count -- but font sizes and margins are absolute within it, so it is not free either.
+
+- A guide to choosing a layout size, `docs/guide/sizes.md`, together with reference pages for the command line and `py2tosc.surface`, and a section in the README.
+
+  The size guide is a reading of the twenty layouts in `tests/examples/`, which all ship with TouchOSC under Help > Examples and are therefore the best available evidence about what the format's designers consider normal. Three findings: size follows purpose rather than device, and the examples group by what they are for; nothing official exceeds 1024x768; and the five general-purpose control surfaces are the smallest of the lot and every one of them pages, `beatmachine_mk2` fitting 231 controls onto 480x320. The last is a tendency rather than a rule -- `hexkeys` puts 240 controls on 740x345 unpaged, because a keyboard has to be seen at once.
+
+### Changed
+
+- `surface` now defaults to a 568x320 canvas, matching `automat5_mk2`, rather than the 1024x768 it started with. That number was a guess, and nothing official is laid out on it except a 767-control DAW controller.
+
+- Caption text is sized from the box it lands in, at 0.55 of its height, rather than fixed at 14pt. Across the 2867 labels in the corpus, text sits at a median 0.54 of the height of the box holding it, and 0.52 across the official examples alone; a fixed size only suits one canvas, and on 1024x768 that 14pt sat at 0.28, half what the surrounding label wanted. The error grew with the canvas, so the fixed text and the oversized default were the same mistake seen twice.
+
+- `tests/examples/` now holds only what TouchOSC ships. The two hand-drawn `GRID` references moved to `tests/data/`, alongside the hand-drawn `PAGER` one that was already there.
+
+### Fixed
+
+- Saving a layout the combinators described but nobody resolved wrote every control at the origin, silently. It was structurally valid, round-tripped byte-exactly, and was visibly wrong only once TouchOSC drew it -- and `save(validate=True)` did not stop it, because the unresolved-layout rule is a warning and saving only refuses on errors.
+
+  `save` now places whatever is still unplaced. It will not re-run a layout that was already resolved, so a frame placed by hand inside one survives; an explicit `resolve` still re-runs everything, which is how a tree is laid out again after its root frame changes. Loading a file and saving it back is unaffected -- a loaded control carries no layout -- and that is asserted over every `.tosc` in the corpus rather than argued.
+
+  `dumps` still serializes exactly what is in the tree, on purpose: it is what you read a layout with while debugging one, and an unplaced layout is the state you need to see.
+
+  The unresolved-layout warning stays, and now says what it means. It is not a report about the file, since saving places the layout anyway -- it is a report about the tree in hand, where an unset frame reads back as `(0, 0, 0, 0)` rather than raising, so anything consulting frames before saving is reading coordinates that mean nothing yet.
+
+- `build` and `show` reported different control counts for the same layout, off by one: `find_all` returns descendants while `walk` includes the root. `show` was right.
+
 ## [0.3.0]
 
 ### Added
@@ -176,6 +212,7 @@ First release: py2tosc is a rewrite of [tosclib](https://github.com/AlbertoV5/to
 
 py2tosc began as a fork of [tosclib](https://github.com/AlbertoV5/tosclib), which had twelve releases between 2022-05-20 and 2022-06-09, ending at 0.3.5. That history belongs to a different distribution and is not restated here; see [the tosclib releases](https://pypi.org/project/tosclib/#history).
 
+[0.3.1]: https://github.com/shakfu/py2tosc/releases/tag/v0.3.1
 [0.3.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.3.0
 [0.2.1]: https://github.com/shakfu/py2tosc/releases/tag/v0.2.1
 [0.2.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.2.0

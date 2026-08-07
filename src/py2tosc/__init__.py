@@ -60,7 +60,7 @@ from .validate import Issue, ValidationError, validate
 #: Keep in step with `version` in pyproject.toml, which the build backend reads
 #: and which `uv_build` requires to be static. `test_version_is_declared_once`
 #: fails if the two drift apart.
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 # Sorted rather than grouped by topic, because RUF022 asks for it and the
 # grouping lives in the API reference instead. See docs/api/.

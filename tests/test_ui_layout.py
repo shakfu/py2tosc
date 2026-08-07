@@ -665,7 +665,7 @@ def test_a_built_grid_matches_one_the_editor_made(sample, kind):
     about the file says how they were arrived at -- which makes an editor-made
     example the only way to know.
     """
-    reference = py2tosc.load(EXAMPLES / f"{sample}.tosc").find(type="GRID")
+    reference = py2tosc.load(DATA / f"{sample}.tosc").find(type="GRID")
     built = ui.grid(kind, columns=2, rows=2, name="grid1")
     ui.resolve(built, tuple(reference.frame))
 
@@ -765,3 +765,114 @@ def test_a_grid_survives_a_round_trip():
     reloaded = py2tosc.loads(doc.dumps()).find(type="GRID")
     assert len(reloaded.children) == 8
     assert reloaded.get("gridType") == 1
+
+
+# -- saving places whatever was never placed ---------------------------------
+
+
+def mixer():
+    """A four-fader row that nobody has resolved."""
+    faders = [py2tosc.fader(name=f"ch{n}") for n in range(1, 5)]
+    return py2tosc.Document(
+        root=ui.row(*faders, gap=4, pad=8, frame=(0, 0, 400, 200), name="mixer")
+    )
+
+
+def test_saving_places_a_layout_nobody_resolved(tmp_path):
+    """The alternative is a file whose every control sits at the origin --
+    structurally valid, byte-exact on a round trip, and wrong in TouchOSC."""
+    out = tmp_path / "forgot.tosc"
+    mixer().save(out)
+
+    written = py2tosc.load(out)
+    assert frames(written.root) == [
+        (8, 8, 93, 184),
+        (105, 8, 93, 184),
+        (202, 8, 93, 184),
+        (299, 8, 93, 184),
+    ]
+
+
+def test_saving_leaves_a_resolved_layout_alone(tmp_path):
+    """A frame placed by hand after resolving survives being saved."""
+    doc = mixer()
+    doc.resolve()
+    doc.find("ch2").set("frame", (300, 10, 40, 40))
+    doc.save(tmp_path / "nudged.tosc")
+
+    written = py2tosc.load(tmp_path / "nudged.tosc")
+    assert tuple(int(v) for v in written.find("ch2").frame) == (300, 10, 40, 40)
+
+
+def test_saving_places_only_the_part_that_was_never_placed(tmp_path):
+    """A group added to an already-resolved tree is placed; the rest is not
+    re-run, so an earlier hand-placed frame elsewhere is still there."""
+    doc = mixer()
+    doc.resolve()
+    doc.find("ch3").set("frame", (7, 7, 9, 9))
+    doc.root.add(
+        ui.column(
+            py2tosc.button(name="b1"),
+            py2tosc.button(name="b2"),
+            frame=(0, 0, 100, 100),
+            name="extra",
+        )
+    )
+    doc.save(tmp_path / "mixed.tosc")
+
+    written = py2tosc.load(tmp_path / "mixed.tosc")
+    assert tuple(int(v) for v in written.find("ch3").frame) == (7, 7, 9, 9)
+    assert tuple(int(v) for v in written.find("b2").frame) == (0, 50, 100, 50)
+
+
+def test_an_explicit_resolve_still_re_runs_a_resolved_layout():
+    """Which is how a tree is re-laid out after its root frame changes, and is
+    the difference between `resolve` and what saving does."""
+    doc = mixer()
+    doc.resolve()
+    doc.root.set("frame", (0, 0, 800, 200))
+    doc.resolve()
+
+    assert frames(doc.root)[0] == (8, 8, 193, 184)
+
+
+@pytest.mark.parametrize("sample", [p for p in CORPUS if p.suffix == ".tosc"])
+def test_saving_a_loaded_layout_is_untouched_by_this(sample, tmp_path):
+    """A loaded control carries no layout, so there is nothing to place. This
+    is what keeps byte-exact round-tripping true now that saving can act."""
+    doc = py2tosc.load(sample)
+    before = py2tosc.dumps(doc)
+    doc.save(tmp_path / "again.tosc")
+    assert py2tosc.dumps(doc) == before
+
+
+def test_saving_places_every_unresolved_sibling(tmp_path):
+    """Not just the first. Walking with `any` over a generator would stop at
+    the subtree that needed placing and leave the rest at the origin."""
+    root = py2tosc.group(frame=(0, 0, 400, 200), name="root")
+    for side, offset in (("left", 0), ("right", 100)):
+        root.add(
+            ui.row(
+                py2tosc.fader(name=f"{side}1"),
+                py2tosc.fader(name=f"{side}2"),
+                frame=(0, offset, 200, 100),
+                name=side,
+            )
+        )
+    py2tosc.Document(root=root).save(tmp_path / "siblings.tosc")
+
+    written = py2tosc.load(tmp_path / "siblings.tosc")
+    for side in ("left", "right"):
+        assert frames(written.find(side)) == [(0, 0, 100, 100), (100, 0, 100, 100)]
+
+
+def test_dumps_does_not_place_an_unresolved_layout():
+    """Deliberate, and not the same rule as `save`: `save` writes a file for
+    TouchOSC, where an unplaced layout is never wanted, while `dumps` is for
+    looking at the tree -- and while debugging one, unplaced is what you need
+    to see."""
+    doc = mixer()
+    xml = doc.dumps(pretty=True)
+
+    assert "<x>0</x>\n<y>0</y>\n<w>100</w>\n<h>100</h>" in xml
+    assert frames(doc.root) == [(0, 0, 100, 100)] * 4

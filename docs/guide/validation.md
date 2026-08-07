@@ -39,9 +39,17 @@ a `message`. Errors sort first.
 - a `GRID` holding a different number of controls than its `grid_x` and `grid_y` claim
 - a local binding writing a value or property the destination does not have
 - a layout the combinators described that nobody has resolved
+- a custom property named after one of the control's own values
 
-The last four are worth knowing about, because each describes a layout that
+The last six are worth knowing about, because each describes a layout that
 loads, round-trips and looks entirely well formed while not working.
+
+The value-shadowing warning catches one specific slip: `label.text = "hi"`
+writes a custom property called `text`, but what a label *says* is its `text`
+**value**, so the property is stored, ignored by TouchOSC, and drawn as
+nothing. Nothing else can catch it -- inventing a property is what the format
+lets a script do, so a typo cannot be told from a feature -- except when the
+name collides with a value the control already has, which is never deliberate.
 
 The unresolved-layout warning is the odd one out, since it is not about the
 file: `save` places whatever is still unplaced, so a layout that draws this
@@ -86,7 +94,7 @@ error, or an OSC address collides with another.
 ## Where the rules come from
 
 Every rule is corroborated against layouts the TouchOSC editor itself wrote. The
-test suite requires all 23 layouts in the corpus to validate without errors, and
+test suite requires all 45 layouts in the corpus to validate without errors, and
 the editor-written ones to produce no warnings at all -- a validator that fires
 on real files trains you to ignore it.
 

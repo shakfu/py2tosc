@@ -4,6 +4,7 @@ Working programs, each in `tests/demos/` in the repository. They take their path
 
 | Demo | What it shows |
 |------|---------------|
+| [One of every control](controls.md) | Building all thirteen control types, and looking at them |
 | [Custom property](custom-property.md) | Storing configuration TouchOSC will keep and expose to Lua |
 | [Copy scripts](copy-scripts.md) | Pushing one Lua script onto many controls |
 | [Faders from JSON](from-json.md) | Building a layout from external data, with OSC addresses |

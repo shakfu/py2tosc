@@ -159,6 +159,21 @@ def _check_control(
                 here,
                 f"property {key!r} belongs to the format but not to {kind.value} controls",
             )
+        # A custom property named after one of the control's own values, which
+        # is what `label.text = "hi"` produces: a label says what its `text`
+        # *value* holds, so the property is written, ignored, and draws as
+        # nothing. Custom properties are a feature, so nothing else reports it
+        # -- but a key that collides with a value the control already has is
+        # the one custom property that is never deliberate. No control in the
+        # corpus has one.
+        elif key not in KNOWN_TYPES and any(v.key == key for v in control.values):
+            yield Issue(
+                WARNING,
+                here,
+                f"custom property {key!r} has the same name as this control's "
+                f"{key!r} value; TouchOSC reads the value, so setting the "
+                f"property has no effect",
+            )
 
     expected_values = {key for key, _ in default_values_for(kind)}
     for value in control.values:

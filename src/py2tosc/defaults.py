@@ -32,10 +32,11 @@ _COMMON: dict[str, Any] = {
     "visible": True,
 }
 
+#: `gridSteps` is per type rather than shared: the editor creates a FADER with
+#: 13 and a RADIAL or ENCODER with 20, and the corpus follows it both times.
 _GRID_LINES: dict[str, Any] = {
     "grid": True,
     "gridColor": (0.0, 0.0, 0.0, 0.25),
-    "gridSteps": 10,
 }
 
 _RESPONSE: dict[str, Any] = {
@@ -71,41 +72,63 @@ _XY: dict[str, Any] = {
     "lockY": False,
 }
 
+#: Decoration and containers do not take touches. A BOX, LABEL, TEXT or GROUP
+#: left interactive swallows the press meant for whatever sits beneath it,
+#: which is a layout that looks right and does nothing. Every one of the 5134
+#: editor-written instances of these four types says so.
+_INERT: dict[str, Any] = {"interactive": False}
+
+#: A RADIAL, ENCODER or RADAR is drawn round: all 171 in the corpus are shape 2
+#: while every rectangular type is 1, and `controls.tosc` -- one freshly made
+#: control of each type -- agrees.
+_ROUND: dict[str, Any] = {"shape": 2}
+
 _CONTAINER: dict[str, Any] = {
     "grabFocus": False,
     "outlineStyle": 0,
 }
 
 _BY_TYPE: dict[ControlType, dict[str, Any]] = {
-    ControlType.BOX: {},
+    ControlType.BOX: {**_INERT},
     ControlType.BUTTON: {
         "buttonType": 0,
         "press": True,
         "release": True,
         "valuePosition": False,
     },
-    ControlType.LABEL: {**_TEXT, "textClip": True, "textLength": 0},
-    ControlType.TEXT: {**_TEXT, "textClip": True, "textWrap": True},
+    ControlType.LABEL: {**_TEXT, **_INERT, "textClip": True, "textLength": 0},
+    ControlType.TEXT: {**_TEXT, **_INERT, "textClip": True, "textWrap": True},
     ControlType.FADER: {
         **_RESPONSE,
         **_GRID_LINES,
         **_CURSOR,
         "bar": True,
         "barDisplay": 0,
+        "gridSteps": 13,
     },
     ControlType.XY: {**_RESPONSE, **_CURSOR, **_LINES, **_XY},
     ControlType.RADIAL: {
         **_RESPONSE,
         **_GRID_LINES,
         **_CURSOR,
+        **_ROUND,
+        "gridSteps": 20,
         "outlineStyle": 0,
         "inverted": False,
         "centered": False,
     },
-    ControlType.ENCODER: {**_RESPONSE, **_GRID_LINES, **_CURSOR, "outlineStyle": 0},
-    ControlType.RADAR: {**_CURSOR, **_LINES, **_XY},
-    ControlType.RADIO: {"steps": 5, "radioType": 0},
-    ControlType.GROUP: {**_CONTAINER},
+    ControlType.ENCODER: {
+        **_RESPONSE,
+        **_GRID_LINES,
+        **_CURSOR,
+        **_ROUND,
+        "gridSteps": 20,
+        "outlineStyle": 0,
+    },
+    ControlType.RADAR: {**_CURSOR, **_LINES, **_XY, **_ROUND},
+    # A radio runs horizontally or vertically; no instance in the corpus is 0.
+    ControlType.RADIO: {"steps": 5, "radioType": 0, "orientation": 1},
+    ControlType.GROUP: {**_CONTAINER, **_INERT},
     ControlType.GRID: {
         "grabFocus": False,
         "exclusive": False,

@@ -2,7 +2,27 @@
 
 Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses [semantic versioning](https://semver.org/spec/v2.0.0.html) -- while the version is below 1.0, a minor bump may break the API.
 
-## [0.3.1] - 2026-08-07
+## [Unreleased]
+
+## [0.3.2]
+
+### Added
+
+- A `controls` demo, building one of every control type on a single sheet, captioned and each addressed by name. It exists to be opened: py2tosc can prove a layout is structurally valid and byte-exact on a round trip, and neither says whether a `RADIAL` came out round. Every construction defect this project has found was valid, round-tripped exactly, and visibly wrong the moment TouchOSC drew it. Confirmed working there.
+
+  It also closes the gap that motivated it -- `BOX`, `ENCODER`, `RADAR`, `RADIAL`, `RADIO` and `TEXT` were read and round-tripped but built by nothing, so nothing exercised the path their defects live on.
+
+- `validate` warns when a control carries a custom property named after one of its own values. `label.text = "hi"` writes a property called `text`, but what a label says is its `text` **value**, so the property is stored, ignored, and drawn as nothing. Nothing else can catch this: inventing a property is exactly what the format lets a script do, which makes a typo indistinguishable from a feature -- except when the name collides with a value the control already has, which is never deliberate. No control in the corpus has one. The `controls` demo walked into it and every caption on the sheet was blank.
+
+### Fixed
+
+- Four wrong control defaults, all of the kind that only matters when you create a control rather than read one. A `RADIAL`, `ENCODER` and `RADAR` are drawn round and default to `shape` 2, where they were built square: all 171 in the corpus are 2, while every rectangular type is 1. A `BOX`, `LABEL`, `TEXT` or `GROUP` defaults to `interactive` off, unanimously across 5134 editor-written instances -- one left interactive swallows the press meant for whatever sits beneath it, which is the defect that made the `simple_mk2` readouts eat their own faders' touches. A `RADIO` defaults to `orientation` 1, since a radio runs horizontally or vertically and no instance in the corpus is 0. And `gridSteps` is per type rather than shared: the editor creates a `FADER` with 13 and a `RADIAL` or `ENCODER` with 20, where one default said 10 for all three.
+
+  These change what a freshly built control looks like, so a script that relied on a `LABEL` being interactive, or on a `RADIAL` being square, will need to say so. Loading and saving is untouched -- a control read from a file keeps what the file said -- and every corpus layout still round-trips byte for byte.
+
+  Found by constructing one of each of the six types nothing in the library had ever authored and diffing them against the editor's own. The corpus frequencies alone would not have settled it, since they cannot tell a wrong default from a popular style; `controls.tosc` did -- one of every control type, made in the editor and left unstyled -- and it is now the reference the defaults are tested against. On that evidence `outline`, `background` and `cornerRadius` were left alone, despite disagreeing with the defaults across most of the corpus: that file has them at the default, so the disagreement is taste.
+
+## [0.3.1]
 
 ### Added
 

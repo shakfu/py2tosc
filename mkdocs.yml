@@ -82,6 +82,7 @@ nav:
       - Validation: guide/validation.md
   - Demos:
       - Overview: demos/index.md
+      - One of every control: demos/controls.md
       - Custom property: demos/custom-property.md
       - Copy scripts: demos/copy-scripts.md
       - Faders from JSON: demos/from-json.md

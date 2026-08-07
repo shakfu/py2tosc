@@ -11,18 +11,37 @@ is done, kept for the reasoning rather than the tick.
   input is now a defined contract with messages rather than tracebacks for
   anything else.
 
-- [ ] **Six control types are never authored by anything**: `BOX`, `ENCODER`,
-  `RADAR`, `RADIAL`, `RADIO`, `TEXT`. They are read and round-tripped, never
-  built. Every defect found in TouchOSC so far has been in construction rather
-  than parsing, and both the pager and the grid hid properties that only
-  matter when you create the control -- `tabLabel`, `gridType`, `shape`,
-  `orientation`.
+- [x] **Six control types are never authored by anything.** Done, and the
+  sweep earned its keep: constructing one of each and diffing it against the
+  editor's own instances found four wrong defaults, in the same class as
+  `tabLabel` and `gridType` -- properties that only matter when you create the
+  control.
 
-  The cheap form is to extend the conformance sweep: construct one of each
-  type and diff it against the editor-made instances in the corpus, the way
-  `test_simple_mk2_behaves_like_the_original` diffs behaviour rather than
-  position. That would surface something like a `RADIAL` needing
-  `cursorDisplay` without waiting for someone to hit it.
+  A `RADIAL`, `ENCODER` and `RADAR` are drawn round: all 171 in the corpus are
+  `shape` 2 while every rectangular type is 1. A `BOX`, `LABEL`, `TEXT` or
+  `GROUP` does not take touches, unanimously across 5134 instances -- the
+  defect that made the `simple_mk2` readouts eat their own faders' presses,
+  now prevented rather than rediscovered. A `RADIO` runs horizontally or
+  vertically and never at `orientation` 0. And `gridSteps` is per type: the
+  editor creates a `FADER` with 13 and a `RADIAL` or `ENCODER` with 20, where
+  one shared default said 10 for all three.
+
+  The method that worked was not the sweep by itself -- a corpus-wide majority
+  confuses a wrong default with a popular style. It was `controls.tosc`: one
+  of every control type, made in the editor and left unstyled, which settles
+  in one file what a frequency count only suggests. That file is now the
+  reference the defaults are tested against.
+
+  The six types are now authored, too: `tests/demos/controls.py` builds one of
+  every type on a sheet meant to be opened, which is how the fixes were
+  confirmed. It found one more defect on the way -- `label(text="...")` sets a
+  custom property rather than the label's `text` value, so every caption on
+  the sheet was blank. `validate` now reports that shape.
+
+  Two things the sweep flagged and this deliberately did not change: `outline`
+  and `background` disagree with the defaults on ten of thirteen types, but
+  `controls.tosc` has both on, so the disagreement is designers turning them
+  off rather than a wrong default. `cornerRadius` is the same.
 
 ## Deliberately not yet
 

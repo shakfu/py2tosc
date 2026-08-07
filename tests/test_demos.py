@@ -33,6 +33,7 @@ def test_every_demo_script_is_covered():
     """A new demo must come with a test, or this fails."""
     covered = {
         "control_surface.py",
+        "controls.py",
         "custom_property.py",
         "copy_scripts.py",
         "from_json.py",
@@ -544,3 +545,58 @@ def test_simple_mk2_behaves_like_the_original(tmp_path):
         if key[2] == "LABEL" and text(mine[key]) != text(theirs[key])
     ]
     assert not blank, blank[:5]
+
+
+# -- controls: one of every type ---------------------------------------------
+
+
+def test_controls_builds_one_of_every_type(tmp_path):
+    """The six types nothing in the library had ever authored are authored
+    here. Confirmed working in TouchOSC, which is the only oracle for whether
+    a RADIAL came out round."""
+    out = tmp_path / "controls.tosc"
+    result = run("controls.py", "-o", out)
+
+    assert "13 control types" in result.stdout
+    doc = py2tosc.load(out)
+
+    built = {c.control_type for c in doc.walk()}
+    assert built == set(py2tosc.ControlType), sorted(
+        t.value for t in set(py2tosc.ControlType) - built
+    )
+    assert doc.validate() == []
+
+
+def test_controls_matches_the_editors_own_sheet(tmp_path):
+    """`controls.tosc` is the same idea drawn by hand. The behavioural
+    properties have to agree, since those are what decide whether a control
+    works rather than where it sits."""
+    out = tmp_path / "controls.tosc"
+    run("controls.py", "-o", out)
+    built = py2tosc.load(out)
+    reference = py2tosc.load(DATA / "controls.tosc")
+
+    for kind in py2tosc.ControlType:
+        mine = next((c for c in built.walk() if c.control_type is kind), None)
+        theirs = next((c for c in reference.walk() if c.control_type is kind), None)
+        if mine is None or theirs is None:
+            continue
+        for key in ("shape", "interactive", "gridSteps"):
+            if mine.has(key) and theirs.has(key):
+                assert mine.get(key) == theirs.get(key), f"{kind.value}.{key}"
+
+
+def test_controls_captions_are_values_not_properties(tmp_path):
+    """`label(text="hi")` sets a custom property of that name, which TouchOSC
+    ignores and draws as nothing -- it is the label's `text` *value* that
+    holds what it says. Every caption on this sheet was blank until that was
+    fixed, and `validate` now reports the mistake."""
+    out = tmp_path / "controls.tosc"
+    run("controls.py", "-o", out)
+    doc = py2tosc.load(out)
+
+    captions = [c for c in doc.walk() if str(c.get("name", "")).endswith("Caption")]
+    assert len(captions) > 12
+    for caption in captions:
+        assert caption.value("text").default
+        assert "text" not in caption.properties

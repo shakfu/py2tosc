@@ -513,3 +513,36 @@ def test_every_resolvable_local_binding_in_the_corpus_addresses_something_real()
     total = [i for p in CORPUS for i in py2tosc.load(p).validate()]
     assert not [i for i in warnings(total) if "writes value" in i.message]
     assert not [i for i in warnings(total) if "writes property" in i.message]
+
+
+def test_a_custom_property_shadowing_a_value_warns():
+    """`label.text = "hi"` writes a custom property, not the label's text.
+
+    Nothing else catches it: inventing a property is what the format lets a
+    script do, so it cannot be told from a typo -- except when the name is one
+    the control already has a value for, which is never deliberate. No control
+    in the corpus has one.
+    """
+    control = py2tosc.label(name="cap")
+    control.text = "hi"
+    doc = py2tosc.Document(root=py2tosc.group(frame=(0, 0, 100, 100), children=[control]))
+
+    issues = doc.validate()
+    assert len(issues) == 1
+    assert "has the same name as this control's 'text' value" in issues[0].message
+
+
+def test_setting_the_value_itself_is_clean():
+    control = py2tosc.label(name="cap")
+    control.value("text").default = "hi"
+    doc = py2tosc.Document(root=py2tosc.group(frame=(0, 0, 100, 100), children=[control]))
+    assert doc.validate() == []
+
+
+def test_the_shadowing_rule_fires_on_nothing_in_the_corpus():
+    """Every rule here is corroborated against layouts the editor wrote."""
+    for path in CORPUS:
+        if path.suffix != ".tosc":
+            continue
+        for issue in py2tosc.load(path).validate():
+            assert "has the same name as this control's" not in issue.message, path.name

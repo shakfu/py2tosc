@@ -3,13 +3,14 @@
 import pytest
 
 import py2tosc
+from _corpus import DATA
 from py2tosc import ControlType
 
 
 def test_factories_apply_type_defaults():
     f = py2tosc.fader()
     assert f.control_type is ControlType.FADER
-    assert f.grid_steps == 10
+    assert f.grid_steps == 13  # what the editor creates a FADER with
     assert f.response_factor == 100
     assert f.bar is True
 
@@ -190,3 +191,56 @@ def test_repr_is_useful():
     root = py2tosc.group(name="panel")
     root.add(py2tosc.fader())
     assert repr(root) == "<GROUP 'panel', 1 children>"
+
+
+# -- defaults against the editor's own one-of-each file -----------------------
+
+
+def test_defaults_match_a_freshly_made_control_of_each_type():
+    """`controls.tosc` holds one of every control type, made in the editor and
+    left alone -- `outline` and `background` are still on, so nothing has been
+    styled. That makes it the closest thing to a statement of what TouchOSC
+    creates each control with.
+
+    Checked for the properties that decide how a control behaves or is drawn,
+    not the ones a designer picks: `cornerRadius`, `outline` and `background`
+    vary by taste across the corpus and agree with the defaults in this file.
+    """
+    reference = py2tosc.load(DATA / "controls.tosc")
+    behavioural = ("shape", "interactive", "orientation", "textAlignV")
+
+    checked = 0
+    for control in reference.walk():
+        built = getattr(py2tosc, control.control_type.value.lower())()
+        for key in behavioural:
+            if not control.has(key) or not built.has(key):
+                continue
+            # A BOX is the one disagreement, and the corpus sides with the
+            # default: 909 of the 910 editor-written boxes are orientation 0,
+            # this file holding the only 1.
+            if control.control_type is ControlType.BOX and key == "orientation":
+                continue
+            assert built.get(key) == control.get(key), (
+                f"{control.control_type.value}.{key}: built {built.get(key)!r}, "
+                f"editor {control.get(key)!r}"
+            )
+            checked += 1
+    assert checked > 40, f"only {checked} comparisons made"
+
+
+def test_the_circular_controls_are_round():
+    """All 171 RADIAL, ENCODER and RADAR controls the editor wrote are shape 2,
+    while every rectangular type is 1. A square radial is the same class of
+    defect as a pager page with no tab label: valid, and visibly wrong."""
+    for kind in ("radial", "encoder", "radar"):
+        assert getattr(py2tosc, kind)().get("shape") == 2
+
+
+def test_decoration_and_containers_do_not_take_touches():
+    """A BOX, LABEL, TEXT or GROUP left interactive swallows the press meant
+    for what sits beneath it -- the defect that made the simple_mk2 readouts
+    eat their own faders' touches."""
+    for kind in ("box", "label", "text", "group"):
+        assert getattr(py2tosc, kind)().get("interactive") is False
+    for kind in ("button", "fader", "radial", "radio"):
+        assert getattr(py2tosc, kind)().get("interactive") is True

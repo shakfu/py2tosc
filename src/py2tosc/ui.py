@@ -92,6 +92,26 @@ _CHANNEL_SLOT = (0.0, 15.0)
 
 _LOCAL_TARGETS = (str(PartialType.VALUE), str(PartialType.PROPERTY))
 
+#: How a page styles its own tab. These belong to the page rather than to the
+#: pager, and no control type declares them: a group is only a page when a
+#: pager holds it, so nothing about the type can know. They are not merely
+#: cosmetic either -- left unset, the label is drawn in no colour at all and
+#: the tab comes out blank. The values are what the corpus agrees on across
+#: roughly a thousand pages.
+#:
+#: Only keys no type defaults are listed here, so filling them in can never
+#: overwrite a caller's choice. The editor also makes its pages
+#: non-interactive and un-outlined, near enough unanimously, but a group
+#: already defaults both the other way and there is no telling an untouched
+#: default from a deliberate one -- so that convention is documented rather
+#: than imposed.
+_PAGE_TAB_STYLE = {
+    "tabColorOff": (0.25, 0.25, 0.25, 1.0),
+    "tabColorOn": (0.5, 0.5, 0.5, 1.0),
+    "textColorOff": (1.0, 1.0, 1.0, 1.0),
+    "textColorOn": (1.0, 1.0, 1.0, 1.0),
+}
+
 
 def value(
     key: str = "x",
@@ -806,9 +826,23 @@ def pager(
     The tab a page is reached by shows its `tab_label`, which is a different
     property from its `name`. A page with a name and no label of its own is
     given its name, since a pager whose tabs are all blank is not usable; set
-    `tab_label` on the page to say something else. A page that is not a `GROUP`
-    is reported by [`validate`][py2tosc.validate] rather than rejected here,
-    since TouchOSC tolerates it.
+    `tab_label` on the page to say something else.
+
+    A page also styles its own tab, through `tab_color_on`, `tab_color_off`,
+    `text_color_on` and `text_color_off`. Those belong to the page rather than
+    to the pager, so no control type declares them as defaults, and a page left
+    without them draws its label in no colour at all -- a tab bar with nothing
+    written on it. Any it does not already carry are filled in with the values
+    the corpus agrees on. The editor also makes its pages non-interactive and
+    un-outlined; a group defaults both the other way, and since an untouched
+    default cannot be told from a deliberate one, that is left to you.
+
+    A pager must not be the document root. TouchOSC treats the root as the
+    canvas and gives it none of its type's behaviour, so a `PAGER` there draws
+    a tab bar and then stacks every page instead of paging between them. Put it
+    inside a group. Both that and a page that is not a `GROUP` are reported by
+    [`validate`][py2tosc.validate] rather than rejected here, since TouchOSC
+    loads them either way.
 
     Args:
         *pages: The pages, in tab order.
@@ -819,9 +853,13 @@ def pager(
         A `PAGER` holding the pages, waiting to be resolved.
     """
     for page in pages:
-        # Only groups: `tabLabel` on anything else is a property that control
-        # type has no use for, which `validate` would rightly report.
-        named = page.control_type is ControlType.GROUP and page.has("name")
-        if named and not page.has("tabLabel"):
+        # Only groups: a tab property on anything else is one that control type
+        # has no use for, which `validate` would rightly report.
+        if page.control_type is not ControlType.GROUP:
+            continue
+        if page.has("name") and not page.has("tabLabel"):
             page.set("tabLabel", page.get("name"))
+        for key, colour in _PAGE_TAB_STYLE.items():
+            if not page.has(key):
+                page.set(key, colour)
     return _arranged(Layout(PAGES, pad=to_pad(pad)), pages, props, ControlType.PAGER)

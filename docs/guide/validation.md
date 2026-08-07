@@ -35,12 +35,21 @@ a `message`. Errors sort first.
 - a `PAGER` page that is not a `GROUP`
 - a gamepad binding with no target
 - a local binding addressed to a node id no control in the layout has
+- a root node that is not a `GROUP`
 
-That last one is worth knowing about, because a stale destination is otherwise
-invisible: nothing about the message is malformed, so the layout looks clean and
-the binding simply never fires. A binding whose destination is still blank is
-left alone -- that is one the editor writes while you are part way through
-setting it up.
+The last two are worth knowing about, because both describe a layout that loads,
+round-trips and looks entirely well formed while not working.
+
+A stale local destination fails invisibly: nothing about the message is
+malformed, so the binding simply never fires. A binding whose destination is
+still blank is left alone -- that is one the editor writes while you are part
+way through setting it up.
+
+The root node is the canvas, and TouchOSC gives it none of the behaviour its
+type would otherwise have. A `PAGER` at the root draws its tab bar and then
+stacks every page on top of one another instead of paging between them. Put the
+pager inside a `GROUP` and it behaves; every layout in the corpus is built that
+way.
 
 A **custom** property -- a key the format does not define at all -- is never
 flagged. That is the distinction the check turns on: `textSize` on a `BOX` is a

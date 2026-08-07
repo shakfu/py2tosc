@@ -294,15 +294,20 @@ def test_control_surface(tmp_path):
     assert "54 parameters -> 5 pages" in result.stdout
 
     doc = py2tosc.load(out)
-    assert doc.root.control_type is py2tosc.ControlType.PAGER
-    assert [p.name for p in doc.root] == ["1-12", "13-24", "25-36", "37-48", "49-54"]
+
+    # the pager sits inside a group: as the root it would draw a tab bar and
+    # then stack every page instead of paging between them
+    assert doc.root.control_type is py2tosc.ControlType.GROUP
+    pager = doc.find(type="PAGER")
+    assert pager is not None and pager in doc.root.children
+    assert [p.name for p in pager] == ["1-12", "13-24", "25-36", "37-48", "49-54"]
 
     # every page shares one frame, sitting below the tab bar rather than under it
-    bar = doc.root.get("tabbarSize")
-    assert {tuple(p.frame) for p in doc.root} == {
-        (0.0, bar, doc.root.frame.w, doc.root.frame.h - bar)
+    bar = pager.get("tabbarSize")
+    assert {tuple(p.frame) for p in pager} == {
+        (0.0, bar, pager.frame.w, pager.frame.h - bar)
     }
-    assert [p.get("tabLabel") for p in doc.root] == [p.name for p in doc.root]
+    assert [p.get("tabLabel") for p in pager] == [p.name for p in pager]
     assert all(c.frame.w > 0 and c.frame.h > 0 for c in doc.walk())
 
     faders = doc.find_all(type="FADER")

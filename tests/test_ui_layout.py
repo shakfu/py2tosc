@@ -9,6 +9,7 @@ import pytest
 
 import py2tosc
 from py2tosc import ui
+from _corpus import DATA, EXAMPLES
 from py2tosc._geometry import ratios, slots
 
 
@@ -428,21 +429,43 @@ def test_a_page_lays_its_own_contents_out():
     assert frames(page) == [(0, 0, 400, 560), (400, 0, 400, 560)]
 
 
+def in_document(pager):
+    """A pager the way TouchOSC needs it: inside a group, not as the root."""
+    return py2tosc.Document(
+        root=ui.stack(pager, name="root", frame=(0, 0, 800, 600))
+    ).resolve()
+
+
 def test_a_pager_of_groups_validates_cleanly():
+    assert in_document(ui.pager(ui.row(py2tosc.fader(), name="1"))).validate() == []
+
+
+def test_a_pager_as_the_root_is_reported():
+    """The root is the canvas, and TouchOSC gives it none of its type's
+    behaviour: a PAGER there draws its tab bar and then stacks every page
+    instead of paging. All 35 corpus layouts root at a GROUP."""
     pages = ui.pager(ui.row(py2tosc.fader(), name="1"), frame=(0, 0, 800, 600))
-    assert py2tosc.Document(root=pages).resolve().validate() == []
+    found = py2tosc.Document(root=pages).resolve().validate()
+    assert len(found) == 1
+    assert "the root is a PAGER" in found[0].message
+
+
+def test_validating_a_subtree_says_nothing_about_the_root():
+    """A bare pager is a fine subtree; only a document has a root to be wrong."""
+    pages = ui.pager(ui.row(py2tosc.fader(), name="1"), frame=(0, 0, 800, 600))
+    ui.resolve(pages)
+    assert pages.validate() == []
 
 
 def test_a_page_that_is_not_a_group_is_reported_not_rejected():
     """TouchOSC tolerates it, so `validate` warns rather than `pager` raising.
 
-    The one warning is about the page itself: `tabLabel` is deliberately not
-    defaulted onto a control that cannot be a page, since that would add a
-    second warning about a property the type has no use for.
+    The one warning is about the page itself: the tab properties are
+    deliberately not defaulted onto a control that cannot be a page, since that
+    would add warnings about properties the type has no use for.
     """
     loose = py2tosc.fader(name="loose")
-    pages = ui.pager(loose, frame=(0, 0, 800, 600))
-    found = py2tosc.Document(root=pages).resolve().validate()
+    found = in_document(ui.pager(loose)).validate()
     assert len(found) == 1
     assert "PAGER pages should be GROUP" in found[0].message
     assert not loose.has("tabLabel")
@@ -508,3 +531,78 @@ def test_an_unnamed_page_gets_no_tab_label():
     page = ui.row(py2tosc.fader())
     ui.pager(page)
     assert not page.has("tabLabel")
+
+
+def test_a_page_styles_its_own_tab():
+    """Without these the tab bar comes out blank, label and all.
+
+    They belong to the page rather than the pager, so no control type declares
+    them as defaults, and a page left without them draws its label in no colour
+    at all. The values are the ones roughly a thousand corpus pages agree on.
+    """
+    page = ui.row(py2tosc.fader(), name="1")
+    ui.pager(page)
+
+    assert page.get("tabColorOff") == py2tosc.to_color((0.25, 0.25, 0.25, 1.0))
+    assert page.get("tabColorOn") == py2tosc.to_color((0.5, 0.5, 0.5, 1.0))
+    assert page.get("textColorOff") == py2tosc.to_color((1.0, 1.0, 1.0, 1.0))
+    assert page.get("textColorOn") == py2tosc.to_color((1.0, 1.0, 1.0, 1.0))
+
+
+def test_explicit_tab_styling_is_left_alone():
+    page = ui.row(py2tosc.fader(), name="1", text_color_on="#ff0000")
+    ui.pager(page)
+    assert page.get("textColorOn") == py2tosc.to_color("#ff0000")
+    assert page.get("textColorOff") == py2tosc.to_color((1.0, 1.0, 1.0, 1.0))
+
+
+def test_a_page_carries_everything_the_editor_writes():
+    """The gap that made the first two pagers render wrong: parity is the test.
+
+    Both defects -- pages under the tab bar, and blank tabs -- were structural
+    differences from what the editor produces, invisible to `validate` and to a
+    round trip. Comparing against a real pager is what finds that class.
+    """
+    reference = py2tosc.load(EXAMPLES / "simple_mk2.tosc").find(type="PAGER")
+    built = ui.pager(
+        ui.row(py2tosc.fader(), name="1"), name="pager1", frame=(0, 0, 320, 480)
+    )
+    ui.resolve(built)
+
+    assert not set(reference[0].properties) - set(built[0].properties)
+    assert not set(reference.properties) - set(built.properties)
+    # and the geometry the reference uses, not merely the same property names
+    assert tuple(built[0].frame) == tuple(reference[0].frame)
+
+
+def test_a_built_pager_matches_one_the_editor_made():
+    """Parity against a minimal pager built by hand in TouchOSC.
+
+    `simple_mk2.tosc` is a large layout whose pager is styled; this one exists
+    only to be a working pager, so anything it carries is something a pager
+    needs rather than something its author chose. Three defects hid in exactly
+    that gap -- pages under the tab bar, blank tabs, and a pager at the root.
+    """
+    reference = py2tosc.load(DATA / "pager_example.tosc")
+    ref_pager = reference.find(type="PAGER")
+
+    built = ui.pager(
+        ui.stack(py2tosc.fader(name="fader1"), name="1"),
+        ui.stack(py2tosc.radial(name="radial1"), name="2"),
+        ui.stack(py2tosc.encoder(name="encoder1"), name="3"),
+        name="pager1",
+        frame=tuple(ref_pager.frame),
+    )
+    ui.resolve(py2tosc.group(frame=tuple(reference.root.frame), children=[built]))
+
+    # the same properties, on the pager and on a page
+    assert set(built.properties) == set(ref_pager.properties)
+    assert set(built[0].properties) == set(ref_pager[0].properties)
+    # and the same page geometry, which is where the tab bar shows up
+    assert [tuple(p.frame) for p in built] == [tuple(p.frame) for p in ref_pager]
+    assert [p.get("tabLabel") for p in built] == ["1", "2", "3"]
+
+
+def test_the_editor_made_pager_still_validates():
+    """It works in TouchOSC, so no rule of ours may object to it."""
+    assert py2tosc.load(DATA / "pager_example.tosc").validate() == []

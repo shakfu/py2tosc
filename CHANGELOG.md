@@ -2,7 +2,12 @@
 
 Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses [semantic versioning](https://semver.org/spec/v2.0.0.html) -- while the version is below 1.0, a minor bump may break the API.
 
-## [Unreleased]
+## [0.2.0]
+
+Adds `py2tosc.ui`, a layer of combinators for building messages and layouts, and
+fixes a defect that made `Control.copy` silently misdirect a duplicated
+subtree's wiring. `py2tosc.layout` and everything else in the core namespace are
+unchanged, so existing scripts keep working.
 
 ### Added
 
@@ -14,13 +19,21 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
 
 - Layout combinators in `py2tosc.ui`: `row`, `column`, `grid` and `stack` describe an arrangement without sizing anything, and `resolve` assigns frames once the frame at the top is known. Each returns the group it built rather than the children, so layouts nest by ordinary composition -- `row(column(a, b), c)` -- a row can hold a fader and a label rather than one control type, and `stack` expresses the button-with-a-label idiom the eager functions cannot. `gap` and `pad` are supported throughout, with exact arithmetic: each slot ends exactly `gap` before the next begins and the last reaches the content edge. `Document.resolve()` runs the pass against the root. `py2tosc.layout` is unchanged.
 
-- `ui.pager`, which stacks groups as the pages of a `PAGER`. The other combinators all build a `GROUP`, and a `PAGER` carries no layout of its own, so before this a page kept whatever frame it was built with -- a 100x100 default inside an 800x600 pager, which `validate` reported as clean. Pages are placed below the tab bar rather than under it, reading the pager's own `tabbar` and `tabbar_size`, and a named page is given its name as its `tab_label` -- a separate property from `name`, and one that leaves every tab blank if nothing sets it.
+- `ui.pager`, which stacks groups as the pages of a `PAGER`. The other combinators all build a `GROUP`, and a `PAGER` carries no layout of its own, so before this a page kept whatever frame it was built with -- a 100x100 default inside an 800x600 pager, which `validate` reported as clean. Pages are placed below the tab bar rather than under it, reading the pager's own `tabbar` and `tabbar_size`. A page is also given the properties that make its tab legible: `tab_label`, which is a separate property from `name`, and the four tab and text colours. None of those belong to a control type's defaults, since a group is only a page when a pager holds it, and a page without them draws its label in no colour at all -- a tab bar with nothing written on it.
 
 - `ui.labelled` and `ui.inset`. `labelled` lays a non-interactive caption over a control, which is the commonest idiom in TouchOSC and the one the eager layout functions cannot express at all. `inset` shrinks a single control within the frame its layout gives it, as a fraction rather than a pixel count, since a deferred layout has no pixels until the frame arrives from above. It is what a group's `pad` cannot say: `pad` insets every child alike, and a key wants its caption padded but not the button beneath. The inset rides on the control rather than on a wrapper group, so it costs no extra node.
 
 - `validate` warns when a control carries a layout that was never resolved. An unset frame reads back as `(0, 0, 0, 0)` rather than raising, so the mistake would otherwise reach the file as a group of zero-sized controls. Saving deliberately does not resolve on its own: writing a file must not change the tree.
 
+- `validate` warns when the root node is not a `GROUP`. TouchOSC treats the root as the canvas and gives it none of the behaviour its type would otherwise have, so a `PAGER` there draws its tab bar and then stacks every page instead of paging between them -- a layout that loads, validates and round-trips while being visibly broken. All 35 layouts in the corpus root at a `GROUP`.
+
 - `validate` warns when a `LocalMessage` is addressed to a node id no control in the layout has. A stale destination is otherwise invisible: nothing about the message is malformed, so the binding simply never fires. A destination that is still blank is left alone, since the editor writes those while a binding is part way through being set up.
+
+- A `control_surface.py` demo, generating a paged MIDI and OSC surface from a plugin's parameter list. It is the second thing built on `py2tosc.ui`, and the one that found the pager gap.
+
+### Changed
+
+- The plugin parameter list in `tests/data/` is now `pro_c_2_fabfilter.json`, pretty-printed. Only the demos and their documented commands refer to it; nothing in the package does.
 
 ### Fixed
 
@@ -128,4 +141,5 @@ First release: py2tosc is a rewrite of [tosclib](https://github.com/AlbertoV5/to
 
 py2tosc began as a fork of [tosclib](https://github.com/AlbertoV5/tosclib), which had twelve releases between 2022-05-20 and 2022-06-09, ending at 0.3.5. That history belongs to a different distribution and is not restated here; see [the tosclib releases](https://pypi.org/project/tosclib/#history).
 
+[0.2.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.2.0
 [0.1.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.1.0

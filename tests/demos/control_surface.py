@@ -153,10 +153,15 @@ def build(
     Returns:
         The document, resolved and ready to save.
     """
-    surface = ui.pager(
-        *pages(captions, prefix), name=prefix.rsplit("/", 1)[-1], frame=frame
-    )
-    return py2tosc.Document(root=surface).resolve()
+    title = prefix.rsplit("/", 1)[-1]
+    surface = ui.pager(*pages(captions, prefix), name=title)
+
+    # The pager cannot be the root. TouchOSC treats the root node as the canvas
+    # and gives it none of its type's behaviour, so a PAGER there draws its tab
+    # bar and then stacks every page instead of paging between them. Every
+    # layout in the corpus roots at a GROUP; `validate` reports it if this slips.
+    root = ui.stack(surface, name=title, frame=frame)
+    return py2tosc.Document(root=root).resolve()
 
 
 def main(json_path: str, output_path: str, prefix: str = "") -> None:
@@ -173,7 +178,7 @@ def main(json_path: str, output_path: str, prefix: str = "") -> None:
 
     doc.save(output_path)
     print(
-        f"{len(parameters)} parameters -> {len(doc.root.children)} pages, "
+        f"{len(parameters)} parameters -> {len(doc.find(type='PAGER').children)} pages, "
         f"{len(doc.find_all())} controls -> {output_path}"
     )
 

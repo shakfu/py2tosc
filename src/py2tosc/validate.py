@@ -227,6 +227,21 @@ def validate(target: Control | Document) -> list[Issue]:
     known_ids = frozenset(control.id for control in root.walk())
     issues = list(_check_control(root, [name], known_ids))
 
+    # The root node is the canvas, and TouchOSC gives it none of the behaviour
+    # its type would otherwise have: a PAGER there draws its tab bar but never
+    # pages, stacking every child instead. All 35 layouts in the corpus root at
+    # a GROUP, and no PAGER appears above depth 1. Only checked for a document,
+    # since validating a subtree says nothing about what sits at the top of it.
+    if not isinstance(target, Control) and root.control_type is not ControlType.GROUP:
+        issues.append(
+            Issue(
+                WARNING,
+                name,
+                f"the root is a {root.control_type.value}; TouchOSC treats the "
+                f"root as a plain container, so put it inside a GROUP instead",
+            )
+        )
+
     # Node ids must be unique across the whole layout, so this cannot be done
     # per control.
     counts = Counter(control.id for control in root.walk())

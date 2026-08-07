@@ -1,0 +1,2233 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Generate and edit TouchOSC layouts from Python.">
+      
+      
+      
+        <link rel="canonical" href="https://shakfu.github.io/py2tosc/changelog/">
+      
+      
+        <link rel="prev" href="../migrating/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Changelog - py2tosc</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#changelog" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="py2tosc" class="md-header__button md-logo" aria-label="py2tosc" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            py2tosc
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Changelog
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/shakfu/py2tosc" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    shakfu/py2tosc
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="py2tosc" class="md-nav__button md-logo" aria-label="py2tosc" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    py2tosc
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/shakfu/py2tosc" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    shakfu/py2tosc
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command line
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Controls and properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/messages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Messages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/layouts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layouts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/sizes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layout sizes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The .tosc format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/custom-properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Demos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Demos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/custom-property/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom property
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/copy-scripts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Copy scripts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/from-json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faders from JSON
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/control-surface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Control surface
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/image-converter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Image converter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/numpad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Numpad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/simple-mk2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rebuilding a template
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/reaper/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reaper to TouchOSC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/document/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/control/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/messages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Values and messages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Message combinators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/layout/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layouts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/enums/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Enumerations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/validate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/codegen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generating Python
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/surface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Control surfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migrating/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coming from tosclib
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#031-2026-08-07" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3.1 - 2026-08-07
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.3.1 - 2026-08-07">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#030" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.3.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#021" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.2.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#020" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.2.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#010" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.1.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.1.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#addeds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Addeds
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prior-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prior history
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#031-2026-08-07" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3.1 - 2026-08-07
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.3.1 - 2026-08-07">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#030" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.3.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.3.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#021" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.2.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#020" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.2.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#010" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.1.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.1.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#addeds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Addeds
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prior-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prior history
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<p>Notable changes to py2tosc. The format follows <a href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>, and this project uses <a href="https://semver.org/spec/v2.0.0.html">semantic versioning</a> -- while the version is below 1.0, a minor bump may break the API.</p>
+<h2 id="031-2026-08-07"><a href="https://github.com/shakfu/py2tosc/releases/tag/v0.3.1">0.3.1</a> - 2026-08-07<a class="headerlink" href="#031-2026-08-07" title="Permanent link">&para;</a></h2>
+<h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p>A <code>py2tosc</code> command. Everything the library does is file-shaped, and none of it needed a script written first -- least of all <code>to_python</code>, where you had to write a script to get a script. Five subcommands: <code>show</code> summarises a layout and draws its tree, <code>validate</code> reports what TouchOSC will reject and exits non-zero if any of it is an error, <code>decompile</code> writes the layout out as Python, <code>convert</code> rewrites it as <code>.tosc</code> or <code>.xml</code>, and <code>build</code> generates a control surface from a list of parameters.</p>
+</li>
+<li>
+<p><code>py2tosc.surface</code>, which builds a paged surface from a parameter list. The <code>control_surface</code> demo did this already, but a demo is not shipped in the wheel and so could not back a subcommand. The demo is now a caller, so the two cannot drift.</p>
+</li>
+</ul>
+<p>Its input is a public contract rather than whatever happened to be in the test data: a list of names, or a list of objects where only <code>name</code> is required and <code>cc</code> and <code>channel</code> are optional. A host's <code>index</code> is ignored on purpose -- it identifies the parameter to the host and is not a controller number, and a real export's run well past the 127 a CC allows -- so controller numbers come from position unless an entry says otherwise. Names are slugged and numbered, since they contain spaces and repeat and an OSC address can carry neither. <code>--midi-only</code> and <code>--osc-only</code> leave out the other binding.</p>
+<p>The design canvas is <code>--size WIDTHxHEIGHT</code>, and <code>surface.build</code> takes a <code>frame</code>. TouchOSC scales a layout to whatever screen opens it, so the canvas is an aspect ratio and a coordinate space rather than a pixel count -- but font sizes and margins are absolute within it, so it is not free either.</p>
+<ul>
+<li>A guide to choosing a layout size, <code>docs/guide/sizes.md</code>, together with reference pages for the command line and <code>py2tosc.surface</code>, and a section in the README.</li>
+</ul>
+<p>The size guide is a reading of the twenty layouts in <code>tests/examples/</code>, which all ship with TouchOSC under Help &gt; Examples and are therefore the best available evidence about what the format's designers consider normal. Three findings: size follows purpose rather than device, and the examples group by what they are for; nothing official exceeds 1024x768; and the five general-purpose control surfaces are the smallest of the lot and every one of them pages, <code>beatmachine_mk2</code> fitting 231 controls onto 480x320. The last is a tendency rather than a rule -- <code>hexkeys</code> puts 240 controls on 740x345 unpaged, because a keyboard has to be seen at once.</p>
+<h3 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><code>surface</code> now defaults to a 568x320 canvas, matching <code>automat5_mk2</code>, rather than the 1024x768 it started with. That number was a guess, and nothing official is laid out on it except a 767-control DAW controller.</p>
+</li>
+<li>
+<p>Caption text is sized from the box it lands in, at 0.55 of its height, rather than fixed at 14pt. Across the 2867 labels in the corpus, text sits at a median 0.54 of the height of the box holding it, and 0.52 across the official examples alone; a fixed size only suits one canvas, and on 1024x768 that 14pt sat at 0.28, half what the surrounding label wanted. The error grew with the canvas, so the fixed text and the oversized default were the same mistake seen twice.</p>
+</li>
+<li>
+<p><code>tests/examples/</code> now holds only what TouchOSC ships. The two hand-drawn <code>GRID</code> references moved to <code>tests/data/</code>, alongside the hand-drawn <code>PAGER</code> one that was already there.</p>
+</li>
+</ul>
+<h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Saving a layout the combinators described but nobody resolved wrote every control at the origin, silently. It was structurally valid, round-tripped byte-exactly, and was visibly wrong only once TouchOSC drew it -- and <code>save(validate=True)</code> did not stop it, because the unresolved-layout rule is a warning and saving only refuses on errors.</li>
+</ul>
+<p><code>save</code> now places whatever is still unplaced. It will not re-run a layout that was already resolved, so a frame placed by hand inside one survives; an explicit <code>resolve</code> still re-runs everything, which is how a tree is laid out again after its root frame changes. Loading a file and saving it back is unaffected -- a loaded control carries no layout -- and that is asserted over every <code>.tosc</code> in the corpus rather than argued.</p>
+<p><code>dumps</code> still serializes exactly what is in the tree, on purpose: it is what you read a layout with while debugging one, and an unplaced layout is the state you need to see.</p>
+<p>The unresolved-layout warning stays, and now says what it means. It is not a report about the file, since saving places the layout anyway -- it is a report about the tree in hand, where an unset frame reads back as <code>(0, 0, 0, 0)</code> rather than raising, so anything consulting frames before saving is reading coordinates that mean nothing yet.</p>
+<ul>
+<li><code>build</code> and <code>show</code> reported different control counts for the same layout, off by one: <code>find_all</code> returns descendants while <code>walk</code> includes the root. <code>show</code> was right.</li>
+</ul>
+<h2 id="030"><a href="https://github.com/shakfu/py2tosc/releases/tag/v0.3.0">0.3.0</a><a class="headerlink" href="#030" title="Permanent link">&para;</a></h2>
+<h3 id="added_1">Added<a class="headerlink" href="#added_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><code>validate</code> warns when a local binding writes a value or property the destination does not have -- a <code>LABEL</code> told to move its <code>x</code>, or a property that was renamed out from under the binding. The message is delivered and then discarded, so the layout loads, round-trips and validates as well formed while the control never moves. All 358 resolvable local bindings in the corpus address something real, so the rule fires on nothing the editor wrote. A blank <code>dst_var</code> is left alone, like a blank <code>dst_id</code>.</p>
+</li>
+<li>
+<p><code>to_python</code>, which writes a layout back out as the Python that would build it. Load a <code>.tosc</code> and read it as source, which is what you want when the layout already exists and the script does not. Every one of the 43 files in the corpus round-trips through its own generated script.</p>
+</li>
+</ul>
+<p>The output is flat -- a variable per control, then the tree, then the bindings -- rather than one nested expression: nesting reads better for five controls and is unusable at a hundred and forty, and a local binding has to be able to name the control it addresses. One difference is documented and asserted rather than hidden: a property the file omits but the control's type defaults will be present in the rebuild, which accounts for ten combinations across the corpus, all keys the format gained after those files were written.</p>
+<ul>
+<li>
+<p><code>validate</code> warns when a <code>GRID</code> holds a different number of controls than its <code>grid_x</code> and <code>grid_y</code> claim. TouchOSC has no empty grid -- creating one populates it -- and all 37 grids in the corpus hold exactly <code>grid_x * grid_y</code> children. A bare <code>py2tosc.grid()</code> says 2x2 of faders in its defaults and creates none, which now gets reported rather than passing as clean.</p>
+</li>
+<li>
+<p>A <code>simple_mk2.py</code> demo, rebuilding one of the layouts TouchOSC ships -- four pages, 140 controls, every binding type the format has -- from nothing. It is the widest thing here that the library authors rather than edits, and the first end-to-end evidence that it can. Same control types, names and tab labels as the original, the same bindings to the message, and of the 134 controls comparable by position, 77 land on exactly the original coordinates and 111 within a point.</p>
+</li>
+<li>
+<p><code>ui.grid</code>, which builds a <code>GRID</code> control with the cells it must hold. TouchOSC has no empty grid, so this is the complete way to make one: it fills itself with <code>columns * rows</code> controls of a single type, which is what a multitoggle or a bank of faders is. Every grid in the corpus holds one type, so the type is what it takes.</p>
+</li>
+</ul>
+<p>A <code>GRID</code> tiles its cells rather than dividing its frame: every cell is the same size, with a three-point margin around and between, and whatever will not divide evenly is left at the far edge. That is reproduced for 36 of the 37 grids in the corpus, and for both hand-made reference grids; the one exception is recorded in the tests. <code>grid_type</code> is set from the control type -- the corpus numbers it by the type's position in the format's own order, so a grid of buttons left at the default would have announced itself as a grid of faders.</p>
+<h3 id="changed_1">Changed<a class="headerlink" href="#changed_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p>Every demo takes its arguments through <code>argparse</code>, so a missing path is a usage message rather than a <code>TypeError</code> traceback, and each answers <code>--help</code>. The output is now <code>-o/--output</code> and defaults to <code>build/&lt;demo&gt;.tosc</code>, named after the script, so a demo can be run with only the inputs it actually needs -- <code>python tests/demos/numpad.py</code> with nothing at all. The directory is created if it is missing. Inputs stay positional and in the same order.</p>
+</li>
+<li>
+<p><strong><code>grid</code> now names the <code>GRID</code> control everywhere and nothing else.</strong> It previously meant three different things across three modules, which is why it took a round of questions to establish how to build one. Two renames follow:</p>
+</li>
+<li>
+<p><code>ui.grid</code> -- the arrangement that tiles controls you already have into a <code>GROUP</code> -- is now <code>ui.tiles</code>. It sits alongside <code>row</code>, <code>column</code> and <code>stack</code>, and is the only one of them that took the format's name for a control it does not build.</p>
+</li>
+<li><code>layout.grid</code> is now <code>layout.matrix</code>. It creates one control type across M by N cells inside a parent, which <code>matrix</code> describes and <code>grid</code> did not; the eager family now reads <code>row</code>, <code>column</code>, <code>matrix</code>. Behaviour is unchanged.</li>
+</ul>
+<p>So <code>py2tosc.grid</code> and <code>ui.grid</code> both give a <code>GRID</code>, the first bare and the second with its cells, while <code>ui.tiles</code> and <code>layout.matrix</code> arrange controls in a <code>GROUP</code>. <code>layout.matrix</code> is the first break in <code>layout</code> since 0.1.0; no demo used it, and it is a rename with no behavioural change.</p>
+<h2 id="021"><a href="https://github.com/shakfu/py2tosc/releases/tag/v0.2.1">0.2.1</a><a class="headerlink" href="#021" title="Permanent link">&para;</a></h2>
+<h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>ui.pager</code> reserved the tab bar from the top edge whatever the pager's <code>orientation</code>, so a bar mounted on the bottom or the left left its pages both the wrong size and in the wrong place. It was right for 999 of the 1005 pager pages in the corpus and wrong for the other six. All 1005 are now reproduced exactly, which covers the bar being switched off as well -- the common case, where a page fills its pager.</li>
+</ul>
+<h2 id="020"><a href="https://github.com/shakfu/py2tosc/releases/tag/v0.2.0">0.2.0</a><a class="headerlink" href="#020" title="Permanent link">&para;</a></h2>
+<p>Adds <code>py2tosc.ui</code>, a layer of combinators for building messages and layouts, and
+fixes a defect that made <code>Control.copy</code> silently misdirect a duplicated
+subtree's wiring. <code>py2tosc.layout</code> and everything else in the core namespace are
+unchanged, so existing scripts keep working.</p>
+<h3 id="added_2">Added<a class="headerlink" href="#added_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><code>py2tosc.ui</code>, message combinators that build the existing dataclasses from a shorter description. <code>osc("/synth/{parent.name}/{name}")</code> expands an f-string-like address into partials, <code>midi_cc</code> and <code>midi_note</code> cover the two common MIDI bindings, and <code>connect</code> replaces the seven keyword arguments a <code>LocalMessage</code> needs with a source and a target described by the same <code>value</code>, <code>const</code>, <code>prop</code> and <code>index</code> constructors used for OSC arguments. Nothing it builds can reach a file that a hand-written message could not. The module is unstable while the version is below 1.0; see the <a href="https://shakfu.github.io/py2tosc/api/ui/">API reference</a>.</p>
+</li>
+<li>
+<p><code>midi_cc</code> and <code>midi_note</code> take a partial as well as a number for the note, the controller and the channel, so <code>midi_note(prop("name"))</code> gives a keyboard whose buttons name their own notes instead of being numbered one at a time. <code>const</code> and <code>prop</code> gained a <code>scale</code> to match, since a MIDI slot draws its fixed byte from the range rather than from the key.</p>
+</li>
+<li>
+<p><code>ALL_CONNECTIONS</code> and <code>ALL_GAMEPADS</code> are exported, having previously been reachable only by importing <code>py2tosc.messages</code> directly.</p>
+</li>
+<li>
+<p>Layout combinators in <code>py2tosc.ui</code>: <code>row</code>, <code>column</code>, <code>grid</code> and <code>stack</code> describe an arrangement without sizing anything, and <code>resolve</code> assigns frames once the frame at the top is known. Each returns the group it built rather than the children, so layouts nest by ordinary composition -- <code>row(column(a, b), c)</code> -- a row can hold a fader and a label rather than one control type, and <code>stack</code> expresses the button-with-a-label idiom the eager functions cannot. <code>gap</code> and <code>pad</code> are supported throughout, with exact arithmetic: each slot ends exactly <code>gap</code> before the next begins and the last reaches the content edge. <code>Document.resolve()</code> runs the pass against the root. <code>py2tosc.layout</code> is unchanged.</p>
+</li>
+<li>
+<p><code>ui.pager</code>, which stacks groups as the pages of a <code>PAGER</code>. The other combinators all build a <code>GROUP</code>, and a <code>PAGER</code> carries no layout of its own, so before this a page kept whatever frame it was built with -- a 100x100 default inside an 800x600 pager, which <code>validate</code> reported as clean. Pages are placed below the tab bar rather than under it, reading the pager's own <code>tabbar</code> and <code>tabbar_size</code>. A page is also given the properties that make its tab legible: <code>tab_label</code>, which is a separate property from <code>name</code>, and the four tab and text colours. None of those belong to a control type's defaults, since a group is only a page when a pager holds it, and a page without them draws its label in no colour at all -- a tab bar with nothing written on it.</p>
+</li>
+<li>
+<p><code>ui.labelled</code> and <code>ui.inset</code>. <code>labelled</code> lays a non-interactive caption over a control, which is the commonest idiom in TouchOSC and the one the eager layout functions cannot express at all. <code>inset</code> shrinks a single control within the frame its layout gives it, as a fraction rather than a pixel count, since a deferred layout has no pixels until the frame arrives from above. It is what a group's <code>pad</code> cannot say: <code>pad</code> insets every child alike, and a key wants its caption padded but not the button beneath. The inset rides on the control rather than on a wrapper group, so it costs no extra node.</p>
+</li>
+<li>
+<p><code>validate</code> warns when a control carries a layout that was never resolved. An unset frame reads back as <code>(0, 0, 0, 0)</code> rather than raising, so the mistake would otherwise reach the file as a group of zero-sized controls. Saving deliberately does not resolve on its own: writing a file must not change the tree.</p>
+</li>
+<li>
+<p><code>validate</code> warns when the root node is not a <code>GROUP</code>. TouchOSC treats the root as the canvas and gives it none of the behaviour its type would otherwise have, so a <code>PAGER</code> there draws its tab bar and then stacks every page instead of paging between them -- a layout that loads, validates and round-trips while being visibly broken. All 35 layouts in the corpus root at a <code>GROUP</code>.</p>
+</li>
+<li>
+<p><code>validate</code> warns when a <code>LocalMessage</code> is addressed to a node id no control in the layout has. A stale destination is otherwise invisible: nothing about the message is malformed, so the binding simply never fires. A destination that is still blank is left alone, since the editor writes those while a binding is part way through being set up.</p>
+</li>
+<li>
+<p>A <code>control_surface.py</code> demo, generating a paged MIDI and OSC surface from a plugin's parameter list. It is the second thing built on <code>py2tosc.ui</code>, and the one that found the pager gap.</p>
+</li>
+</ul>
+<h3 id="changed_2">Changed<a class="headerlink" href="#changed_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The plugin parameter list in <code>tests/data/</code> is now <code>pro_c_2_fabfilter.json</code>, pretty-printed. Only the demos and their documented commands refer to it; nothing in the package does.</li>
+</ul>
+<h3 id="fixed_2">Fixed<a class="headerlink" href="#fixed_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><code>Control.copy(new_ids=True)</code> left local messages pointing at the originals. Duplicating a wired subtree -- the obvious use of <code>copy</code>, and how a second numpad gets built -- produced a clone whose controls drove the subtree it was copied from, silently, because the id it held still resolved. Destinations inside the copied subtree now follow the copy; destinations outside it are left alone, since those are deliberate references to controls the copy does not own.</p>
+</li>
+<li>
+<p>Pressing the same numpad key twice in a row did nothing the second time. A key writes its caption into the very value the readout displays, and TouchOSC reports a value only when it changes -- so sending <code>7</code> while the readout already showed <code>7</code> was not a change, and the script never ran. Keys now send their caption behind a <code>#</code>, which a total can never start with, keeping the two disjoint whatever is on screen. <code>SEND</code> had the same defect for its own reason, writing <code>1</code> to the readout's touch on press and never releasing it; it now mirrors the button so the pulse falls back.</p>
+</li>
+<li>
+<p>The numpad demo's <code>SEND</code> key, which previously carried no binding at all and did nothing. It now pushes the total to <code>/numpad/value</code> over OSC. The binding lives on the readout rather than on <code>SEND</code>, because an OSC argument reads the control it sits on and only the readout holds the total; <code>SEND</code> touches the readout, and the readout sends on touch.</p>
+</li>
+<li>
+<p>The numpad demo's readout script. Every entry carried a leading zero, because the running total started at <code>"0"</code> and each keypress was concatenated onto it, so pressing 7 displayed <code>07</code>. <code>DEL</code> did nothing at all: it blanked the readout's text, which appended an empty string and then redrew the unchanged total. A branch meant to show <code>0</code> for an empty total was dead, overwritten by the line after it. The script now tracks the total separately from the display, ignores a leading zero, and gives <code>DEL</code> and <code>CLR</code> their meaning by name -- so every key sends its own name and is wired identically, rather than <code>CLR</code> and <code>DEL</code> carrying bespoke messages.</p>
+</li>
+<li>
+<p>The messages guide taught <code>dst_type="FLOAT"</code> on a <code>LocalMessage</code>, which is a <code>Conversion</code> value in a field that takes a <code>PartialType</code>. <code>dst_type</code> says what kind of thing is written on the destination, so it takes <code>VALUE</code> or <code>PROPERTY</code>; nothing catches the mistake, since the field is annotated as a bare <code>str</code> and <code>validate</code> has no rule for it.</p>
+</li>
+</ul>
+<h2 id="010"><a href="https://github.com/shakfu/py2tosc/releases/tag/v0.1.0">0.1.0</a><a class="headerlink" href="#010" title="Permanent link">&para;</a></h2>
+<p>First release: py2tosc is a rewrite of <a href="https://github.com/AlbertoV5/tosclib">tosclib</a> 0.3.5 by Alberto Valdez; the entries below describe what changed relative to it. Scripts written against tosclib will not run against py2tosc, and there are no compatibility shims. See <a href="https://shakfu.github.io/py2tosc/migrating/">Coming from tosclib</a> for a name by name mapping.</p>
+<h3 id="addeds">Addeds<a class="headerlink" href="#addeds" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><code>Document</code>, with <code>load</code>, <code>loads</code>, <code>save</code> and <code>dumps</code> named after the <code>json</code> module's. <code>load</code> accepts a <code>.tosc</code> or an <code>.xml</code> without being told which, and <code>save</code> picks the format from the file extension.</p>
+</li>
+<li>
+<p><code>Control</code> as the node model. Traversal returns controls, not <code>ET.Element</code>, so children no longer have to be re-wrapped by hand.</p>
+</li>
+<li>
+<p><code>find</code>, <code>find_all</code> and <code>walk</code>, searching by name, by control type or both.</p>
+</li>
+<li>
+<p><code>Control.copy</code>, duplicating a subtree with fresh node ids.</p>
+</li>
+<li>
+<p><code>save(validate=True)</code> and <code>dumps(validate=True)</code>, which refuse to write a layout that has errors and raise <code>ValidationError</code> instead. Off by default.</p>
+</li>
+<li>
+<p><code>validate</code>, an opt-in check for things TouchOSC rejects or ignores -- children on a control that cannot hold them, duplicate node ids, a property stored under the wrong type, or a format property on a control type that has no use for it. Advisory and never raises; custom properties are left alone. Every rule is corroborated against layouts the editor wrote.</p>
+</li>
+<li>
+<p><code>GamepadMessage</code>. tosclib 0.3.x had a <code>ControlElements.GAMEPAD</code> enum member with no implementation behind it, so a layout containing a gamepad binding could not be read at all.</p>
+</li>
+<li>
+<p><code>Frame</code> and <code>Color</code> named tuples. Colours accept normalised floats, 0-255 integers or hex strings.</p>
+</li>
+<li>
+<p><code>__version__</code>, and an <code>__all__</code> that governs the public namespace.</p>
+</li>
+<li>
+<p>Support for reading and writing lexml version 6, the format TouchOSC 1.5 writes: the <code>&lt;includes&gt;</code> element and the <code>&lt;noDuplicates&gt;</code> message flag. Both are omitted from documents that declare an older version.</p>
+</li>
+<li>
+<p>Frames keep sub-pixel positions. TouchOSC stores frames like <code>x=417.439</code>, which earlier releases -- and the first draft of this one -- rounded to integers, moving the control.</p>
+</li>
+<li>
+<p>A test corpus of 42 layout files, including the twenty examples bundled with TouchOSC 1.5.2, spanning both format versions, and demo scripts that the test suite executes -- including a numpad built from nested layouts, a Lua script and LOCAL message wiring.</p>
+</li>
+</ul>
+<h3 id="changed_3">Changed<a class="headerlink" href="#changed_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><strong>The API is <code>snake_case</code>.</strong> <code>setColor</code> is <code>control.color = ...</code>, <code>findChildByName</code> is <code>find</code>. Property keys stay camelCase in the file, because that is what the format stores; <code>control.corner_radius</code> addresses the <code>cornerRadius</code> key.</p>
+</li>
+<li>
+<p><strong>Property and value data are native Python types</strong>, not strings. <code>Value.locked</code> is a <code>bool</code>; <code>Property("textSize", 14).value</code> is <code>14</code>.</p>
+</li>
+<li>
+<p><strong>Reading no longer mutates the tree.</strong> tosclib inserted empty <code>&lt;messages&gt;</code> and <code>&lt;children&gt;</code> elements into any control it wrapped.</p>
+</li>
+<li>
+<p><strong>Missing properties raise <code>AttributeError</code></strong> rather than returning <code>None</code>. Use <code>control.get(key)</code> where absence is expected.</p>
+</li>
+<li>
+<p><strong>Layouts are functions, not decorators.</strong> <code>layout.row</code>, <code>layout.column</code> and <code>layout.grid</code> take the parent as an argument and return the controls they made, so nesting is ordinary function composition.</p>
+</li>
+<li>
+<p>Serialization is written directly rather than through <code>ElementTree</code>, so CDATA sections, element order and the XML declaration are preserved. Loading a layout and saving it reproduces the TouchOSC editor's own bytes exactly, in both the compressed and exported forms.</p>
+</li>
+<li>
+<p>Documentation moved from Sphinx to MkDocs.</p>
+</li>
+<li>
+<p>Packaging moved to <code>pyproject.toml</code> with the <code>uv_build</code> backend; <code>setup.py</code>, <code>tox.ini</code> and the three <code>requirements*.txt</code> files are gone.</p>
+</li>
+<li>
+<p>Releasing and publishing the documentation are driven from the Makefile rather than from CI. <code>make release-check</code> gates the declared version, the changelog entry and the state of the working tree; <code>make dist-check</code> rebuilds <code>dist/</code> from empty and validates it with <code>twine check --strict</code>; <code>make publish</code> uploads, behind a <code>CONFIRM=1</code> guard because a filename PyPI has accepted can never be reused. <code>make docs-deploy</code> pushes the documentation to <code>gh-pages</code>. Nothing is published automatically.</p>
+</li>
+<li>
+<p>CI runs the suite on Ubuntu against Python 3.10 through 3.14, and checks types, lint, a strict documentation build, and the built wheel, on every push and pull request.</p>
+</li>
+</ul>
+<h3 id="removed">Removed<a class="headerlink" href="#removed" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><strong>numpy is no longer a dependency.</strong> py2tosc has no runtime dependencies at all. The layout arithmetic is plain Python.</p>
+</li>
+<li>
+<p><code>ElementTOSC</code> and the <code>elements</code>, <code>controls</code> and <code>tosc</code> modules.</p>
+</li>
+<li>
+<p><code>asCtrl</code>, which was declared, exported, and had <code>pass</code> for a body.</p>
+</li>
+</ul>
+<h3 id="fixed_3">Fixed<a class="headerlink" href="#fixed_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><code>import tosclib</code> failed without <code>pyparsing</code>, an undeclared dependency reached by a stray <code>from pyparsing import Optional</code> that was never used. In a clean environment, <code>pip install tosclib</code> produced an unimportable package.</p>
+</li>
+<li>
+<p>Building a control with more than one message nested the second message inside the first, because the XML builder rebound its parent element inside a nested loop. An OSC and a MIDI binding on the same control produced a file TouchOSC could not load.</p>
+</li>
+<li>
+<p>MIDI bindings were written with a trigger's fields in place of the status bytes, from a leaked loop variable, and their values used a <code>&lt;midivalue&gt;</code> tag the format does not define. No MIDI binding tosclib produced was valid.</p>
+</li>
+<li>
+<p><code>&lt;dstID&gt;</code> was written without its CDATA wrapper, unlike every other string in the format.</p>
+</li>
+<li>
+<p>Generated layouts declared <code>lexml version=3</code> and omitted <code>&lt;includes&gt;</code>.</p>
+</li>
+<li>
+<p>Default <code>connections</code> was five slots wide; TouchOSC 1.5 uses ten.</p>
+</li>
+<li>
+<p>Element truth-value testing, deprecated since Python 3.12.</p>
+</li>
+<li>
+<p>The test suite only passed when run from the repository root.</p>
+</li>
+<li>
+<p>CI declared its matrix key as <code>python-versions</code> but read <code>matrix.python-version</code>, so every leg silently tested the same interpreter, and the matrix targeted Python versions the package rejected.</p>
+</li>
+<li>
+<p><code>numpy&gt;=2</code> broke every layout: numpy 2 changed scalar <code>repr</code>, and the frames were stringified through it.</p>
+</li>
+<li>
+<p><code>gridColor</code> was missing from XY and RADAR defaults, <code>textClip</code> and <code>textWrap</code> from TEXT, and <code>lines</code>/<code>linesDisplay</code> from XY.</p>
+</li>
+<li>
+<p><code>GamepadMessage.connections</code> defaulted to ten characters. The gamepad field counts controllers, not network connections, and is four wide.</p>
+</li>
+<li>
+<p><code>MidiType.NOTE_ON</code> was spelled <code>NOTEON</code>; the format uses <code>NOTE_ON</code>.</p>
+</li>
+<li>
+<p><code>PAGER</code> carried an <code>x</code> value instead of <code>page</code>, and <code>ENCODER</code> was missing its <code>y</code>.</p>
+</li>
+</ul>
+<h2 id="prior-history">Prior history<a class="headerlink" href="#prior-history" title="Permanent link">&para;</a></h2>
+<p>py2tosc began as a fork of <a href="https://github.com/AlbertoV5/tosclib">tosclib</a>, which had twelve releases between 2022-05-20 and 2022-06-09, ending at 0.3.5. That history belongs to a different distribution and is not restated here; see <a href="https://pypi.org/project/tosclib/#history">the tosclib releases</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/shakfu/py2tosc" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://pypi.org/project/py2tosc/" target="_blank" rel="noopener" title="pypi.org" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6M286.2 444.7a20.4 20.4 0 1 1 0-40.7 20.4 20.4 0 1 1 0 40.7M167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4m-6.6-183.4a20.4 20.4 0 1 1 0 40.8 20.4 20.4 0 1 1 0-40.8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "content.code.annotate", "search.suggest", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2024 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Generate and edit TouchOSC layouts from Python.">
+      
+      
+      
+        <link rel="canonical" href="https://shakfu.github.io/py2tosc/dev/combinators/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>High-level helpers and combinators - py2tosc</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#high-level-helpers-and-combinators" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="py2tosc" class="md-header__button md-logo" aria-label="py2tosc" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            py2tosc
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              High-level helpers and combinators
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/shakfu/py2tosc" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    shakfu/py2tosc
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="py2tosc" class="md-nav__button md-logo" aria-label="py2tosc" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    py2tosc
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/shakfu/py2tosc" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    shakfu/py2tosc
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command line
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Controls and properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/messages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Messages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/layouts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layouts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/sizes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layout sizes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The .tosc format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/custom-properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Demos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Demos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/custom-property/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom property
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/copy-scripts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Copy scripts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/from-json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faders from JSON
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/control-surface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Control surface
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/image-converter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Image converter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/numpad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Numpad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/simple-mk2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rebuilding a template
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/reaper/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reaper to TouchOSC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/document/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/control/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/messages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Values and messages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Message combinators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/layout/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layouts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/enums/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Enumerations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/validate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/codegen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generating Python
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/surface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Control surfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../migrating/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coming from tosclib
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The problem
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The problem">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#messages-carry-most-of-the-cost" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Messages carry most of the cost
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-layout-functions-do-not-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The layout functions do not compose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#two-idioms-are-missing-entirely" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Two idioms are missing entirely
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constraints
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-it-lives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where it lives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tier-1-message-combinators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 1: message combinators
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tier 1: message combinators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-shared-vocabulary-for-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A shared vocabulary for sources
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#addresses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Addresses
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#midi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MIDI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#local-wiring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local wiring
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loaded-messages-are-not-what-the-dataclasses-declare" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loaded messages are not what the dataclasses declare
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tier-2-layout-by-deferred-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 2: layout by deferred resolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tier 2: layout by deferred resolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#constructors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constructors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#carrying-the-intent-without-touching-the-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Carrying the intent without touching the file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#naming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Naming
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-resolution-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The resolution pass
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reuse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reuse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-the-implementation-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the implementation changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tier-3-idioms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tier 3: idioms
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tier 3: idioms">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-inset-could-not-wait" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why inset could not wait
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rejected-alternatives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rejected alternatives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resolved-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolved questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#staging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Staging
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Staging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-second-numpad-rewrite-showed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the second numpad rewrite showed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#proving-the-rewrite-changes-nothing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proving the rewrite changes nothing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="high-level-helpers-and-combinators">High-level helpers and combinators<a class="headerlink" href="#high-level-helpers-and-combinators" title="Permanent link">&para;</a></h1>
+<p><strong>Status:</strong> implemented in <code>py2tosc.ui</code>. The API is unstable below 1.0.</p>
+<p>The problem statement below is kept in its original present tense and describes the state before Tier 1 landed; the sections after it record what was built and what the corpus forced to change along the way.</p>
+<h2 id="the-problem">The problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h2>
+<p><code>tests/demos/numpad.py</code> builds a nine-key numpad in 173 lines. It is the demo that most exercises the library, and reading it shows where the current API makes the caller do work the library could do.</p>
+<h3 id="messages-carry-most-of-the-cost">Messages carry most of the cost<a class="headerlink" href="#messages-carry-most-of-the-cost" title="Permanent link">&para;</a></h3>
+<p>There is no public helper anywhere in the package that turns an OSC address into the partials the format stores. <code>_default_path</code> in <code>messages.py</code> is private and hardcodes <code>/&lt;name&gt;</code>. Anything else is assembled by hand, which is what the messages guide currently teaches:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">path</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">Partial</span><span class="p">(</span><span class="s2">&quot;CONSTANT&quot;</span><span class="p">,</span> <span class="s2">&quot;STRING&quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">Partial</span><span class="p">(</span><span class="s2">&quot;PROPERTY&quot;</span><span class="p">,</span> <span class="s2">&quot;STRING&quot;</span><span class="p">,</span> <span class="s2">&quot;parent.name&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">Partial</span><span class="p">(</span><span class="s2">&quot;CONSTANT&quot;</span><span class="p">,</span> <span class="s2">&quot;STRING&quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">Partial</span><span class="p">(</span><span class="s2">&quot;PROPERTY&quot;</span><span class="p">,</span> <span class="s2">&quot;STRING&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">]</span>
+</code></pre></div>
+<p>Four objects and twelve positional arguments to say <code>/{parent.name}/{name}</code>.</p>
+<p><code>LocalMessage</code> is worse, because it needs seven keyword arguments and a destination id to express one idea. The numpad wraps the pattern once and then repeats it inline three more times:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">LocalMessage</span><span class="p">(</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">triggers</span><span class="o">=</span><span class="p">[</span><span class="n">Trigger</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;RISE&quot;</span><span class="p">)],</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;PROPERTY&quot;</span><span class="p">,</span> <span class="n">conversion</span><span class="o">=</span><span class="s2">&quot;STRING&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">dst_type</span><span class="o">=</span><span class="s2">&quot;VALUE&quot;</span><span class="p">,</span> <span class="n">dst_var</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="n">dst_id</span><span class="o">=</span><span class="n">readout</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">)</span>
+</code></pre></div>
+<p>The <code>dst_id</code> requirement also leaks the data model into user code: the destination control must be constructed before anything that talks to it, so the build order is dictated by the wiring rather than by the layout.</p>
+<h3 id="the-layout-functions-do-not-compose">The layout functions do not compose<a class="headerlink" href="#the-layout-functions-do-not-compose" title="Permanent link">&para;</a></h3>
+<p>The changelog describes the layout functions as composable -- "layouts are functions, not decorators ... so nesting is ordinary function composition". They are functions, but they do not compose, because the output type is not an accepted input type:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>row : (Control, ControlType) -&gt; list[Control]
+</code></pre></div>
+<p>Composition needs <code>row(column(a, b), c)</code> to typecheck, which means returning what it accepts. Three consequences follow, all of them visible in the demo:</p>
+<ul>
+<li>
+<p><strong>One control type per call.</strong> <code>_build</code> in <code>layout.py</code> applies a single <code>control_type</code> to every slot, so a row holding a fader and a label drops to manual frame arithmetic.</p>
+</li>
+<li>
+<p><strong>The parent must already exist and already have a frame.</strong> Layout is a side effect applied to a tree, not a description of one, which forces outside-in construction.</p>
+</li>
+<li>
+<p><strong>The parent is discarded.</strong> The caller gets the children back and re-derives the structure it just described.</p>
+</li>
+</ul>
+<h3 id="two-idioms-are-missing-entirely">Two idioms are missing entirely<a class="headerlink" href="#two-idioms-are-missing-entirely" title="Permanent link">&para;</a></h3>
+<p>Padding and insets are hand-rolled:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">pad</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">inset</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">h</span> <span class="o">*</span> <span class="n">inset</span><span class="p">),</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>       <span class="nb">int</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">inset</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="n">h</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">inset</span><span class="p">)))</span>
+</code></pre></div>
+<p>So is overlaying, even though a label sitting on a button is the most common control idiom in TouchOSC. The numpad's <code>key()</code> helper exists only to place two controls at the same <code>(0, 0, w, h)</code>.</p>
+<h2 id="constraints">Constraints<a class="headerlink" href="#constraints" title="Permanent link">&para;</a></h2>
+<p>Any design has to hold to four things.</p>
+<p><strong>One tree.</strong> Half of what this library is for is editing layouts that already exist, and <code>load()</code> returns <code>Control</code>s. Helpers that only work on freshly built objects would not apply to loaded ones, which is a bad split.</p>
+<p><strong>Nothing new in the file.</strong> The library's claim is byte-exact round-tripping. Helpers must not write vocabulary into <code>.tosc</code> files that TouchOSC has no concept of.</p>
+<p><strong>Additive.</strong> <code>layout.row</code>, <code>layout.column</code> and <code>layout.grid</code> keep working unchanged. Nothing here deprecates them. (<code>layout.grid</code> was later renamed <code>layout.matrix</code>, so that <code>grid</code> names the <code>GRID</code> control everywhere and nothing else; the behaviour is untouched.)</p>
+<p><strong>No dependencies.</strong> The package has none, and the arithmetic stays plain Python.</p>
+<h2 id="where-it-lives">Where it lives<a class="headerlink" href="#where-it-lives" title="Permanent link">&para;</a></h2>
+<p>Proposed: a new <code>py2tosc.ui</code> module, exported but documented as unstable while the version is below 1.0.</p>
+<p>The reason for keeping it out of the core namespace is that the two layers have different lifespans. <code>control</code>, <code>codec</code> and <code>messages</code> are a binding to a file format someone else defines; they are right or wrong, and they age at the speed of TouchOSC. A combinator layer encodes opinions about how interfaces should be composed, and opinions age faster. Isolating them means the opinionated layer can churn without dragging the core's version with it.</p>
+<p>Tier 1 was the exception worth arguing about, since it only builds structures the format already defines and adds no vocabulary of its own, and could reasonably have lived in <code>messages</code>. It goes in <code>ui</code> anyway; see the resolved questions below.</p>
+<h2 id="tier-1-message-combinators">Tier 1: message combinators<a class="headerlink" href="#tier-1-message-combinators" title="Permanent link">&para;</a></h2>
+<p>Pure functions returning the existing dataclasses. No new concepts, no architecture change, and by the evidence above the largest reduction in caller code. This tier is worth doing whether or not the rest happens.</p>
+<h3 id="a-shared-vocabulary-for-sources">A shared vocabulary for sources<a class="headerlink" href="#a-shared-vocabulary-for-sources" title="Permanent link">&para;</a></h3>
+<p>Four constructors, used by both OSC arguments and local messages:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">value</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">conversion</span><span class="o">=</span><span class="s2">&quot;FLOAT&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="n">Partial</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">const</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">conversion</span><span class="o">=</span><span class="s2">&quot;STRING&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Partial</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">prop</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">conversion</span><span class="o">=</span><span class="s2">&quot;STRING&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Partial</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">conversion</span><span class="o">=</span><span class="s2">&quot;INTEGER&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="n">Partial</span>
+</code></pre></div>
+<p><code>scale</code> unpacks into the <code>scale_min</code> and <code>scale_max</code> fields, which is the one place the current dataclasses read as two arguments for one idea.</p>
+<p><code>index</code> was not in the first draft, which had three constructors and no way to reach the fourth <code>PartialType</code>. It is worth having: <code>INDEX</code> accounts for 147 partials in the corpus, and its defaults are not guessable from the other three -- every one of them converts to <code>INTEGER</code> over a 1-2 range, not <code>STRING</code> over 0-1.</p>
+<h3 id="addresses">Addresses<a class="headerlink" href="#addresses" title="Permanent link">&para;</a></h3>
+<p>An address mini-syntax where braces mark a property lookup, mirroring f-strings:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">osc</span><span class="p">(</span><span class="s2">&quot;/synth/</span><span class="si">{name}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>expands to two partials: <code>CONSTANT "/synth/"</code>, <code>PROPERTY "name"</code>. The guide's example becomes <code>osc("/{parent.name}/{name}")</code>.</p>
+<p><strong>Adjacent constant text coalesces into one partial.</strong> An earlier draft of this section split on every <code>/</code>, which would have produced four partials for the example above. The corpus says otherwise -- TouchOSC stores a constant run exactly as it was typed, and does not segment it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>1093x  CONSTANT &quot;/&quot;               PROPERTY &quot;parent.name&quot;  CONSTANT &quot;/&quot;  PROPERTY &quot;name&quot;
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a> 180x  CONSTANT &quot;/channel/track/&quot; PROPERTY &quot;parent.parent.name&quot;  ...
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  23x  CONSTANT &quot;/action/str&quot;
+</code></pre></div>
+<p>Coalescing is also the rule that makes <code>osc()</code> agree with the library's own default: <code>osc("/{name}")</code> reproduces <code>_default_path</code> partial for partial.</p>
+<p>Two consequences to document at the API:</p>
+<ul>
+<li>
+<p><strong>There is no canonical segmentation.</strong> <code>CONSTANT "/"</code> + <code>CONSTANT "track/select"</code> and a single <code>CONSTANT "/track/select"</code> describe the same address, and both occur in real files. <code>osc()</code> is a constructor, not a normaliser: feeding a loaded message's address back through it will not reproduce the original partials byte for byte, and it should not claim to.</p>
+</li>
+<li>
+<p><strong>Braces need escaping.</strong> <code>{{</code> and <code>}}</code> for a literal brace, as in f-strings. An unmatched brace is an error at the call rather than a silently malformed address.</p>
+</li>
+</ul>
+<p><code>{#}</code> marks the control's index, since a path is where <code>INDEX</code> partials actually occur and <code>#</code> cannot be confused with a property key. That keeps the expansion total: every path shape in the corpus is reachable from the syntax.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">osc</span><span class="p">(</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="n">address</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/</span><span class="si">{name}</span><span class="s2">&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">args</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Partial</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>   <span class="c1"># defaults to [value(&quot;x&quot;)]</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">on</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ANY&quot;</span><span class="p">,</span>                         <span class="c1"># trigger condition</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">var</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>                          <span class="c1"># watched value</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="n">triggers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Trigger</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>   <span class="c1"># escape hatch, overrides on/var</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>    <span class="n">send</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="n">receive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>    <span class="n">feedback</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>    <span class="n">no_duplicates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>    <span class="n">connections</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">ALL_CONNECTIONS</span><span class="p">,</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OscMessage</span>
+</code></pre></div>
+<p><code>args</code> defaults to <code>None</code> rather than to a literal, because <code>Partial</code> is a mutable dataclass and a shared default would be aliased across every message.</p>
+<h3 id="midi">MIDI<a class="headerlink" href="#midi" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">midi_cc</span><span class="p">(</span><span class="n">controller</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Partial</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">127</span><span class="p">),</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">flags</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MidiMessage</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">midi_note</span><span class="p">(</span><span class="n">note</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Partial</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">127</span><span class="p">),</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">flags</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MidiMessage</span>
+</code></pre></div>
+<p>These cover the two bindings that account for nearly all MIDI use. Anything else keeps constructing <code>MidiMessage</code> directly.</p>
+<p>The sketch called the value key <code>var</code>, which collides with the trigger <code>var</code> every other combinator takes. It is <code>source</code> here, matching <code>connect</code>, so <code>on</code> and <code>var</code> mean the trigger and nothing else across the whole module. <code>**flags</code> is spelled out in the implementation rather than left as <code>**kwargs</code>, because <code>mypy --strict</code> cannot check what it cannot see.</p>
+<p>What the three MIDI slots mean had to come from the corpus rather than from the field names. They supply the channel, the first data byte and the second, in that order; the channel slot stays scaled 0-15 whatever channel the message is on, because the channel itself lives in the command. A fixed first data byte is written twice, as <code>data1</code> and as an <code>INDEX</code> slot scaled <code>(n, n + 1)</code> -- attested at n=13 and n=29 -- which is the mechanism that lets a row of controls number itself from its position. <code>midi_cc(0)</code> therefore reproduces <code>MidiMessage()</code> exactly.</p>
+<p><strong>Every byte takes the same partial vocabulary, not just a number.</strong> The first version of these took <code>int</code> for the note and the channel, which covers the dominant shapes and locks out three more that the corpus contains:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>24x  NOTE_ON       CONSTANT &quot;&quot;  0-15   PROPERTY &quot;name&quot;  VALUE &quot;x&quot; 0-127
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>24x  NOTE_ON       PROPERTY &quot;tag&quot;      PROPERTY &quot;name&quot;  VALUE &quot;x&quot; 0-127
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>10x  CONTROLCHANGE CONSTANT &quot;&quot;  0-15   INDEX &quot;&quot;   5-6   CONSTANT &quot;&quot; 0-127
+</code></pre></div>
+<p>The first is a keyboard whose buttons name their own notes rather than being numbered one at a time, which is the reason to want this at all. So <code>note</code>, <code>controller</code> and <code>channel</code> each accept a number or a partial: a number goes in the command and numbers the slot from itself, a partial leaves the command at zero and lets the slot decide.</p>
+<p>Two consequences. <code>const</code> and <code>prop</code> grew a <code>scale</code>, since a MIDI slot takes its fixed byte from the range rather than from the key, and a vocabulary with a hole in exactly the place it is needed is not one. And range checking now applies only to the number form, because there is nothing to check on a partial.</p>
+<p><code>MidiValue</code> turns out to be a <code>Partial</code> minus the conversion -- a MIDI byte is a number whatever it was drawn from -- so one small adapter covers all three slots.</p>
+<h3 id="local-wiring">Local wiring<a class="headerlink" href="#local-wiring" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>    <span class="n">dst</span><span class="p">:</span> <span class="n">Control</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="n">source</span><span class="p">:</span> <span class="n">Partial</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>   <span class="c1"># bare str means value(str)</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>    <span class="n">to</span><span class="p">:</span> <span class="n">Partial</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>       <span class="c1"># bare str means a VALUE target</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>    <span class="n">on</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ANY&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>    <span class="n">var</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LocalMessage</span>
+</code></pre></div>
+<p>Reusing <code>value</code>, <code>const</code> and <code>prop</code> for both ends means one vocabulary covers OSC arguments and local wiring. The numpad's four wiring sites become:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">connect</span><span class="p">(</span><span class="n">readout</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">prop</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span> <span class="n">to</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;RISE&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">connect</span><span class="p">(</span><span class="n">readout</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">const</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">),</span>   <span class="n">to</span><span class="o">=</span><span class="n">prop</span><span class="p">(</span><span class="s2">&quot;sum&quot;</span><span class="p">),</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;RISE&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">connect</span><span class="p">(</span><span class="n">readout</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">const</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">),</span>    <span class="n">to</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;FALL&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p><code>dst</code> accepts a <code>Control</code> and reads its <code>id</code>, or a raw id string.</p>
+<p><code>to</code> decides <code>dst_type</code> as well as <code>dst_var</code>: a bare string or a <code>value()</code> partial targets a <code>VALUE</code>, a <code>prop()</code> partial targets a <code>PROPERTY</code>. That is what the corpus contains -- <code>dstType</code> holds <code>VALUE</code> (six occurrences) or <code>PROPERTY</code> (one), never anything else.</p>
+<p><strong>The messages guide is wrong about this and must be fixed first.</strong> <code>docs/guide/messages.md</code> teaches <code>dst_type="FLOAT"</code>, which is a <code>Conversion</code> value in a <code>PartialType</code> field; <code>tests/test_messages.py</code> copies the same mistake, harmlessly, since it only asserts tag ordering. Writing <code>connect()</code> against the guide as it stands would cement the error into the API. Nothing catches it today: <code>dst_type</code> is annotated as a bare <code>str</code>, and <code>validate</code> has no rule for it.</p>
+<h3 id="loaded-messages-are-not-what-the-dataclasses-declare">Loaded messages are not what the dataclasses declare<a class="headerlink" href="#loaded-messages-are-not-what-the-dataclasses-declare" title="Permanent link">&para;</a></h3>
+<p>The "one tree" constraint has a counterpart in the message layer that the rest of this document assumed away.</p>
+<p><code>codec._read_message</code> never coerces to enums, so a round-tripped <code>Partial.type</code> is a plain <code>str</code>, not a <code>PartialType</code>. Combinators must compare against string values, never enum identity, or they will behave differently on a built layout and a loaded one.</p>
+<p>Read-side defaults also diverge from the dataclass defaults, so a loaded message can hold combinations no constructor would produce:</p>
+<ul>
+<li><code>connections</code> reads as <code>""</code> when the element is missing, not <code>ALL_CONNECTIONS</code>.</li>
+<li><code>MidiValue.scale_max</code> reads as <code>0</code>, against a dataclass default of <code>15</code>.</li>
+<li><code>path</code> and <code>arguments</code> read as <code>[]</code> when absent, not the default partials.</li>
+</ul>
+<p>Separately, <code>ALL_CONNECTIONS</code> and <code>ALL_GAMEPADS</code> live in <code>messages</code> but are in neither its <code>__all__</code> nor the package's, so any public signature defaulting to one of them needs the export added.</p>
+<h2 id="tier-2-layout-by-deferred-resolution">Tier 2: layout by deferred resolution<a class="headerlink" href="#tier-2-layout-by-deferred-resolution" title="Permanent link">&para;</a></h2>
+<p>The tension to resolve is that eager sizing and inside-out composition are incompatible. <code>row(a, b)</code> cannot assign frames unless it knows its own frame, which it only learns from a parent that does not exist yet.</p>
+<p>The fix is to separate description from placement. The combinators build an ordinary <code>Control</code> tree and record the intent; a single pass assigns frames afterwards, top-down, once the root frame is known.</p>
+<h3 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">row</span><span class="p">(</span><span class="o">*</span><span class="n">children</span><span class="p">:</span> <span class="n">Control</span><span class="p">,</span> <span class="n">sizes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">props</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Control</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">column</span><span class="p">(</span><span class="o">*</span><span class="n">children</span><span class="p">:</span> <span class="n">Control</span><span class="p">,</span> <span class="n">sizes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">props</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Control</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">grid</span><span class="p">(</span><span class="o">*</span><span class="n">children</span><span class="p">:</span> <span class="n">Control</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">rows</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">props</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Control</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">stack</span><span class="p">(</span><span class="o">*</span><span class="n">children</span><span class="p">:</span> <span class="n">Control</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">props</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Control</span>
+</code></pre></div>
+<p>Each returns a <code>GROUP</code> holding the children, so the result is immediately usable anywhere a <code>Control</code> is. <code>**props</code> sets ordinary properties on that group, so <code>row(..., name="strip", color="#264653")</code> works without a second statement.</p>
+<p><code>stack</code> is the overlay case: every child is sized to fill the group. That alone replaces the numpad's <code>key()</code> helper.</p>
+<h3 id="carrying-the-intent-without-touching-the-file">Carrying the intent without touching the file<a class="headerlink" href="#carrying-the-intent-without-touching-the-file" title="Permanent link">&para;</a></h3>
+<p>The group stores its layout on a private attribute, <code>control._layout</code>. Two existing mechanisms make this clean, and neither needs changing:</p>
+<ul>
+<li>
+<p><code>Control.__setattr__</code> routes underscore-prefixed names to <code>object.__setattr__</code> instead of into the property table, so <code>_layout</code> never becomes a <code>Property</code>.</p>
+</li>
+<li>
+<p><code>codec</code> serializes only <code>properties</code>, <code>values</code>, <code>messages</code> and <code>children</code>, so an attribute outside those four cannot reach the file.</p>
+</li>
+</ul>
+<p><code>deepcopy</code> in <code>Control.copy</code> carries it along, which is the behaviour we want. Reading it back needs <code>getattr(control, "_layout", None)</code>, because <code>Control.__getattr__</code> raises <code>AttributeError</code> for underscore names rather than returning <code>None</code>.</p>
+<p>There is already a precedent for the whole pattern: <code>_has_includes</code> is set by <code>object.__setattr__</code> in <code>Control.__init__</code>, read by the codec with <code>getattr(control, "_has_includes", False)</code>, and written back by <code>codec._read_control</code>. <code>_layout</code> should follow it exactly.</p>
+<p>One asymmetry to know about: <code>Control.__delattr__</code> has no underscore branch, so <code>del control._layout</code> routes into <code>delete()</code>, looks for a property named <code>_Layout</code>, misses, and raises. Clearing the attribute requires <code>object.__delattr__</code>.</p>
+<h3 id="naming">Naming<a class="headerlink" href="#naming" title="Permanent link">&para;</a></h3>
+<p><code>ui.row(*children)</code> and <code>layout.row(parent)</code> have inverted semantics under one name: one consumes children, the other creates them. Calling the new layer additive is true but does not settle this.</p>
+<p>Requiring <code>ui</code> to be imported as a module, the way <code>layout</code> already is, makes the two read as distinct at every call site (<code>ui.row</code> against <code>layout.row</code>) and is the cheapest resolution. It is also an independent argument for the module namespace, since <code>value</code>, <code>const</code>, <code>prop</code> and <code>osc</code> are too generic to sit in the flat package namespace -- <code>py2tosc.grid</code> against <code>layout.grid</code> already shows what that costs. The alternative, if the collision still reads badly in use, is distinct names such as <code>hbox</code> and <code>vbox</code>.</p>
+<h3 id="the-resolution-pass">The resolution pass<a class="headerlink" href="#the-resolution-pass" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">resolve</span><span class="p">(</span><span class="n">control</span><span class="p">:</span> <span class="n">Control</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Control</span>
+</code></pre></div>
+<p>Assigns <code>frame</code> to the control if given, then walks down: any control carrying a <code>_layout</code> computes frames for its direct children from its own frame and the recorded spec, and recurses. Controls without a <code>_layout</code> are leaves and are left alone.</p>
+<p><code>Document.resolve()</code> calls it against <code>root.frame</code>.</p>
+<p>Semantics that need deciding and then documenting:</p>
+<ul>
+<li>
+<p><strong>A parent overrides a child's explicit frame.</strong> Simple and predictable. Manual placement is still available by not wrapping the control in a layout group, or by using <code>stack</code> with explicit frames.</p>
+</li>
+<li>
+<p><strong><code>sizes</code> matches positional children</strong>, as it does today. Omitted, every child gets an equal share.</p>
+</li>
+<li>
+<p><strong><code>gap</code> is the space between slots; <code>pad</code> is the inset before the first and after the last.</strong> Both accept an int, a <code>(horizontal, vertical)</code> pair, or a four-tuple.</p>
+</li>
+<li>
+<p><strong>Rounding invariant.</strong> <code>_spans</code> currently guarantees that each slot ends exactly where the next begins, so rounding can never open a gap or an overlap and the last slot always reaches the end. <code>gap</code> breaks that statement by construction, so it has to be restated rather than preserved: slot <em>i</em> ends exactly <code>gap</code> before slot <em>i+1</em> begins, the first slot begins at <code>pad</code>, and the last ends at <code>length - pad</code>. That needs a test of its own; <code>test_rounding_never_loses_or_gains_pixels</code> covers the existing wording and should stay as it is.</p>
+</li>
+</ul>
+<h3 id="reuse">Reuse<a class="headerlink" href="#reuse" title="Permanent link">&para;</a></h3>
+<p><code>_ratios</code> and <code>_spans</code> in <code>layout.py</code> already do the arithmetic. The resolution pass should call them rather than growing a second implementation, which probably means promoting them to a shared internal module.</p>
+<p>They moved to <code>_geometry</code>, which also holds the <code>Layout</code> spec, the frame arithmetic and <code>resolve</code>. Putting them there rather than in <code>ui</code> was not only about sharing: <code>validate</code> needs to read a spec and <code>Document</code> needs to run the pass, and having either import the unstable opinionated layer would invert exactly the layering this document argues for. <code>layout.py</code> imports the two helpers back under their old private names and is otherwise untouched.</p>
+<h3 id="what-the-implementation-changed">What the implementation changed<a class="headerlink" href="#what-the-implementation-changed" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><strong><code>gap</code> has no four-sided form.</strong> The sketch said <code>gap</code> and <code>pad</code> both take an int, a pair or a four-tuple. Padding surrounds a region and has four sides; a gap sits <em>between</em> slots and has two. <code>gap</code> takes an int or a <code>(horizontal, vertical)</code> pair, and rejects anything longer.</p>
+</li>
+<li>
+<p><strong>Resolution walks the whole tree.</strong> The sketch said controls without a <code>_layout</code> are leaves and are left alone. That would strand a combinator group nested inside a hand-placed one, which is a normal thing to build. <code>resolve</code> recurses everywhere and only <em>assigns</em> frames where there is a spec.</p>
+</li>
+<li>
+<p><strong>The content edge is rounded before the division, not after.</strong> The first version computed the available length, divided it, then shifted each slot by the padding. On a fractional frame that pushes the last slot a pixel past its parent, because <code>round</code> was being applied to a span that no longer started at zero. Rounding <code>length - pad</code> first makes the invariant exact again. The parametrised invariant test caught this immediately, which is the argument for writing it first.</p>
+</li>
+<li>
+<p><strong>A layout that does not fit raises.</strong> Silently clamping to zero produces a file full of zero-sized controls, which is the failure mode the unresolved-layout warning exists to catch; there is no reason to have a second way of reaching it.</p>
+</li>
+</ul>
+<h2 id="tier-3-idioms">Tier 3: idioms<a class="headerlink" href="#tier-3-idioms" title="Permanent link">&para;</a></h2>
+<p>Thin wrappers over the two tiers above, worth adding only once they are settled.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">labelled</span><span class="p">(</span><span class="n">control</span><span class="p">:</span> <span class="n">Control</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span> <span class="n">inset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Control</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">inset</span><span class="p">(</span><span class="n">control</span><span class="p">:</span> <span class="n">Control</span><span class="p">,</span> <span class="n">amount</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Control</span>
+</code></pre></div>
+<p><code>labelled</code> is <code>stack</code> plus a non-interactive <code>LABEL</code>, which is the whole of the numpad's <code>key()</code>.</p>
+<h3 id="why-inset-could-not-wait">Why <code>inset</code> could not wait<a class="headerlink" href="#why-inset-could-not-wait" title="Permanent link">&para;</a></h3>
+<p>Both were meant to be optional, added only once something real had asked for them. Rewriting the numpad against Tier 2 asked immediately, and for a reason the sketch had not anticipated: <strong><code>pad</code> cannot express the numpad's key at all.</strong></p>
+<p>Two separate problems, both in the one line the demo was already hand-rolling.</p>
+<ul>
+<li>
+<p><strong><code>pad</code> insets every child alike.</strong> A key wants its caption padded and the button beneath it filling the cell. A group-level inset cannot say that.</p>
+</li>
+<li>
+<p><strong><code>pad</code> is in pixels and the inset is a fraction.</strong> The whole premise of Tier 2 is that no size is known until the frame arrives from above, so a proportional inset cannot be converted at the call.</p>
+</li>
+</ul>
+<p>The obvious composition, <code>stack(button, stack(caption, pad=...))</code>, fails on the second point and costs a group per key on the first -- nine of them on the numpad, a fifth of the layout.</p>
+<p>So an inset belongs to a <em>control</em>, not to a group: <code>_inset</code> is a fraction stored on the control and applied by <code>resolve</code> to the frame its parent computed. Applying it to the computed frame rather than to the control's current one keeps <code>resolve</code> idempotent, which matters because nothing stops it being called twice.</p>
+<p>That makes <code>inset</code> the load-bearing half of Tier 3 and <code>labelled</code> the convenience on top, which is the reverse of what this section assumed.</p>
+<h2 id="rejected-alternatives">Rejected alternatives<a class="headerlink" href="#rejected-alternatives" title="Permanent link">&para;</a></h2>
+<p><strong>A parallel lazy <code>Node</code> tree.</strong> Pure, and testable without a <code>Document</code>, but it means two tree types, and the combinators would not apply to loaded layouts because <code>load()</code> yields <code>Control</code>s. Given that editing existing files is half the point of the library, that asymmetry is disqualifying.</p>
+<p><strong>Storing the layout spec as real properties.</strong> TouchOSC tolerates custom properties and <code>validate</code> leaves them alone, so this would work. It is rejected because it writes this library's private vocabulary into the user's file, which contradicts the round-tripping claim.</p>
+<p><strong>Eager sizing with one tree.</strong> Keeps <code>Control</code> as the only type, but still forces outside-in construction, which is what already exists. No real gain.</p>
+<p><strong>Decorators.</strong> The tosclib approach, already deliberately dropped.</p>
+<h2 id="resolved-questions">Resolved questions<a class="headerlink" href="#resolved-questions" title="Permanent link">&para;</a></h2>
+<p><strong>Does Tier 1 belong in <code>messages</code> rather than <code>ui</code>?</strong> In <code>ui</code>, imported as a module. The argument for <code>messages</code> was that Tier 1 adds no vocabulary the format lacks, which is true and not decisive. <code>value</code>, <code>const</code>, <code>prop</code>, <code>osc</code> and <code>connect</code> are too generic to go into a flat namespace that already has to explain <code>py2tosc.grid</code> against <code>layout.grid</code>, and keeping both tiers on one import path is worth more than the purity of the split.</p>
+<p><strong>Should <code>connect</code> accept a destination name?</strong> Not in Tier 1. It would make Tier 1 depend on a resolution pass that does not exist yet, and Tier 1 is meant to stand alone. Revisit with Tier 2, where a tree-walking pass already exists to hang it on.</p>
+<p>Most of the motivation for it has since gone, though. The build-order constraint was the visible complaint; the actual defect underneath was that <code>Control.copy(new_ids=True)</code> reminted ids without re-pointing the bindings, so duplicating a wired subtree produced a clone driving the original -- silently, because the stale id still resolved. <code>copy</code> now rewrites destinations that fall inside the copied subtree, and <code>validate</code> warns on one that resolves to nothing. What is left is an ordering inconvenience rather than a correctness problem, which is a much weaker case for resolving names late.</p>
+<p><strong>Should <code>save</code> resolve automatically?</strong> No. Writing a file must not mutate the tree -- that is the round-tripping claim applied to the object model rather than the bytes. <code>Document.resolve()</code> stays explicit.</p>
+<p><strong>Does <code>validate</code> need a rule for an unresolved <code>_layout</code>?</strong> Yes, as a warning, shipped with Tier 2. <code>Control.frame</code> returns <code>Frame(0, 0, 0, 0)</code> for an unset frame rather than raising, so an unresolved layout otherwise fails silently and produces a file full of zero-sized controls.</p>
+<p><strong>Should <code>Control.copy</code> accept layout overrides?</strong> Defer. No demand until Tier 2 has been used for something.</p>
+<h2 id="staging">Staging<a class="headerlink" href="#staging" title="Permanent link">&para;</a></h2>
+<ol>
+<li>
+<p>Tier 1, message combinators in <code>py2tosc.ui</code>, with <code>numpad.py</code> rewritten against them.</p>
+</li>
+<li>
+<p>Tier 2, in the same module, with the restated rounding invariant tested first.</p>
+</li>
+<li>
+<p>Tier 3, only once the first two have been used for something real.</p>
+</li>
+</ol>
+<p>Step 1 is worth doing on its own merits and does not commit us to steps 2 or 3.</p>
+<h3 id="what-the-second-numpad-rewrite-showed">What the second numpad rewrite showed<a class="headerlink" href="#what-the-second-numpad-rewrite-showed" title="Permanent link">&para;</a></h3>
+<p>Rewriting the demo against Tiers 2 and 3 produced a document differing from the original in <strong>9 numbers out of 6928 lines</strong>, all of them the <code>x</code> of a key caption, all moving from 16 to 17. The control count is unchanged at 45.</p>
+<p>That difference is a fix. The hand-rolled formula was <code>int(w * inset)</code> for the offset and <code>int(w * (1 - 2 * inset))</code> for the width, which on a 167-wide cell leaves 16 pixels on the left and 18 on the right. <code>inset</code> computes both margins from the same rounding, so the caption is centred.</p>
+<p>The line count did <strong>not</strong> improve: 141 to 166. Worth being plain about, since the Tier 1 rewrite was justified on exactly that measure. What changed is elsewhere:</p>
+<ul>
+<li>
+<p><strong>No frame arithmetic in the demo at all.</strong> <code>cell.frame</code> unpacking and the four-term <code>pad</code> tuple are gone, and with them the only place the demo could get centring wrong.</p>
+</li>
+<li>
+<p><strong>The structure reads as the structure.</strong> <code>column(row(...), grid(...), row(...))</code> nests the way the layout does, instead of a sequence of statements that mutate a tree built from the outside in.</p>
+</li>
+<li>
+<p><strong>Colours have to be computed up front.</strong> Three <code>layout.gradient</code> calls where the eager API had <code>colors=GRADIENT</code> on each function. This is not a gap worth closing: the demo tints each cell's button and caption with the cell's own colour, so the colour is needed at child-construction time regardless of who assigns it. A <code>colors=</code> on <code>ui.row</code> would not have helped.</p>
+</li>
+</ul>
+<p>The verdict on the wrappers: <code>stack</code> alone was not enough, and the reason had nothing to do with convenience -- see above.</p>
+<h3 id="proving-the-rewrite-changes-nothing">Proving the rewrite changes nothing<a class="headerlink" href="#proving-the-rewrite-changes-nothing" title="Permanent link">&para;</a></h3>
+<p>Rewriting <code>numpad.py</code> measures the reduction in caller code. It should also prove the combinators are pure sugar, which is a stronger claim and a cheaper test than it looks.</p>
+<p>Freeze the current script's output, then require the rewritten script to produce a structurally identical document. Raw bytes will never match, because <code>Control.__init__</code> mints a <code>uuid4</code> per control and <code>LocalMessage.dst_id</code> carries one, so the comparison has to remap ids to their walk order first. Everything else -- properties, values, message fields, tree shape -- must match exactly.</p>
+<p>Without it, an <code>osc()</code> or <code>connect()</code> that quietly emits different partials still passes: <code>tests/test_demos.py</code> checks control counts and the set of wired keys, not the contents of the messages.</p>
+<p><strong>Result.</strong> The rewrite produced an identical document, and took <code>numpad.py</code> from 173 lines to 141. All four wiring sites collapsed to one line each; <code>sends_name_to</code>, the helper that existed only to wrap the pattern, is now a single call and could be dropped entirely. The whole 32-line reduction came out of the four <code>LocalMessage</code> blocks, which is where the original reading of the demo said the cost was.</p>
+<p>The check itself was run once rather than committed. Freezing the demo's output would pin a demo, which is meant to change; the equivalent protection lives in <code>tests/test_ui.py</code>, where each combinator is pinned against the dataclass it must produce -- <code>osc() == OscMessage()</code> and <code>midi_cc(0) == MidiMessage()</code> do most of that work on their own.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/shakfu/py2tosc" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://pypi.org/project/py2tosc/" target="_blank" rel="noopener" title="pypi.org" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6M286.2 444.7a20.4 20.4 0 1 1 0-40.7 20.4 20.4 0 1 1 0 40.7M167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4m-6.6-183.4a20.4 20.4 0 1 1 0 40.8 20.4 20.4 0 1 1 0-40.8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "content.code.annotate", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

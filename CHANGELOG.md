@@ -2,6 +2,12 @@
 
 Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses [semantic versioning](https://semver.org/spec/v2.0.0.html) -- while the version is below 1.0, a minor bump may break the API.
 
+## [0.2.1]
+
+### Fixed
+
+- `ui.pager` reserved the tab bar from the top edge whatever the pager's `orientation`, so a bar mounted on the bottom or the left left its pages both the wrong size and in the wrong place. It was right for 999 of the 1005 pager pages in the corpus and wrong for the other six. All 1005 are now reproduced exactly, which covers the bar being switched off as well -- the common case, where a page fills its pager.
+
 ## [0.2.0]
 
 Adds `py2tosc.ui`, a layer of combinators for building messages and layouts, and
@@ -141,5 +147,6 @@ First release: py2tosc is a rewrite of [tosclib](https://github.com/AlbertoV5/to
 
 py2tosc began as a fork of [tosclib](https://github.com/AlbertoV5/tosclib), which had twelve releases between 2022-05-20 and 2022-06-09, ending at 0.3.5. That history belongs to a different distribution and is not restated here; see [the tosclib releases](https://pypi.org/project/tosclib/#history).
 
+[0.2.1]: https://github.com/shakfu/py2tosc/releases/tag/v0.2.1
 [0.2.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.2.0
 [0.1.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.1.0

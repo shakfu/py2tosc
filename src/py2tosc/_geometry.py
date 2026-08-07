@@ -180,6 +180,33 @@ class Layout:
     resolved: bool = False
 
 
+#: Which edge a pager's tab bar occupies, by its `orientation`, as multipliers
+#: for left, top, right and bottom. The corpus attests 0 on 122 pagers, 3 on
+#: two and 2 on one; 1 is the only edge left over and is inferred rather than
+#: observed. Read as a clockwise order from the top, which is also the order
+#: `pad` and `inset` take their four numbers in.
+_TAB_EDGES = {
+    0: (0, 1, 0, 0),  # top
+    1: (0, 0, 1, 0),  # right, inferred
+    2: (0, 0, 0, 1),  # bottom
+    3: (1, 0, 0, 0),  # left
+}
+
+
+def tab_bar(control: Control, kind: str) -> tuple[int, int, int, int]:
+    """How much of a pager each edge loses to its tab bar.
+
+    Zero on every edge unless the control is a pager showing one, which is the
+    common case in the corpus: 906 of 1005 pages have the bar switched off and
+    fill their pager exactly.
+    """
+    if kind != PAGES or not control.get("tabbar"):
+        return (0, 0, 0, 0)
+    bar = round(float(control.get("tabbarSize") or 0))
+    edges = _TAB_EDGES.get(int(control.get("orientation") or 0), _TAB_EDGES[0])
+    return (edges[0] * bar, edges[1] * bar, edges[2] * bar, edges[3] * bar)
+
+
 def child_frames(spec: Layout, control: Control, count: int) -> list[Frame]:
     """The frames `spec` gives to `count` children of `control`.
 
@@ -194,13 +221,14 @@ def child_frames(spec: Layout, control: Control, count: int) -> list[Frame]:
     across, down = spec.gap
 
     if spec.kind in (STACK, PAGES):
-        # A pager draws its tab bar across the top and gives its pages what is
-        # left, so a page sized to the whole frame would sit underneath it.
-        bar = 0
-        if spec.kind == PAGES and control.get("tabbar"):
-            bar = round(float(control.get("tabbarSize") or 0))
+        # A pager gives its pages whatever the tab bar leaves, so a page sized
+        # to the whole frame would sit underneath it.
+        bar_left, bar_top, bar_right, bar_bottom = tab_bar(control, spec.kind)
         filled = Frame(
-            left, top + bar, width - left - right, height - top - bottom - bar
+            left + bar_left,
+            top + bar_top,
+            width - left - right - bar_left - bar_right,
+            height - top - bottom - bar_top - bar_bottom,
         )
         if filled.w < 0 or filled.h < 0:
             raise ValueError(f"padding of {spec.pad} does not fit in {frame}")

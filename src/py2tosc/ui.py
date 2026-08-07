@@ -815,7 +815,9 @@ def pager(
     page gets the same frame -- the arrangement [`stack`][py2tosc.ui.stack]
     makes, on a `PAGER` rather than a `GROUP`, and minus the tab bar. A page
     sized to the whole pager would sit underneath the tabs, so `resolve` reads
-    the pager's own `tabbar` and `tabbar_size` and reserves that much.
+    the pager's own `tabbar`, `tabbar_size` and `orientation` and reserves that
+    much from whichever edge the bar is on. With `tabbar` off a page fills the
+    pager exactly, which is what most of the corpus does.
 
     Pages should be groups, which the other combinators already return:
 

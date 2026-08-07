@@ -9,7 +9,7 @@ import pytest
 
 import py2tosc
 from py2tosc import ui
-from _corpus import DATA, EXAMPLES
+from _corpus import CORPUS, DATA, EXAMPLES
 from py2tosc._geometry import ratios, slots
 
 
@@ -606,3 +606,47 @@ def test_a_built_pager_matches_one_the_editor_made():
 def test_the_editor_made_pager_still_validates():
     """It works in TouchOSC, so no rule of ours may object to it."""
     assert py2tosc.load(DATA / "pager_example.tosc").validate() == []
+
+
+@pytest.mark.parametrize(
+    ("orientation", "expected"),
+    [
+        (0, (0, 40, 320, 440)),  # top, 122 pagers in the corpus
+        (1, (0, 0, 280, 480)),  # right, inferred: the only edge left over
+        (2, (0, 0, 320, 440)),  # bottom, one pager
+        (3, (40, 0, 280, 480)),  # left, two pagers
+    ],
+)
+def test_the_tab_bar_can_sit_on_any_edge(orientation, expected):
+    """`orientation` moves the bar, and the page keeps what is left.
+
+    Only the top was implemented at first, which is right for 999 of the 1005
+    pages in the corpus and wrong for the other six.
+    """
+    pages = ui.pager(ui.row(py2tosc.fader(), name="1"), orientation=orientation)
+    ui.resolve(pages, (0, 0, 320, 480))
+    assert frames(pages) == [expected]
+
+
+def test_every_pager_page_in_the_corpus_is_reproduced_exactly():
+    """The whole rule, checked against every real pager rather than a sample.
+
+    Covers the bar being off (906 pages fill their pager), on at the top (93),
+    and on another edge (6) -- the three cases that took four tries to get
+    right, all in one assertion.
+    """
+    from py2tosc._geometry import PAGES, Layout, child_frames
+
+    checked = 0
+    for path in CORPUS:
+        for control in py2tosc.load(path).walk():
+            if control.control_type is not py2tosc.ControlType.PAGER:
+                continue
+            if not control.children:
+                continue
+            computed = child_frames(Layout(PAGES), control, len(control.children))
+            actual = [tuple(p.frame) for p in control.children]
+            assert [tuple(f) for f in computed] == actual, path.name
+            checked += len(actual)
+
+    assert checked > 1000, f"only {checked} pages checked"

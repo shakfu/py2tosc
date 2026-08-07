@@ -2,6 +2,25 @@
 
 Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses [semantic versioning](https://semver.org/spec/v2.0.0.html) -- while the version is below 1.0, a minor bump may break the API.
 
+## [0.3.0]
+
+### Added
+
+- `validate` warns when a `GRID` holds a different number of controls than its `grid_x` and `grid_y` claim. TouchOSC has no empty grid -- creating one populates it -- and all 37 grids in the corpus hold exactly `grid_x * grid_y` children. A bare `py2tosc.grid()` says 2x2 of faders in its defaults and creates none, which now gets reported rather than passing as clean.
+
+- `ui.grid`, which builds a `GRID` control with the cells it must hold. TouchOSC has no empty grid, so this is the complete way to make one: it fills itself with `columns * rows` controls of a single type, which is what a multitoggle or a bank of faders is. Every grid in the corpus holds one type, so the type is what it takes.
+
+  A `GRID` tiles its cells rather than dividing its frame: every cell is the same size, with a three-point margin around and between, and whatever will not divide evenly is left at the far edge. That is reproduced for 36 of the 37 grids in the corpus, and for both hand-made reference grids; the one exception is recorded in the tests. `grid_type` is set from the control type -- the corpus numbers it by the type's position in the format's own order, so a grid of buttons left at the default would have announced itself as a grid of faders.
+
+### Changed
+
+- **`grid` now names the `GRID` control everywhere and nothing else.** It previously meant three different things across three modules, which is why it took a round of questions to establish how to build one. Two renames follow:
+
+  - `ui.grid` -- the arrangement that tiles controls you already have into a `GROUP` -- is now `ui.tiles`. It sits alongside `row`, `column` and `stack`, and is the only one of them that took the format's name for a control it does not build.
+  - `layout.grid` is now `layout.matrix`. It creates one control type across M by N cells inside a parent, which `matrix` describes and `grid` did not; the eager family now reads `row`, `column`, `matrix`. Behaviour is unchanged.
+
+  So `py2tosc.grid` and `ui.grid` both give a `GRID`, the first bare and the second with its cells, while `ui.tiles` and `layout.matrix` arrange controls in a `GROUP`. `layout.matrix` is the first break in `layout` since 0.1.0; no demo used it, and it is a rename with no behavioural change.
+
 ## [0.2.1]
 
 ### Fixed
@@ -147,6 +166,7 @@ First release: py2tosc is a rewrite of [tosclib](https://github.com/AlbertoV5/to
 
 py2tosc began as a fork of [tosclib](https://github.com/AlbertoV5/tosclib), which had twelve releases between 2022-05-20 and 2022-06-09, ending at 0.3.5. That history belongs to a different distribution and is not restated here; see [the tosclib releases](https://pypi.org/project/tosclib/#history).
 
+[0.3.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.3.0
 [0.2.1]: https://github.com/shakfu/py2tosc/releases/tag/v0.2.1
 [0.2.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.2.0
 [0.1.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.1.0

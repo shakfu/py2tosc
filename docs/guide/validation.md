@@ -36,9 +36,10 @@ a `message`. Errors sort first.
 - a gamepad binding with no target
 - a local binding addressed to a node id no control in the layout has
 - a root node that is not a `GROUP`
+- a `GRID` holding a different number of controls than its `grid_x` and `grid_y` claim
 
-The last two are worth knowing about, because both describe a layout that loads,
-round-trips and looks entirely well formed while not working.
+The last three are worth knowing about, because each describes a layout that
+loads, round-trips and looks entirely well formed while not working.
 
 A stale local destination fails invisibly: nothing about the message is
 malformed, so the binding simply never fires. A binding whose destination is
@@ -50,6 +51,12 @@ type would otherwise have. A `PAGER` at the root draws its tab bar and then
 stacks every page on top of one another instead of paging between them. Put the
 pager inside a `GROUP` and it behaves; every layout in the corpus is built that
 way.
+
+A `GRID` is never empty in TouchOSC -- creating one populates it, and `grid_x`
+and `grid_y` say how many controls it holds rather than describing space to be
+filled later. A bare [`grid`][py2tosc.grid] says 2x2 of faders in its defaults
+and creates none of them, so it is reported;
+[`ui.grid`](../api/ui.md) builds one with the cells it claims.
 
 A **custom** property -- a key the format does not define at all -- is never
 flagged. That is the distinction the check turns on: `textSize` on a `BOX` is a

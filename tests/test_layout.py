@@ -49,7 +49,7 @@ def test_rounding_never_loses_or_gains_pixels():
 
 def test_grid_tiles_in_row_major_order():
     parent = py2tosc.group(frame=(0, 0, 400, 300))
-    cells = layout.grid(parent, columns=4, rows=3)
+    cells = layout.matrix(parent, columns=4, rows=3)
 
     assert len(cells) == 12
     assert cells[0].frame == (0, 0, 100, 100)
@@ -60,7 +60,7 @@ def test_grid_tiles_in_row_major_order():
 
 def test_grid_creates_the_requested_control_type():
     parent = py2tosc.group(frame=(0, 0, 200, 200))
-    cells = layout.grid(parent, "BUTTON", columns=2, rows=2)
+    cells = layout.matrix(parent, "BUTTON", columns=2, rows=2)
     assert all(c.control_type is py2tosc.ControlType.BUTTON for c in cells)
 
 
@@ -83,7 +83,7 @@ def test_gradient_rejects_zero():
 @pytest.mark.parametrize("direction", ["horizontal", "vertical", "sequential"])
 def test_grid_gradient_directions_cover_every_cell(direction):
     parent = py2tosc.group(frame=(0, 0, 300, 300))
-    cells = layout.grid(parent, columns=3, rows=3, colors=("#000000", "#ffffff"), direction=direction)
+    cells = layout.matrix(parent, columns=3, rows=3, colors=("#000000", "#ffffff"), direction=direction)
 
     assert len(cells) == 9
     assert all(isinstance(c.color, Color) for c in cells)
@@ -92,14 +92,14 @@ def test_grid_gradient_directions_cover_every_cell(direction):
 
 def test_horizontal_gradient_repeats_per_row():
     parent = py2tosc.group(frame=(0, 0, 300, 200))
-    cells = layout.grid(parent, columns=3, rows=2, colors=("#000000", "#ffffff"))
+    cells = layout.matrix(parent, columns=3, rows=2, colors=("#000000", "#ffffff"))
     assert cells[0].color == cells[3].color
     assert cells[2].color == cells[5].color
 
 
 def test_vertical_gradient_is_constant_along_a_row():
     parent = py2tosc.group(frame=(0, 0, 300, 200))
-    cells = layout.grid(parent, columns=3, rows=2, colors=("#000000", "#ffffff"), direction="vertical")
+    cells = layout.matrix(parent, columns=3, rows=2, colors=("#000000", "#ffffff"), direction="vertical")
     assert cells[0].color == cells[1].color == cells[2].color
     assert cells[0].color != cells[3].color
 
@@ -107,7 +107,7 @@ def test_vertical_gradient_is_constant_along_a_row():
 def test_grid_rejects_an_unknown_direction():
     parent = py2tosc.group(frame=(0, 0, 100, 100))
     with pytest.raises(ValueError, match="gradient direction"):
-        layout.grid(parent, direction="diagonal")
+        layout.matrix(parent, direction="diagonal")
 
 
 def test_sizes_must_be_positive():
@@ -120,7 +120,7 @@ def test_sizes_must_be_positive():
 
 def test_nested_layouts_round_trip():
     doc = py2tosc.Document.new(frame=(0, 0, 1600, 1600))
-    cells = layout.grid(doc.root, columns=3, rows=3, colors=("#CE6A85", "#5C374C"))
+    cells = layout.matrix(doc.root, columns=3, rows=3, colors=("#CE6A85", "#5C374C"))
     layout.column(cells[4], "BUTTON", sizes=4, colors=("#CE6A85", "#5C374C"))
     layout.row(cells[6], "FADER", sizes=2, colors=("#CE6A85", "#5C374C"))
 

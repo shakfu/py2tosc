@@ -20,7 +20,7 @@ from .control import Control
 from .enums import ControlType
 from .properties import Color, to_color
 
-__all__ = ["column", "gradient", "grid", "row"]
+__all__ = ["column", "gradient", "matrix", "row"]
 
 _DEFAULT_COLORS = ((0.25, 0.25, 0.25, 1.0), (0.25, 0.25, 0.25, 1.0))
 
@@ -114,7 +114,7 @@ def row(
     return _build(parent, control_type, frames, colors)
 
 
-def grid(
+def matrix(
     parent: Control,
     control_type: ControlType | str = ControlType.GROUP,
     *,

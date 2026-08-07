@@ -79,7 +79,7 @@ The short version of why: 0.3.x could not be installed cleanly, wrote invalid MI
 
 **Missing properties raise.** `control.script` raises `AttributeError` if there is no script. Use `control.get("script")` when absence is expected.
 
-**Layouts are functions.** The `@layout.row` / `@layout.column` / `@layout.grid` decorators are gone. The replacements take the parent as an argument and return the controls they made, so nesting is ordinary function composition.
+**Layouts are functions.** The `@layout.row` / `@layout.column` / `@layout.grid` decorators are gone. The replacements are [`layout.row`][py2tosc.layout.row], [`layout.column`][py2tosc.layout.column] and [`layout.matrix`][py2tosc.layout.matrix] -- the last renamed so that `grid` names the `GRID` control and nothing else. They take the parent as an argument and return the controls they made, so nesting is ordinary function composition. See also [`py2tosc.ui`](api/ui.md), which describes a layout instead of applying one.
 
 **numpy is not required.** It is not a dependency at all. py2tosc has none.
 

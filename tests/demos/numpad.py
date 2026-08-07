@@ -170,7 +170,7 @@ def build() -> py2tosc.Document:
     )
 
     # -- the digits, in a 3x3 grid
-    numbers = ui.grid(
+    numbers = ui.tiles(
         *(
             key(
                 caption,

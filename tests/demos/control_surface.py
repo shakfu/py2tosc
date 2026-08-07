@@ -117,7 +117,7 @@ def pages(captions: Sequence[str], prefix: str) -> Iterator[Control]:
 
     for first in range(0, len(captions), PER_PAGE):
         chunk = range(first, min(first + PER_PAGE, len(captions)))
-        yield ui.grid(
+        yield ui.tiles(
             *(
                 strip(
                     names[i],

@@ -179,6 +179,21 @@ def _check_control(
             f"so its {len(control.children)} children are given frames",
         )
 
+    # A GRID is never empty in TouchOSC: creating one populates it, and its
+    # `gridX`/`gridY` say how many cells it holds rather than describing
+    # something to be filled in later. All 37 in the corpus hold exactly
+    # `gridX * gridY` children, and none holds none.
+    if kind is ControlType.GRID:
+        cells = int(control.get("gridX") or 0) * int(control.get("gridY") or 0)
+        if len(control.children) != cells:
+            yield Issue(
+                WARNING,
+                here,
+                f"GRID is {control.get('gridX')}x{control.get('gridY')}, so it "
+                f"should hold {cells} controls, but it holds "
+                f"{len(control.children)}",
+            )
+
     if control.children and kind not in CONTAINERS:
         yield Issue(
             ERROR,

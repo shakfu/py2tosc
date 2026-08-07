@@ -21,7 +21,7 @@ an arrangement and assign frames later, which lets one be written inside out:
 ```python
 panel = ui.column(
     ui.row(readout, send),
-    ui.grid(*keys, columns=3, gap=4),
+    ui.tiles(*keys, columns=3, gap=4),
     sizes=(1, 3),
     frame=(0, 0, 500, 800),
 )
@@ -41,11 +41,12 @@ from collections.abc import Sequence
 from typing import Any
 
 from ._geometry import (
+    CELLS,
     COLUMN,
-    GRID,
     PAGES,
     ROW,
     STACK,
+    TILES,
     Layout,
     to_gap,
     to_inset,
@@ -83,6 +84,7 @@ __all__ = [
     "resolve",
     "row",
     "stack",
+    "tiles",
     "value",
 ]
 
@@ -659,7 +661,7 @@ def column(
     )
 
 
-def grid(
+def tiles(
     *children: Control,
     columns: int = 4,
     rows: int | None = None,
@@ -681,7 +683,7 @@ def grid(
         A `GROUP` holding the children, waiting to be resolved.
     """
     return _arranged(
-        Layout(GRID, columns=columns, rows=rows, gap=to_gap(gap), pad=to_pad(pad)),
+        Layout(TILES, columns=columns, rows=rows, gap=to_gap(gap), pad=to_pad(pad)),
         children,
         props,
     )
@@ -865,3 +867,69 @@ def pager(
             if not page.has(key):
                 page.set(key, colour)
     return _arranged(Layout(PAGES, pad=to_pad(pad)), pages, props, ControlType.PAGER)
+
+
+def grid(
+    control_type: ControlType | str,
+    *,
+    columns: int = 2,
+    rows: int = 2,
+    **props: Any,
+) -> Control:
+    """Build a `GRID` control: one control replicated across its cells.
+
+    This is the format's own `GRID`, the same control
+    [`py2tosc.grid`][py2tosc.grid] makes, but with the cells it must hold --
+    TouchOSC has no empty grid. It fills itself with `columns * rows` controls
+    of one type, which is what a multitoggle or a bank of faders is; every grid
+    in the corpus holds a single type, so the type is what it takes rather than
+    a list of children.
+
+    To arrange controls you already have, and get a `GROUP` rather than a
+    `GRID`, use [`tiles`][py2tosc.ui.tiles].
+
+    A `GRID` tiles its cells itself rather than dividing its frame the way a
+    layout does: every cell is the same size, with a three-point margin around
+    and between, and whatever will not divide evenly is left at the far edge.
+    Frames are assigned by [`resolve`][py2tosc.ui.resolve], as everywhere else.
+
+    Cells are named `1` upwards, in the order `grid_order` and `grid_start`
+    describe -- by default across each row from the top left. Reach them
+    through the returned control to give them messages:
+
+    ```python
+    pads = matrix("BUTTON", columns=8, rows=8, name="multitoggle")
+    for cell in pads:
+        cell.messages.append(midi_note(prop("name")))
+    ```
+
+    Args:
+        control_type: The control to replicate.
+        columns: Cells across, written as `grid_x`.
+        rows: Cells down, written as `grid_y`.
+        **props: Properties to set on the grid itself.
+
+    Returns:
+        A `GRID` holding `columns * rows` controls, waiting to be resolved.
+
+    Raises:
+        ValueError: If `columns` or `rows` is less than one.
+    """
+    if columns < 1 or rows < 1:
+        raise ValueError(f"a grid needs at least one cell, asked for {columns}x{rows}")
+
+    kind = ControlType(control_type)
+    cells = [Control(kind, name=str(n + 1)) for n in range(columns * rows)]
+    props.setdefault("grid_x", columns)
+    props.setdefault("grid_y", rows)
+    # `gridType` records what the cells are, and the corpus numbers it by the
+    # control type's position in the format's own order -- 1 BUTTON, 2 LABEL,
+    # 4 FADER, 7 ENCODER, 8 RADAR, all five matching. Left at its default a
+    # grid of buttons would announce itself as a grid of faders.
+    props.setdefault("grid_type", list(ControlType).index(kind))
+    return _arranged(
+        Layout(CELLS, columns=columns, rows=rows),
+        cells,
+        props,
+        ControlType.GRID,
+    )

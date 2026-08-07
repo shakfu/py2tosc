@@ -24,10 +24,13 @@
   building as infrastructure; worth re-running by hand when a container type
   is added.
 
-- [ ] `ui` cannot build a `GRID`, the third container type. A GRID tiles its own
-  children with margins (`gridX`/`gridY` and 437 children across the corpus),
-  so it needs the same treatment `pager` got. It is the control behind
-  `simple_mk2`'s 64-cell multitoggle, so this and the rebuild task overlap.
+- [x] `ui` cannot build a `GRID`. Added as `ui.grid`, reproducing 36 of the
+  37 grids in the corpus exactly, including both hand-made examples.
+
+- [x] Whether a circular control forces square grid cells. It does not: a 5x2
+  of ENCODERs with filled 120x132 cells draws as round, evenly spaced circles
+  in TouchOSC, so the control is inscribed in whatever frame it gets. The one
+  square-celled grid in the corpus is how that file was authored.
 
 - [ ] Nothing catches a layout that is structurally valid and behaviourally
   dead. All three numpad defects found in TouchOSC -- leading zeros, a DEL that

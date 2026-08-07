@@ -6,6 +6,6 @@ Functions that fill a control's frame with evenly divided children. See [Layouts
 
 ::: py2tosc.layout.column
 
-::: py2tosc.layout.grid
+::: py2tosc.layout.matrix
 
 ::: py2tosc.layout.gradient

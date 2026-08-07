@@ -34,17 +34,25 @@ The same four constructors describe an OSC argument, a MIDI slot and either end 
 
 ## Layout
 
-These describe an arrangement instead of applying one. Each returns a `GROUP` holding its children, so the result goes wherever a control goes and layouts nest by ordinary composition. Frames are assigned later, by `resolve`.
+These describe an arrangement instead of applying one. Each returns the container it built, so the result goes wherever a control goes and layouts nest by ordinary composition. Frames are assigned later, by `resolve`.
+
+The first four build a `GROUP`, arranging controls you already have.
 
 ::: py2tosc.ui.row
 
 ::: py2tosc.ui.column
 
-::: py2tosc.ui.grid
+::: py2tosc.ui.tiles
 
 ::: py2tosc.ui.stack
 
+The last two build the control the format names, which cannot be a plain group: a `PAGER` pages between its children, and a `GRID` holds copies of one control type.
+
 ::: py2tosc.ui.pager
+
+::: py2tosc.ui.grid
+
+## Resolving
 
 ::: py2tosc.ui.resolve
 

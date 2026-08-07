@@ -99,9 +99,19 @@ def test_the_whole_corpus_produces_two_known_warnings():
 # -- what a clean layout looks like ------------------------------------------
 
 
+#: The one type whose defaults do not describe a control that could exist.
+#: TouchOSC has no empty GRID -- creating one populates it, and the defaults say
+#: 2x2 of gridType 4, which is four faders. `Control` does not invent children
+#: for any type, so a bare GRID contradicts its own `gridX`/`gridY` and is
+#: reported. Building one through `ui.grid` gives the cells it claims.
+INCOMPLETE_BY_DEFAULT = {py2tosc.ControlType.GRID}
+
+
 def test_a_freshly_built_layout_is_clean():
     doc = py2tosc.Document.new(frame=(0, 0, 800, 600))
     for control_type in py2tosc.ControlType:
+        if control_type in INCOMPLETE_BY_DEFAULT:
+            continue
         doc.add(py2tosc.Control(control_type, name=control_type.value.lower()))
     assert doc.validate() == []
 
@@ -109,13 +119,33 @@ def test_a_freshly_built_layout_is_clean():
 def test_every_default_control_is_clean():
     """A control built from its own defaults must never fail its own rules."""
     for control_type in py2tosc.ControlType:
+        if control_type in INCOMPLETE_BY_DEFAULT:
+            continue
         control = py2tosc.Control(control_type)
         assert control.validate() == [], control_type.value
 
 
+def test_a_bare_grid_is_reported_as_incomplete():
+    """The exception above, pinned so it cannot quietly become the rule.
+
+    All 37 grids in the corpus hold exactly `gridX * gridY` children and none
+    holds none, so an empty one is not something the editor can produce.
+    """
+    found = warnings(py2tosc.grid().validate())
+    assert len(found) == 1
+    assert "should hold 4 controls, but it holds 0" in found[0].message
+
+
+def test_a_grid_holding_what_it_claims_is_clean():
+    filled = py2tosc.grid(
+        grid_x=3, grid_y=2, children=[py2tosc.fader() for _ in range(6)]
+    )
+    assert filled.validate() == []
+
+
 def test_layout_helpers_produce_clean_output():
     doc = py2tosc.Document.new(frame=(0, 0, 800, 600))
-    cells = py2tosc.layout.grid(doc.root, "BUTTON", columns=3, rows=3)
+    cells = py2tosc.layout.matrix(doc.root, "BUTTON", columns=3, rows=3)
     py2tosc.layout.row(doc.root, "FADER", sizes=4)
     assert cells
     assert doc.validate() == []

@@ -25,7 +25,7 @@ Slots always add up to the parent's frame exactly; rounding is absorbed as the l
 ## Grids
 
 ```python
-cells = layout.grid(panel, "BUTTON", columns=4, rows=3)
+cells = layout.matrix(panel, "BUTTON", columns=4, rows=3)
 ```
 
 Cells come back in row-major order: left to right, then top to bottom.
@@ -41,7 +41,7 @@ layout.row(panel, "FADER", sizes=8, colors=("#264653", "#e76f51"))
 For grids, `direction` chooses how the gradient runs:
 
 ```python
-layout.grid(panel, columns=4, rows=4, colors=("#264653", "#e76f51"),
+layout.matrix(panel, columns=4, rows=4, colors=("#264653", "#e76f51"),
             direction="horizontal")   # across each row, repeated per row
             direction="vertical"      # down the rows, constant along each
             direction="sequential"    # cell by cell, row-major
@@ -61,7 +61,7 @@ Because each function returns the controls it made, layouts compose by passing o
 ```python
 doc = py2tosc.Document.new(frame=(0, 0, 1600, 1600))
 
-cells = layout.grid(doc.root, columns=3, rows=3, colors=("#CE6A85", "#5C374C"))
+cells = layout.matrix(doc.root, columns=3, rows=3, colors=("#CE6A85", "#5C374C"))
 layout.column(cells[4], "BUTTON", sizes=4)
 layout.row(cells[6], "FADER", sizes=2)
 ```
@@ -89,7 +89,7 @@ from py2tosc import ui
 
 doc = py2tosc.Document(root=ui.column(
     ui.row(py2tosc.label(name="readout"), py2tosc.button(name="send")),
-    ui.grid(*keys, columns=3, gap=4, pad=8),
+    ui.tiles(*keys, columns=3, gap=4, pad=8),
     sizes=(1, 3),
     frame=(0, 0, 500, 800),
 ))
@@ -136,10 +136,24 @@ The inset belongs to the control rather than to a wrapper group, so padding a ca
 
 ```python
 ui.pager(
-    ui.grid(*first_twelve, columns=4, name="1-12"),
-    ui.grid(*next_twelve, columns=4, name="13-24"),
+    ui.tiles(*first_twelve, columns=4, name="1-12"),
+    ui.tiles(*next_twelve, columns=4, name="13-24"),
     frame=(0, 0, 1024, 768),
 )
 ```
 
 Pages should be groups, which the other combinators already return, and a page's name is its tab label. A page that is not a group is reported by [validation](validation.md) rather than refused, since TouchOSC tolerates it.
+
+### Grids of one control
+
+`ui.tiles` arranges controls you already have. The format also has a `GRID` *control*, which holds many copies of a single control type and is what a multitoggle or a bank of faders is made from. `ui.grid` builds one:
+
+```python
+pads = ui.grid("BUTTON", columns=8, rows=8, name="multitoggle")
+for cell in pads:
+    cell.messages.append(ui.midi_note(ui.prop("name")))
+```
+
+Cells are named `1` upwards and reached through the returned control, so each can carry its own bindings.
+
+A `GRID` tiles rather than divides. Every cell is the same size, with a three-point margin around and between them, and whatever will not divide evenly is left at the far edge instead of being shared out -- which is the opposite of what `ui.tiles` and the eager layout functions do, where the last slot always reaches the edge.

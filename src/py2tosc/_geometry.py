@@ -13,6 +13,7 @@ so a deferred layout never becomes part of a `.tosc` file.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 
@@ -22,9 +23,24 @@ from .properties import Frame
 #: The arrangements a `_layout` can describe.
 ROW = "row"
 COLUMN = "column"
-GRID = "grid"
+TILES = "tiles"
 STACK = "stack"
 PAGES = "pages"
+CELLS = "cells"
+
+#: The gap a `GRID` control leaves around and between its cells. It has no
+#: property for this -- the editor writes the child frames out -- and every
+#: grid in the corpus uses three points, whatever its size or shape.
+CELL_MARGIN = 3
+
+
+def _round(value: float) -> int:
+    """Round halves upwards, which is what a `GRID` control does.
+
+    Python rounds halves to even, so it turns 404.5 into 404. The editor writes
+    405, and an eight-wide grid in the corpus lands on exactly that boundary.
+    """
+    return math.floor(value + 0.5)
 
 
 def ratios(sizes: int | Sequence[float]) -> list[float]:
@@ -159,11 +175,13 @@ class Layout:
     """How a group arranges its children, recorded until frames can be assigned.
 
     Attributes:
-        kind: `row`, `column`, `grid` or `stack`.
+        kind: `row`, `column`, `tiles`, `stack`, `pages` or `cells`. The last
+            two are the arrangements a `PAGER` and a `GRID` impose on their own
+            children rather than ones a caller picks.
         sizes: Relative weights matching the children, or `None` for equal
-            shares. Unused by `grid` and `stack`.
-        columns: Grid width.
-        rows: Grid height, or `None` to derive it from the child count.
+            shares. Used only by `row` and `column`.
+        columns: How many across, for `tiles` and `cells`.
+        rows: How many down, or `None` to take just enough for the children.
         gap: Space between slots, horizontal and vertical.
         pad: Inset before the first slot and after the last, on all four sides.
         resolved: Whether frames have been assigned yet. `validate` reports a
@@ -234,7 +252,31 @@ def child_frames(spec: Layout, control: Control, count: int) -> list[Frame]:
             raise ValueError(f"padding of {spec.pad} does not fit in {frame}")
         return [filled] * count
 
-    if spec.kind == GRID:
+    if spec.kind == CELLS:
+        # A GRID control tiles its cells itself, and does not divide its frame
+        # the way a layout does: every cell is the same size, with a margin all
+        # round and between, and whatever will not divide evenly is left over
+        # at the far edge rather than shared out.
+        columns = spec.columns
+        rows = spec.rows if spec.rows is not None else 1
+        margin = CELL_MARGIN
+        pitch_x = (width - margin) / columns
+        pitch_y = (height - margin) / rows
+        cell_w, cell_h = _round(pitch_x - margin), _round(pitch_y - margin)
+        if cell_w < 0 or cell_h < 0:
+            raise ValueError(f"a {columns}x{rows} grid does not fit in {frame}")
+        return [
+            Frame(
+                _round(margin + col * pitch_x),
+                _round(margin + row * pitch_y),
+                cell_w,
+                cell_h,
+            )
+            for row in range(rows)
+            for col in range(columns)
+        ]
+
+    if spec.kind == TILES:
         columns = spec.columns
         rows = spec.rows if spec.rows is not None else -(-count // columns)
         across_slots = slots(width, ratios(columns), left, right, across, "width")

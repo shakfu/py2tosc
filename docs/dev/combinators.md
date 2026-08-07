@@ -70,7 +70,7 @@ Any design has to hold to four things.
 
 **Nothing new in the file.** The library's claim is byte-exact round-tripping. Helpers must not write vocabulary into `.tosc` files that TouchOSC has no concept of.
 
-**Additive.** `layout.row`, `layout.column` and `layout.grid` keep working unchanged. Nothing here deprecates them.
+**Additive.** `layout.row`, `layout.column` and `layout.grid` keep working unchanged. Nothing here deprecates them. (`layout.grid` was later renamed `layout.matrix`, so that `grid` names the `GRID` control everywhere and nothing else; the behaviour is untouched.)
 
 **No dependencies.** The package has none, and the arithmetic stays plain Python.
 

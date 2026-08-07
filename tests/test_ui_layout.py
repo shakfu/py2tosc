@@ -104,7 +104,7 @@ def test_column_divides_the_height_by_weight():
 
 
 def test_grid_takes_just_enough_rows_for_its_children():
-    cells = ui.grid(*[py2tosc.button() for _ in range(6)], columns=3)
+    cells = ui.tiles(*[py2tosc.button() for _ in range(6)], columns=3)
     ui.resolve(cells, (0, 0, 300, 200))
     assert frames(cells) == [
         (0, 0, 100, 100),
@@ -117,7 +117,7 @@ def test_grid_takes_just_enough_rows_for_its_children():
 
 
 def test_grid_rows_can_be_given_explicitly():
-    cells = ui.grid(py2tosc.button(), columns=2, rows=2)
+    cells = ui.tiles(py2tosc.button(), columns=2, rows=2)
     ui.resolve(cells, (0, 0, 200, 200))
     assert frames(cells) == [(0, 0, 100, 100)]
 
@@ -162,7 +162,7 @@ def test_pad_accepts_one_two_or_four_numbers(pad, expected):
 
 def test_gap_accepts_a_pair_for_the_two_axes():
     """A gap has no four-sided form: it sits between slots, not around them."""
-    cells = ui.grid(*[py2tosc.button() for _ in range(4)], columns=2, gap=(10, 20))
+    cells = ui.tiles(*[py2tosc.button() for _ in range(4)], columns=2, gap=(10, 20))
     ui.resolve(cells, (0, 0, 210, 220))
     assert frames(cells) == [
         (0, 0, 100, 100),
@@ -412,7 +412,7 @@ def test_pager_gives_every_page_the_whole_pager():
     """A pager shows one page at a time, so pages share rather than divide."""
     pages = ui.pager(
         ui.row(py2tosc.fader(), py2tosc.fader(), name="1"),
-        ui.grid(py2tosc.button(), columns=2, name="2"),
+        ui.tiles(py2tosc.button(), columns=2, name="2"),
     )
     ui.resolve(pages, (0, 0, 800, 600))
 
@@ -650,3 +650,118 @@ def test_every_pager_page_in_the_corpus_is_reproduced_exactly():
             checked += len(actual)
 
     assert checked > 1000, f"only {checked} pages checked"
+
+
+# -- GRID controls -----------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("sample", "kind"), [("grid-faders", "FADER"), ("grid-encoders", "ENCODER")]
+)
+def test_a_built_grid_matches_one_the_editor_made(sample, kind):
+    """Parity against minimal grids built by hand in TouchOSC.
+
+    A `GRID` writes its cell frames out rather than deriving them, so nothing
+    about the file says how they were arrived at -- which makes an editor-made
+    example the only way to know.
+    """
+    reference = py2tosc.load(EXAMPLES / f"{sample}.tosc").find(type="GRID")
+    built = ui.grid(kind, columns=2, rows=2, name="grid1")
+    ui.resolve(built, tuple(reference.frame))
+
+    assert [tuple(c.frame) for c in built] == [tuple(c.frame) for c in reference]
+    assert [c.get("name") for c in built] == [c.get("name") for c in reference]
+    assert not set(reference.properties) - set(built.properties)
+    assert built.get("gridType") == reference.get("gridType")
+
+
+def test_grid_cells_are_tiled_not_divided():
+    """A GRID leaves a margin all round and gives every cell the same size.
+
+    A layout divides its frame and lets the last slot reach the edge; a GRID
+    does not, so the leftover sits at the far edge instead of being shared out.
+    """
+    built = ui.grid("BUTTON", columns=2, rows=2)
+    ui.resolve(built, (0, 0, 240, 240))
+    assert frames(built) == [
+        (3, 3, 116, 116),
+        (122, 3, 116, 116),
+        (3, 122, 116, 116),
+        (122, 122, 116, 116),
+    ]
+
+
+def test_every_grid_in_the_corpus_is_reproduced():
+    """One exception, named rather than tolerated.
+
+    `script_demo.tosc` holds a 5x2 of RADARs whose cells are square rather than
+    filling the frame's height. That is how the file was authored, not a rule:
+    a 5x2 of ENCODERs generated with filled cells of 120x132 draws as round,
+    evenly spaced circles in TouchOSC, so a circular control is inscribed in
+    whatever frame it is given. Filling is what the other 36 grids do and what
+    this model produces.
+    """
+    from py2tosc._geometry import CELLS, Layout, child_frames
+
+    squared = {"script_demo.tosc"}
+    checked = exceptions = 0
+    for path in CORPUS:
+        for g in py2tosc.load(path).walk():
+            if g.control_type is not py2tosc.ControlType.GRID or not g.children:
+                continue
+            nx = int(g.get("gridX") or 1)
+            ny = int(g.get("gridY") or 1)
+            spec = Layout(CELLS, columns=nx, rows=ny)
+            ours = {tuple(f) for f in child_frames(spec, g, nx * ny)}
+            theirs = {tuple(c.frame) for c in g.children}
+            if ours == theirs:
+                checked += 1
+            else:
+                assert path.name in squared, f"{path.name}: {nx}x{ny}"
+                exceptions += 1
+
+    assert checked >= 36 and exceptions == 1
+
+
+def test_grid_type_names_the_control_the_cells_are():
+    """The corpus numbers it by the type's position in the format's own order."""
+    assert ui.grid("BUTTON", columns=1, rows=1).get("gridType") == 1
+    assert ui.grid("LABEL", columns=1, rows=1).get("gridType") == 2
+    assert ui.grid("FADER", columns=1, rows=1).get("gridType") == 4
+    assert ui.grid("ENCODER", columns=1, rows=1).get("gridType") == 7
+    assert ui.grid("RADAR", columns=1, rows=1).get("gridType") == 8
+
+
+def test_a_grid_fills_itself_with_one_control_type():
+    pads = ui.grid("BUTTON", columns=8, rows=8, name="multitoggle")
+    assert pads.control_type is py2tosc.ControlType.GRID
+    assert len(pads.children) == 64
+    assert {c.control_type.value for c in pads} == {"BUTTON"}
+    assert [c.get("name") for c in pads][:3] == ["1", "2", "3"]
+    assert (pads.get("gridX"), pads.get("gridY")) == (8, 8)
+
+
+@pytest.mark.parametrize(("columns", "rows"), [(0, 2), (2, 0), (-1, 1)])
+def test_a_grid_needs_at_least_one_cell(columns, rows):
+    with pytest.raises(ValueError, match="at least one cell"):
+        ui.grid("BUTTON", columns=columns, rows=rows)
+
+
+def test_a_grid_that_cannot_fit_its_cells_raises():
+    built = ui.grid("BUTTON", columns=20, rows=20)
+    with pytest.raises(ValueError, match="does not fit"):
+        ui.resolve(built, (0, 0, 20, 20))
+
+
+def test_a_grid_survives_a_round_trip():
+    doc = py2tosc.Document(
+        root=ui.stack(
+            ui.grid("BUTTON", columns=4, rows=2, name="pads"),
+            frame=(0, 0, 400, 200),
+        )
+    ).resolve()
+    assert doc.validate() == []
+
+    reloaded = py2tosc.loads(doc.dumps()).find(type="GRID")
+    assert len(reloaded.children) == 8
+    assert reloaded.get("gridType") == 1

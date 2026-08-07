@@ -6,8 +6,8 @@ bound both to an OSC address and to a MIDI CC. Nothing about the layout is
 written by hand: the parameter list decides how many pages there are and what
 is on them.
 
-    python tests/demos/control_surface.py tests/data/pro_c_2_fabfilter.json out.tosc
-    python tests/demos/control_surface.py params.json out.tosc synth/bank1
+    python tests/demos/control_surface.py tests/data/pro_c_2_fabfilter.json
+    python tests/demos/control_surface.py params.json synth/bank1 -o surface.tosc
 
 The optional third argument is the OSC namespace every address hangs off. It
 defaults to the file's name, which is convenient and fragile -- renaming the
@@ -25,9 +25,9 @@ Compare `from_json.py`, which is the smallest version of this idea: one row of
 faders, OSC only, using the eager `py2tosc.layout` functions.
 """
 
+import argparse
 import json
 import re
-import sys
 from collections.abc import Iterator, Sequence
 from pathlib import Path
 
@@ -164,7 +164,7 @@ def build(
     return py2tosc.Document(root=root).resolve()
 
 
-def main(json_path: str, output_path: str, prefix: str = "") -> None:
+def main(json_path: str, output_path: Path, prefix: str = "") -> None:
     with open(json_path) as file:
         parameters = json.load(file)
 
@@ -176,6 +176,7 @@ def main(json_path: str, output_path: str, prefix: str = "") -> None:
     for issue in doc.validate():
         print(f"  {issue}")
 
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     doc.save(output_path)
     print(
         f"{len(parameters)} parameters -> {len(doc.find(type='PAGER').children)} pages, "
@@ -183,5 +184,29 @@ def main(json_path: str, output_path: str, prefix: str = "") -> None:
     )
 
 
+def parse_args() -> argparse.Namespace:
+    """Read the command line, so a missing path is a message and not a crash."""
+    parser = argparse.ArgumentParser(
+        description=__doc__.split("\n\n")[0],
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("parameters", help="a JSON list of plugin parameters")
+    parser.add_argument(
+        "prefix",
+        nargs="?",
+        default="",
+        help="the OSC namespace; defaults to the parameter file name",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        default=Path("build") / f"{Path(__file__).stem}.tosc",
+        help="where to write the layout (default: %(default)s)",
+    )
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    main(*sys.argv[1:4])
+    args = parse_args()
+    main(args.parameters, args.output, args.prefix)

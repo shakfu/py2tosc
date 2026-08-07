@@ -1,15 +1,17 @@
 # TODO
 
-- [ ] Create a py2tosc script which creates `tests/examples/simple_mk2.tosc`
+- [x] Create a py2tosc script which creates `tests/examples/simple_mk2.tosc`
 
-  140 controls, 5 levels deep, 240 messages, a 4-page PAGER, a 64-cell GRID and
-  853 property assignments that differ from `defaults_for()`. Decide what it is
-  for first: a *demo* must be readable and so will abstract away from the file,
-  while a *coverage probe* should be generated rather than written -- a
-  `to_python()` emitting a rebuild script would subsume this task and give
-  users a `.tosc` decompiler. Either way assert structural equivalence, not
-  bytes: the file already round-trips byte-exactly, so what is untested is
-  construction, and every remaining property difference is a finding.
+  Done as a demo, `tests/demos/simple_mk2.py`: readable and factored rather
+  than a transcription of the file's 853 property assignments. Structural
+  equivalence is asserted, not bytes -- same types, names, tab labels and
+  message counts, with 77 of 134 controls on exactly the original coordinates
+  and 111 within a point.
+
+  The coverage-probe framing is closed too: `to_python` emits a rebuild script
+  from any loaded document, and all 43 corpus files round-trip through their
+  own generated source. That is the construction check this task was really
+  asking for, and it covers every file rather than one.
 
 - [x] data-driven ui creation: auto-generate midi/osc interface from midi or
   osc mapping in json. -- `tests/demos/control_surface.py`, from the plugin
@@ -32,8 +34,15 @@
   in TouchOSC, so the control is inscribed in whatever frame it gets. The one
   square-celled grid in the corpus is how that file was authored.
 
-- [ ] Nothing catches a layout that is structurally valid and behaviourally
-  dead. All three numpad defects found in TouchOSC -- leading zeros, a DEL that
+- [x] Nothing catches a layout that is structurally valid and behaviourally
+  dead. Partly closed: of the three shapes named below, the one that survived
+  contact with the corpus is now a rule -- a local binding writing a value or
+  property the destination does not have. The other two did not: a payload
+  that can equal what it overwrites needs the script modelled, and a RISE with
+  no FALL fires on 106 editor-written bindings. Lua behaviour still has no
+  oracle but TouchOSC.
+
+  Original note: All three numpad defects found in TouchOSC -- leading zeros, a DEL that
   did nothing, a key that could not fire twice -- passed `validate()`,
   round-tripped byte-exactly and satisfied the demo tests. TouchOSC is the only
   real oracle, but the shapes are recognisable: a message whose payload can

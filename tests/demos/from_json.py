@@ -2,11 +2,12 @@
 
 Each fader is named after its parameter and sends to /<group>/<fader>.
 
-    python tests/demos/from_json.py tests/data/pro_c_2_fabfilter.json out.tosc
+    python tests/demos/from_json.py tests/data/pro_c_2_fabfilter.json
 """
 
+import argparse
 import json
-import sys
+from pathlib import Path
 
 import py2tosc
 from py2tosc import OscMessage, layout, ui
@@ -19,7 +20,7 @@ def parameter_message() -> OscMessage:
     return ui.osc("/{parent.name}/{name}")
 
 
-def main(json_path: str, output_path: str) -> None:
+def main(json_path: str, output_path: Path) -> None:
     with open(json_path) as file:
         parameters = json.load(file)[:LIMIT]
 
@@ -35,9 +36,28 @@ def main(json_path: str, output_path: str) -> None:
         fader.name = parameter["name"]
         fader.messages.append(parameter_message())
 
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     doc.save(output_path)
     print([fader.name for fader in faders])
 
 
+def parse_args() -> argparse.Namespace:
+    """Read the command line, so a missing path is a message and not a crash."""
+    parser = argparse.ArgumentParser(
+        description=__doc__.split("\n\n")[0],
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("parameters", help="a JSON list of plugin parameters")
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        default=Path("build") / f"{Path(__file__).stem}.tosc",
+        help="where to write the layout (default: %(default)s)",
+    )
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    main(*sys.argv[1:3])
+    args = parse_args()
+    main(args.parameters, args.output)

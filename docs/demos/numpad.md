@@ -18,7 +18,7 @@ appends the digit and clamps the running total to its `max` property.
 ```
 
 ```console
-$ python tests/demos/numpad.py numpad.tosc
+$ python tests/demos/numpad.py
 45 controls -> numpad.tosc
 ```
 

@@ -7,10 +7,10 @@ Generate a whole interface from a plugin's parameter list: a fader per parameter
 ```
 
 ```console
-$ python tests/demos/control_surface.py tests/data/pro_c_2_fabfilter.json out.tosc
-54 parameters -> 5 pages, 167 controls -> out.tosc
+$ python tests/demos/control_surface.py tests/data/pro_c_2_fabfilter.json
+54 parameters -> 5 pages, 168 controls -> build/control_surface.tosc
 
-$ python tests/demos/control_surface.py params.json out.tosc synth/bank1
+$ python tests/demos/control_surface.py params.json synth/bank1 -o surface.tosc
 ```
 
 The optional third argument is the OSC namespace every address hangs off, and it may be more than one segment deep. It defaults to the file's name, which is convenient and fragile: renaming the data silently moves every address, so anything that has to stay put should say so.

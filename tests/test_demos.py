@@ -6,13 +6,14 @@ docs say to invoke it, and its output is loaded back to prove it produced a
 layout rather than merely exiting zero.
 """
 
+import collections
 import subprocess
 import sys
 
 import pytest
 
 import py2tosc
-from _corpus import DATA, DEMOS
+from _corpus import DATA, DEMOS, EXAMPLES
 
 DEMO_SCRIPTS = sorted(DEMOS.glob("*.py"))
 
@@ -37,6 +38,7 @@ def test_every_demo_script_is_covered():
         "from_json.py",
         "image_converter.py",
         "numpad.py",
+        "simple_mk2.py",
     }
     assert {p.name for p in DEMO_SCRIPTS} == covered
 
@@ -49,7 +51,7 @@ def test_every_demo_compiles(script):
 
 def test_custom_property(tmp_path):
     out = tmp_path / "custom.tosc"
-    result = run("custom_property.py", DATA / "test2.tosc", out)
+    result = run("custom_property.py", DATA / "test2.tosc", "-o", out)
 
     assert "Craig" in result.stdout
     doc = py2tosc.load(out)
@@ -60,7 +62,7 @@ def test_custom_property(tmp_path):
 
 def test_copy_scripts(tmp_path):
     out = tmp_path / "scripts.tosc"
-    run("copy_scripts.py", DATA / "test.tosc", out, "source", "target")
+    run("copy_scripts.py", DATA / "test.tosc", "source", "target", "-o", out)
 
     doc = py2tosc.load(out)
     source = doc.find("source")
@@ -77,9 +79,10 @@ def test_copy_scripts_reports_a_missing_control(tmp_path):
             sys.executable,
             str(DEMOS / "copy_scripts.py"),
             str(DATA / "test.tosc"),
-            str(tmp_path / "out.tosc"),
             "nonexistent",
             "target",
+            "-o",
+            str(tmp_path / "out.tosc"),
         ],
         capture_output=True,
         text=True,
@@ -90,7 +93,7 @@ def test_copy_scripts_reports_a_missing_control(tmp_path):
 
 def test_from_json(tmp_path):
     out = tmp_path / "fromjson.tosc"
-    result = run("from_json.py", DATA / "pro_c_2_fabfilter.json", out)
+    result = run("from_json.py", DATA / "pro_c_2_fabfilter.json", "-o", out)
 
     assert "Threshold" in result.stdout
 
@@ -116,7 +119,7 @@ def test_image_converter(tmp_path):
 
     out = tmp_path / "image.tosc"
     result = run(
-        "image_converter.py", DATA / "test.tosc", out, DATA / "logo.jpg", "canvas"
+        "image_converter.py", DATA / "test.tosc", DATA / "logo.jpg", "canvas", "-o", out
     )
 
     assert "boxes" in result.stdout
@@ -139,9 +142,10 @@ def test_image_converter_reports_a_missing_canvas(tmp_path):
             sys.executable,
             str(DEMOS / "image_converter.py"),
             str(DATA / "test.tosc"),
-            str(tmp_path / "out.tosc"),
             str(DATA / "logo.jpg"),
             "no-such-group",
+            "-o",
+            str(tmp_path / "out.tosc"),
         ],
         capture_output=True,
         text=True,
@@ -153,7 +157,7 @@ def test_image_converter_reports_a_missing_canvas(tmp_path):
 def test_numpad(tmp_path):
     """The most involved demo: nested layouts, a Lua script, and LOCAL wiring."""
     out = tmp_path / "numpad.tosc"
-    result = run("numpad.py", out)
+    result = run("numpad.py", "-o", out)
 
     assert "45 controls" in result.stdout
     doc = py2tosc.load(out)
@@ -187,7 +191,7 @@ def test_every_numpad_key_is_wired_identically(tmp_path):
     does nothing visible here rather than only in TouchOSC.
     """
     out = tmp_path / "numpad.tosc"
-    run("numpad.py", out)
+    run("numpad.py", "-o", out)
     doc = py2tosc.load(out)
 
     def shape(control):
@@ -229,7 +233,7 @@ def test_a_numpad_key_never_sends_what_the_readout_already_shows(tmp_path):
     marker keeps a keypress and a total disjoint, whatever the total is.
     """
     out = tmp_path / "numpad.tosc"
-    run("numpad.py", out)
+    run("numpad.py", "-o", out)
     doc = py2tosc.load(out)
 
     sent = {
@@ -252,7 +256,7 @@ def test_numpad_send_pushes_the_total_over_osc(tmp_path):
     `touch` RISE is an attested OSC trigger.
     """
     out = tmp_path / "numpad.tosc"
-    run("numpad.py", out)
+    run("numpad.py", "-o", out)
     doc = py2tosc.load(out)
     readout = doc.find("valueLabel")
 
@@ -275,7 +279,7 @@ def test_numpad_send_pushes_the_total_over_osc(tmp_path):
 
 def test_numpad_output_is_a_clean_layout(tmp_path):
     out = tmp_path / "numpad.tosc"
-    run("numpad.py", out)
+    run("numpad.py", "-o", out)
     assert py2tosc.load(out).validate() == []
 
 
@@ -290,7 +294,7 @@ def _control_surface():
 def test_control_surface(tmp_path):
     """A whole interface generated from a parameter list, nothing hand-placed."""
     out = tmp_path / "surface.tosc"
-    result = run("control_surface.py", DATA / "pro_c_2_fabfilter.json", out)
+    result = run("control_surface.py", DATA / "pro_c_2_fabfilter.json", "-o", out)
     assert "54 parameters -> 5 pages" in result.stdout
 
     doc = py2tosc.load(out)
@@ -317,7 +321,7 @@ def test_control_surface(tmp_path):
 
 def test_control_surface_output_is_a_clean_layout(tmp_path):
     out = tmp_path / "surface.tosc"
-    run("control_surface.py", DATA / "pro_c_2_fabfilter.json", out)
+    run("control_surface.py", DATA / "pro_c_2_fabfilter.json", "-o", out)
     assert py2tosc.load(out).validate() == []
 
 
@@ -328,7 +332,7 @@ def test_control_surface_names_are_addressable(tmp_path):
     multi-word name contains spaces, which an OSC address cannot.
     """
     out = tmp_path / "surface.tosc"
-    run("control_surface.py", DATA / "pro_c_2_fabfilter.json", out)
+    run("control_surface.py", DATA / "pro_c_2_fabfilter.json", "-o", out)
     doc = py2tosc.load(out)
 
     names = [f.name for f in doc.find_all(type="FADER")]
@@ -353,7 +357,7 @@ def test_control_surface_numbers_ccs_by_position_not_parameter_index(tmp_path):
     assert max(p["index"] for p in parameters) > 127
 
     out = tmp_path / "surface.tosc"
-    run("control_surface.py", DATA / "pro_c_2_fabfilter.json", out)
+    run("control_surface.py", DATA / "pro_c_2_fabfilter.json", "-o", out)
     doc = py2tosc.load(out)
 
     ccs = [
@@ -398,7 +402,9 @@ def test_control_surface_takes_an_osc_prefix(tmp_path):
     moves every address, which is exactly what happened once already.
     """
     out = tmp_path / "surface.tosc"
-    run("control_surface.py", DATA / "pro_c_2_fabfilter.json", out, "Synth/Bank 1")
+    run(
+        "control_surface.py", DATA / "pro_c_2_fabfilter.json", "Synth/Bank 1", "-o", out
+    )
     doc = py2tosc.load(out)
 
     osc = next(
@@ -416,7 +422,7 @@ def test_control_surface_takes_an_osc_prefix(tmp_path):
 
 def test_control_surface_falls_back_to_the_filename(tmp_path):
     out = tmp_path / "surface.tosc"
-    run("control_surface.py", DATA / "pro_c_2_fabfilter.json", out)
+    run("control_surface.py", DATA / "pro_c_2_fabfilter.json", "-o", out)
     doc = py2tosc.load(out)
     assert doc.root.name == "proC2Fabfilter"
 
@@ -427,3 +433,175 @@ def test_control_surface_namespace_is_osc_safe():
     assert surface.namespace("/leading/and/trailing/") == "leading/and/trailing"
     assert surface.namespace("  ") == ""
     assert surface.namespace("") == ""
+
+
+def _absolute(doc):
+    """Every leaf control in absolute coordinates, keyed by page, name and type.
+
+    The rebuild nests more groups than the original, so a frame relative to its
+    parent is not comparable; where a control ends up on screen is.
+    """
+    found = {}
+
+    def walk(control, ox, oy, page=None):
+        x, y, w, h = control.frame
+        ax, ay = ox + x, oy + y
+        if control.control_type is py2tosc.ControlType.GROUP and control.get(
+            "tabLabel"
+        ):
+            page = control.get("tabLabel")
+        if control.control_type not in (
+            py2tosc.ControlType.GROUP,
+            py2tosc.ControlType.PAGER,
+        ):
+            found[(page, control.get("name"), control.control_type.value)] = (
+                int(ax),
+                int(ay),
+                int(w),
+                int(h),
+            )
+        for child in control.children:
+            walk(child, ax, ay, page)
+
+    walk(doc.root, 0, 0)
+    return found
+
+
+def test_simple_mk2(tmp_path):
+    """The widest thing here that is authored rather than edited."""
+    out = tmp_path / "mk2.tosc"
+    result = run("simple_mk2.py", "-o", out)
+    assert "4 pages" in result.stdout
+
+    doc = py2tosc.load(out)
+    reference = py2tosc.load(EXAMPLES / "simple_mk2.tosc")
+
+    # the same controls, by type and by name
+    def types(d):
+        return collections.Counter(
+            c.control_type.value
+            for c in d.walk()
+            if c.control_type is not py2tosc.ControlType.GROUP
+        )
+
+    assert types(doc) == types(reference)
+    assert sorted(
+        str(c.get("name"))
+        for c in doc.walk()
+        if c.control_type is not py2tosc.ControlType.GROUP
+    ) == sorted(
+        str(c.get("name"))
+        for c in reference.walk()
+        if c.control_type is not py2tosc.ControlType.GROUP
+    )
+
+    # the same bindings, to the message
+    def messages(d):
+        return collections.Counter(
+            type(m).__name__ for c in d.walk() for m in c.messages
+        )
+
+    assert messages(doc) == messages(reference)
+    assert [p.get("tabLabel") for p in doc.find(type="PAGER")] == [
+        "FADERS",
+        "PADS",
+        "XY",
+        "MATRIX",
+    ]
+
+
+def test_simple_mk2_lands_where_the_original_does(tmp_path):
+    """Positions are the claim the combinators have to earn.
+
+    The readouts are the deliberate exception: they fill the control they
+    caption rather than being small boxes placed by eye, so they are counted
+    and named rather than quietly tolerated.
+    """
+    out = tmp_path / "mk2.tosc"
+    run("simple_mk2.py", "-o", out)
+
+    mine = _absolute(py2tosc.load(out))
+    theirs = _absolute(py2tosc.load(EXAMPLES / "simple_mk2.tosc"))
+    shared = set(mine) & set(theirs)
+    assert len(shared) == 134
+
+    exact = [k for k in shared if mine[k] == theirs[k]]
+    close = [
+        k for k in shared if max(abs(a - b) for a, b in zip(mine[k], theirs[k])) <= 1
+    ]
+    apart = [k for k in shared if k not in close]
+
+    assert len(exact) >= 77, f"only {len(exact)} exact"
+    assert len(close) >= 111, f"only {len(close)} within a point"
+    assert {k[2] for k in apart} == {"LABEL"}, "only the readouts may differ"
+
+
+def test_simple_mk2_output_is_a_clean_layout(tmp_path):
+    out = tmp_path / "mk2.tosc"
+    run("simple_mk2.py", "-o", out)
+    assert py2tosc.load(out).validate() == []
+
+
+def test_simple_mk2_behaves_like_the_original(tmp_path):
+    """The properties that decide what a control *does*, not how it looks.
+
+    Every one of these was wrong on the first pass and every one of them was
+    invisible to the checks above: the layout validated, round-tripped and had
+    the right controls in the right places while nothing on it responded to
+    touch. An interactive label swallows the touch meant for the fader under
+    it; a momentary button will not latch; a fader is vertical whatever shape
+    its frame is.
+
+    A label's text belongs here for the same reason. A caption left empty is
+    not a cosmetic difference -- the control reads as missing.
+    """
+    out = tmp_path / "mk2.tosc"
+    run("simple_mk2.py", "-o", out)
+
+    def by_page(doc):
+        found = {}
+        for page in doc.find(type="PAGER"):
+            for control in page.walk():
+                if control.control_type not in (
+                    py2tosc.ControlType.GROUP,
+                    py2tosc.ControlType.PAGER,
+                ):
+                    key = (page.get("tabLabel"), control.get("name"))
+                    found[(*key, control.control_type.value)] = control
+        return found
+
+    mine = by_page(py2tosc.load(out))
+    theirs = by_page(py2tosc.load(EXAMPLES / "simple_mk2.tosc"))
+    shared = set(mine) & set(theirs)
+    assert len(shared) == 134
+
+    behaviour = [
+        "interactive",
+        "visible",
+        "buttonType",
+        "shape",
+        "orientation",
+        "response",
+        "outline",
+        "cursor",
+        "centered",
+        "pointerPriority",
+        "locked",
+    ]
+    differing = [
+        (key, prop, theirs[key].get(prop), mine[key].get(prop))
+        for key in shared
+        for prop in behaviour
+        if theirs[key].get(prop) != mine[key].get(prop)
+    ]
+    assert not differing, differing[:5]
+
+    def text(control):
+        return [v.default for v in control.values if v.key == "text"]
+
+    blank = [
+        key
+        for key in shared
+        if key[2] == "LABEL" and text(mine[key]) != text(theirs[key])
+    ]
+    assert not blank, blank[:5]

@@ -6,13 +6,23 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
 
 ### Added
 
+- `validate` warns when a local binding writes a value or property the destination does not have -- a `LABEL` told to move its `x`, or a property that was renamed out from under the binding. The message is delivered and then discarded, so the layout loads, round-trips and validates as well formed while the control never moves. All 358 resolvable local bindings in the corpus address something real, so the rule fires on nothing the editor wrote. A blank `dst_var` is left alone, like a blank `dst_id`.
+
+- `to_python`, which writes a layout back out as the Python that would build it. Load a `.tosc` and read it as source, which is what you want when the layout already exists and the script does not. Every one of the 43 files in the corpus round-trips through its own generated script.
+
+  The output is flat -- a variable per control, then the tree, then the bindings -- rather than one nested expression: nesting reads better for five controls and is unusable at a hundred and forty, and a local binding has to be able to name the control it addresses. One difference is documented and asserted rather than hidden: a property the file omits but the control's type defaults will be present in the rebuild, which accounts for ten combinations across the corpus, all keys the format gained after those files were written.
+
 - `validate` warns when a `GRID` holds a different number of controls than its `grid_x` and `grid_y` claim. TouchOSC has no empty grid -- creating one populates it -- and all 37 grids in the corpus hold exactly `grid_x * grid_y` children. A bare `py2tosc.grid()` says 2x2 of faders in its defaults and creates none, which now gets reported rather than passing as clean.
+
+- A `simple_mk2.py` demo, rebuilding one of the layouts TouchOSC ships -- four pages, 140 controls, every binding type the format has -- from nothing. It is the widest thing here that the library authors rather than edits, and the first end-to-end evidence that it can. Same control types, names and tab labels as the original, the same bindings to the message, and of the 134 controls comparable by position, 77 land on exactly the original coordinates and 111 within a point.
 
 - `ui.grid`, which builds a `GRID` control with the cells it must hold. TouchOSC has no empty grid, so this is the complete way to make one: it fills itself with `columns * rows` controls of a single type, which is what a multitoggle or a bank of faders is. Every grid in the corpus holds one type, so the type is what it takes.
 
   A `GRID` tiles its cells rather than dividing its frame: every cell is the same size, with a three-point margin around and between, and whatever will not divide evenly is left at the far edge. That is reproduced for 36 of the 37 grids in the corpus, and for both hand-made reference grids; the one exception is recorded in the tests. `grid_type` is set from the control type -- the corpus numbers it by the type's position in the format's own order, so a grid of buttons left at the default would have announced itself as a grid of faders.
 
 ### Changed
+
+- Every demo takes its arguments through `argparse`, so a missing path is a usage message rather than a `TypeError` traceback, and each answers `--help`. The output is now `-o/--output` and defaults to `build/<demo>.tosc`, named after the script, so a demo can be run with only the inputs it actually needs -- `python tests/demos/numpad.py` with nothing at all. The directory is created if it is missing. Inputs stay positional and in the same order.
 
 - **`grid` now names the `GRID` control everywhere and nothing else.** It previously meant three different things across three modules, which is why it took a round of questions to establish how to build one. Two renames follow:
 

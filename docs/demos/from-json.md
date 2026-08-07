@@ -7,7 +7,7 @@ Build a layout from external data: one fader per plugin parameter, each named af
 ```
 
 ```console
-$ python tests/demos/from_json.py tests/data/pro_c_2_fabfilter.json out.tosc
+$ python tests/demos/from_json.py tests/data/pro_c_2_fabfilter.json
 ```
 
 The OSC address is assembled from [`Partial`][py2tosc.Partial] segments, so it follows the controls if they are renamed later. See [Messages](../guide/messages.md).

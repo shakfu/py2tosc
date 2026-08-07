@@ -14,6 +14,7 @@ layouts before editing them with third party tools.
 """
 
 from . import layout, ui
+from .codegen import to_python
 from .control import (
     Control,
     box,
@@ -109,6 +110,7 @@ __all__ = [
     "text",
     "to_color",
     "to_frame",
+    "to_python",
     "ui",
     "validate",
     "xy",

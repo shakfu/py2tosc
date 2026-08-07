@@ -86,6 +86,7 @@ nav:
       - Control surface: demos/control-surface.md
       - Image converter: demos/image-converter.md
       - Numpad: demos/numpad.md
+      - Rebuilding a template: demos/simple-mk2.md
       - Reaper to TouchOSC: demos/reaper.md
   - API reference:
       - Documents: api/document.md
@@ -96,6 +97,7 @@ nav:
       - Layouts: api/layout.md
       - Enumerations: api/enums.md
       - Validation: api/validate.md
+      - Generating Python: api/codegen.md
   - Coming from tosclib: migrating.md
   - Changelog: changelog.md
 

@@ -7,7 +7,7 @@ Copy one control's Lua script onto every child of another group. Useful when a l
 ```
 
 ```console
-$ python tests/demos/copy_scripts.py tests/data/test.tosc out.tosc source target
+$ python tests/demos/copy_scripts.py tests/data/test.tosc source target
 ```
 
 `script` is an ordinary string property, so this is just a read and a write -- see [Controls and properties](../guide/controls.md).

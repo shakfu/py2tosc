@@ -24,11 +24,12 @@ The whole layout is described inside out with the combinators in `py2tosc.ui`,
 so nothing is sized until `resolve` runs at the end. Compare `from_json.py`,
 which uses the eager `py2tosc.layout` functions instead.
 
-    python tests/demos/numpad.py out.tosc
+    python tests/demos/numpad.py
 """
 
-import sys
+import argparse
 from collections.abc import Sequence
+from pathlib import Path
 
 import py2tosc
 from py2tosc import Control, LocalMessage, Value, layout, ui
@@ -209,15 +210,33 @@ def build() -> py2tosc.Document:
     return doc.resolve()
 
 
-def main(output_path: str) -> None:
+def main(output_path: Path) -> None:
     doc = build()
 
     for issue in doc.validate():
         print(f"  {issue}")
 
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     doc.save(output_path)
     print(f"{len(doc.find_all())} controls -> {output_path}")
 
 
+def parse_args() -> argparse.Namespace:
+    """Read the command line, so a missing path is a message and not a crash."""
+    parser = argparse.ArgumentParser(
+        description=__doc__.split("\n\n")[0],
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        default=Path("build") / f"{Path(__file__).stem}.tosc",
+        help="where to write the layout (default: %(default)s)",
+    )
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    main(*sys.argv[1:2])
+    args = parse_args()
+    main(args.output)

@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING
 
 from .control import Control
 from .defaults import allowed_properties, default_values_for
-from .enums import ControlType
+from .enums import ControlType, PartialType
 from .messages import GamepadMessage, LocalMessage
 from .properties import KNOWN_TYPES
 
@@ -93,8 +93,50 @@ def _path(trail: list[str]) -> str:
     return "/".join(trail) or "<root>"
 
 
+def _check_destination(
+    message: LocalMessage, destination: Control, here: str
+) -> Iterator[Issue]:
+    """Check that a local message writes something the destination actually has.
+
+    A binding whose `dst_var` names nothing on the destination is delivered and
+    then discarded -- the layout loads, round-trips and looks entirely well
+    formed while that control never moves. All 358 resolvable local messages in
+    the corpus address something real, so this fires on nothing the editor
+    wrote.
+
+    A blank `dst_var` is left alone for the same reason a blank `dst_id` is:
+    the editor writes half-configured bindings while you are setting one up.
+    """
+    if not message.dst_var:
+        return
+
+    # `color.a` addresses one component of a property, so only the root has to
+    # exist. The corpus writes two of those.
+    root = message.dst_var.split(".", 1)[0]
+    kind = destination.control_type
+
+    if str(message.dst_type) == str(PartialType.VALUE):
+        carried = {key for key, _ in default_values_for(kind)}
+        if root not in carried:
+            yield Issue(
+                WARNING,
+                here,
+                f"LocalMessage writes value {message.dst_var!r} on a "
+                f"{kind.value}, which carries {', '.join(sorted(carried))}",
+            )
+    elif str(message.dst_type) == str(PartialType.PROPERTY) and not destination.has(
+        root
+    ):
+        yield Issue(
+            WARNING,
+            here,
+            f"LocalMessage writes property {message.dst_var!r} on a "
+            f"{kind.value} that has no such property",
+        )
+
+
 def _check_control(
-    control: Control, trail: list[str], known_ids: frozenset[str]
+    control: Control, trail: list[str], known: dict[str, Control]
 ) -> Iterator[Issue]:
     here = _path(trail)
     kind = control.control_type
@@ -155,17 +197,17 @@ def _check_control(
         # has not filled in yet, and the editor writes them -- five times
         # across the corpus -- so it is a normal intermediate state rather than
         # a mistake. Only a destination that names something is checked.
-        if (
-            isinstance(message, LocalMessage)
-            and message.dst_id
-            and message.dst_id not in known_ids
-        ):
-            yield Issue(
-                WARNING,
-                here,
-                f"LocalMessage is addressed to node id {message.dst_id!r}, "
-                f"which no control in this layout has",
-            )
+        if isinstance(message, LocalMessage) and message.dst_id:
+            destination = known.get(message.dst_id)
+            if destination is None:
+                yield Issue(
+                    WARNING,
+                    here,
+                    f"LocalMessage is addressed to node id {message.dst_id!r}, "
+                    f"which no control in this layout has",
+                )
+            else:
+                yield from _check_destination(message, destination, here)
 
     # A layout that was never resolved is invisible in the output: an unset
     # frame reads back as (0, 0, 0, 0) rather than raising, so the children are
@@ -215,7 +257,7 @@ def _check_control(
         yield from _check_control(
             child,
             [*trail, child.get("name") or f"<{child.control_type.value}>"],
-            known_ids,
+            known,
         )
 
 
@@ -239,8 +281,8 @@ def validate(target: Control | Document) -> list[Issue]:
     root = target if isinstance(target, Control) else target.root
     name = str(root.get("name") or "<root>")
 
-    known_ids = frozenset(control.id for control in root.walk())
-    issues = list(_check_control(root, [name], known_ids))
+    known = {control.id: control for control in root.walk()}
+    issues = list(_check_control(root, [name], known))
 
     # The root node is the canvas, and TouchOSC gives it none of the behaviour
     # its type would otherwise have: a PAGER there draws its tab bar but never

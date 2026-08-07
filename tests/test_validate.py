@@ -436,3 +436,80 @@ def test_validation_error_carries_warnings_as_well():
 
     levels = {i.level for i in caught.value.issues}
     assert levels == {ERROR, WARNING}
+
+
+def test_a_local_binding_writing_a_value_the_destination_lacks_warns():
+    """The dead-but-valid shape: delivered, then discarded.
+
+    Nothing about the message is malformed, so the layout loads, round-trips
+    and validates as well formed while the destination never moves.
+    """
+    readout = py2tosc.label(name="readout")
+    button = py2tosc.button(name="key")
+    button.messages.append(
+        py2tosc.LocalMessage(dst_type="VALUE", dst_var="x", dst_id=readout.id)
+    )
+    panel = py2tosc.group(name="panel", children=[readout, button])
+
+    found = warnings(panel.validate())
+    assert len(found) == 1
+    assert "writes value 'x' on a LABEL" in found[0].message
+    assert "text, touch" in found[0].message
+
+
+def test_a_local_binding_writing_a_property_the_destination_lacks_warns():
+    target = py2tosc.button(name="pad")
+    button = py2tosc.button(name="key")
+    button.messages.append(
+        py2tosc.LocalMessage(dst_type="PROPERTY", dst_var="nosuch", dst_id=target.id)
+    )
+    panel = py2tosc.group(name="panel", children=[target, button])
+
+    found = warnings(panel.validate())
+    assert len(found) == 1
+    assert "writes property 'nosuch'" in found[0].message
+
+
+def test_a_local_binding_may_address_one_component_of_a_property():
+    """`color.a` is the alpha channel; only the root has to exist.
+
+    The corpus writes two of these, so a check on the whole string would fire
+    on a file the editor wrote.
+    """
+    target = py2tosc.button(name="pad")
+    button = py2tosc.button(name="key")
+    button.messages.append(
+        py2tosc.LocalMessage(dst_type="PROPERTY", dst_var="color.a", dst_id=target.id)
+    )
+    panel = py2tosc.group(name="panel", children=[target, button])
+    assert panel.validate() == []
+
+
+def test_a_half_configured_local_binding_is_left_alone():
+    """The editor writes these while a binding is being set up."""
+    target = py2tosc.label(name="readout")
+    button = py2tosc.button(name="key")
+    button.messages.append(
+        py2tosc.LocalMessage(dst_type="VALUE", dst_var="", dst_id=target.id)
+    )
+    panel = py2tosc.group(name="panel", children=[target, button])
+    assert panel.validate() == []
+
+
+def test_every_resolvable_local_binding_in_the_corpus_addresses_something_real():
+    """The standard this rule had to clear before it was allowed to exist."""
+    checked = 0
+    for path in CORPUS:
+        doc = py2tosc.load(path)
+        known = {c.id: c for c in doc.walk()}
+        for control in doc.walk():
+            for message in control.messages:
+                if not isinstance(message, py2tosc.LocalMessage):
+                    continue
+                if message.dst_id in known and message.dst_var:
+                    checked += 1
+    assert checked > 350, f"only {checked} bindings checked"
+
+    total = [i for p in CORPUS for i in py2tosc.load(p).validate()]
+    assert not [i for i in warnings(total) if "writes value" in i.message]
+    assert not [i for i in warnings(total) if "writes property" in i.message]

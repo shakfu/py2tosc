@@ -12,9 +12,7 @@ No dependencies. Python 3.10 or newer. **[Documentation](https://shakfu.github.i
 
 ## Why
 
-TouchOSC layouts are drawn by hand in a GUI editor, which is the right tool right up until the work is repetitive. Laying out a fader per parameter for a plugin with fifty-four of them, numbering an eight-by-eight pad grid, renaming two hundred controls, restyling everything, or keeping a layout in step with a config file -- all of it is an afternoon of clicking, and a few lines of Python.
-
-py2tosc builds them instead:
+TouchOSC layouts are drawn by hand in a GUI editor, which is the right tool right up until the work is repetitive. Laying out a fader per parameter for a plugin with fifty-four of them, numbering an eight-by-eight pad grid, renaming two hundred controls, restyling everything, or keeping a layout in step with a config file -- all of it is an afternoon of clicking, or a few lines of Python:
 
 ```python
 import py2tosc
@@ -42,7 +40,9 @@ doc.save("mixer.tosc")
 It reads them back too, so a layout someone else drew is as editable as one you generated. Three things make that safe to do to a file you care about:
 
 - **It round-trips exactly.** Loading a file and saving it again reproduces the editor's own bytes, in both the compressed `.tosc` and the exported `.xml`. Everything in the corpus is checked that way on every commit, so an edit changes what you edited and nothing else.
+
 - **It covers the whole format.** All thirteen control types, OSC, MIDI, local and gamepad bindings, Lua scripts, custom properties, and the two container types with rules of their own.
+
 - **It can tell you when a layout is wrong** before TouchOSC does, and refuse to write one that is.
 
 A `.tosc` file is a zlib-compressed XML tree; py2tosc is a careful binding to that tree plus a layer of convenience over it.

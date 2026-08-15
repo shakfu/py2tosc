@@ -68,6 +68,12 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
 
+# docs/dev/ is a scratch space for sketching features and design rationale. It
+# lives with the docs because it is written in the same voice and links to the
+# same pages, but it is not part of the published site.
+exclude_docs: |
+  dev/
+
 nav:
   - Home: index.md
   - Getting started: getting-started.md

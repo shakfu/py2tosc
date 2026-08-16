@@ -201,4 +201,4 @@ for key in keyboard:
     key.messages.append(ui.midi_note(ui.prop("name")))
 ```
 
-Nothing there reaches a file that a hand-written `OscMessage` could not, and the two styles mix freely. The module is unstable below 1.0.
+Nothing there reaches a file that a hand-written `OscMessage` could not, and the two styles mix freely. The module is [provisional](../stability.md#the-py2toscui-carve-out): it may change in a minor release, where the rest of the API may not. Since the two styles mix, a message written the long way is always available as a fallback.

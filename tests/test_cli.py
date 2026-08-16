@@ -11,7 +11,7 @@ import pytest
 
 import py2tosc
 from _corpus import DATA, EXAMPLES
-from py2tosc.cli import main
+from py2tosc.cli import CANNOT_RUN, INVALID, OK, main
 
 
 def run(capsys, *argv):
@@ -108,7 +108,7 @@ def test_convert_picks_the_format_from_the_extension(capsys, tmp_path):
 def test_convert_needs_somewhere_to_put_it():
     with pytest.raises(SystemExit) as raised:
         main(["convert", str(DATA / "fader_with_label.tosc")])
-    assert raised.value.code == 2
+    assert raised.value.code == CANNOT_RUN
 
 
 # -- build -------------------------------------------------------------------
@@ -165,7 +165,7 @@ def test_build_can_leave_out_either_binding(capsys, tmp_path, flag, absent):
 def test_build_cannot_be_asked_for_neither():
     with pytest.raises(SystemExit) as raised:
         main(["build", "x.json", "--midi-only", "--osc-only"])
-    assert raised.value.code == 2
+    assert raised.value.code == CANNOT_RUN
 
 
 # -- failures read as messages -----------------------------------------------
@@ -174,36 +174,86 @@ def test_build_cannot_be_asked_for_neither():
 def test_a_missing_file_is_a_message(capsys):
     with pytest.raises(SystemExit) as raised:
         main(["show", "no-such-file.tosc"])
-    assert "no such file" in str(raised.value)
+    assert raised.value.code == CANNOT_RUN
+    assert "no such file" in capsys.readouterr().err
 
 
 def test_a_layout_passed_to_build_is_a_message(capsys):
     """`build` takes JSON. Handing it a `.tosc` is an easy mistake to make."""
     with pytest.raises(SystemExit) as raised:
         main(["build", str(DATA / "fader_with_label.tosc")])
-    assert "not text" in str(raised.value)
+    assert raised.value.code == CANNOT_RUN
+    assert "not text" in capsys.readouterr().err
 
 
-def test_malformed_json_is_a_message(tmp_path):
+def test_malformed_json_is_a_message(capsys, tmp_path):
     bad = tmp_path / "bad.json"
     bad.write_text("{oh no")
     with pytest.raises(SystemExit) as raised:
         main(["build", str(bad)])
-    assert "not valid JSON" in str(raised.value)
+    assert raised.value.code == CANNOT_RUN
+    assert "not valid JSON" in capsys.readouterr().err
 
 
-def test_json_of_the_wrong_shape_is_a_message(tmp_path):
+def test_json_of_the_wrong_shape_is_a_message(capsys, tmp_path):
     bad = tmp_path / "bad.json"
     bad.write_text('{"not": "a list"}')
     with pytest.raises(SystemExit) as raised:
         main(["build", str(bad)])
-    assert "expected a list" in str(raised.value)
+    assert raised.value.code == CANNOT_RUN
+    assert "expected a list" in capsys.readouterr().err
 
 
 def test_no_command_is_a_usage_error():
     with pytest.raises(SystemExit) as raised:
         main([])
-    assert raised.value.code == 2
+    assert raised.value.code == CANNOT_RUN
+
+
+def test_the_exit_codes_are_three_distinct_numbers():
+    """The codes are a documented contract, so nothing may quietly collide.
+
+    The values match what `grep`, `diff` and `mypy` use: 1 for "what you asked
+    about is bad", 2 for "I could not look". A bad command line and an
+    unreadable file share 2 deliberately -- no caller acts on the difference,
+    and argparse picks 2 for the first of them without being asked.
+    """
+    assert (OK, INVALID, CANNOT_RUN) == (0, 1, 2)
+    assert len({OK, INVALID, CANNOT_RUN}) == 3
+
+
+def test_a_broken_layout_and_a_missing_file_do_not_share_a_code(capsys, tmp_path):
+    """The reason the codes were split.
+
+    Both used to exit 1, so a CI step running `py2tosc validate` could not tell
+    a layout it should reject from a path someone typed wrong -- the first is a
+    result, the second is the check never having run.
+    """
+    broken = tmp_path / "broken.tosc"
+    doc = py2tosc.Document(root=py2tosc.group(name="root"))
+    box = py2tosc.box(name="oops")
+    box.add(py2tosc.fader())  # a BOX cannot hold children; TouchOSC refuses it
+    doc.add(box)
+    doc.save(broken)
+
+    invalid, _, _ = run(capsys, "validate", broken)
+
+    with pytest.raises(SystemExit) as raised:
+        main(["validate", str(tmp_path / "absent.tosc")])
+
+    assert invalid == INVALID
+    assert raised.value.code == CANNOT_RUN
+    assert invalid != raised.value.code
+
+
+def test_an_unreadable_file_does_not_report_invalid(capsys, tmp_path):
+    """A file that is not a layout says nothing about any layout's contents."""
+    junk = tmp_path / "junk.tosc"
+    junk.write_text("this is not a layout")
+    with pytest.raises(SystemExit) as raised:
+        main(["validate", str(junk)])
+    assert raised.value.code == CANNOT_RUN
+    assert "not a readable layout" in capsys.readouterr().err
 
 
 def test_size_sets_the_canvas(capsys, tmp_path):
@@ -230,4 +280,4 @@ def test_a_bad_size_is_a_usage_error(text, tmp_path, capsys):
     names.write_text(json.dumps(["a"]))
     with pytest.raises(SystemExit) as raised:
         main(["build", str(names), "--size", text])
-    assert raised.value.code == 2
+    assert raised.value.code == CANNOT_RUN

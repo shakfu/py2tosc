@@ -294,7 +294,7 @@ $ py2tosc build params.json -o surface.tosc
 
 `grid` names the `GRID` control everywhere and nothing else: `py2tosc.grid` is the bare control and `ui.grid` builds one with its cells. Arranging controls you already have is `ui.tiles`, and the eager equivalent is `layout.matrix`.
 
-The `ui` module is separate from the core deliberately. `control`, `codec` and `messages` bind to a format someone else defines and age at the speed of TouchOSC; `ui` encodes opinions about how interfaces are composed, and opinions age faster. It is unstable while the version is below 1.0.
+The `ui` module is separate from the core deliberately. `control`, `codec` and `messages` bind to a format someone else defines and age at the speed of TouchOSC; `ui` encodes opinions about how interfaces are composed, and opinions age faster. `ui` is therefore provisional: it may change in a minor release, where the rest of the API may not. See the [stability policy](https://shakfu.github.io/py2tosc/stability/) for what is covered.
 
 ## Credits
 

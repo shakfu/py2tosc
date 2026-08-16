@@ -14,6 +14,7 @@ from typing import Any
 
 from .control import Control
 from .enums import ControlType, PropertyType
+from .errors import FormatError
 from .messages import (
     GamepadMessage,
     LocalMessage,
@@ -454,7 +455,7 @@ def _read_message(element: ET.Element) -> Message:
             dst_id=_text(element.find("dstID")),
         )
 
-    raise ValueError(f"<{element.tag}> is not a known message type")
+    raise FormatError(f"<{element.tag}> is not a known message type")
 
 
 def _read_control(element: ET.Element) -> Control:
@@ -499,14 +500,28 @@ def from_xml(source: str | bytes) -> tuple[Control, str]:
         The root control and the `lexml` version it declared.
 
     Raises:
-        ValueError: If the document is not a `lexml` root holding one node.
+        FormatError: If the source is not XML, or is not a `lexml` root
+            holding one node, or holds a type the format does not define.
     """
-    root = ET.fromstring(source)
+    try:
+        root = ET.fromstring(source)
+    except ET.ParseError as exc:
+        raise FormatError(f"not valid XML: {exc}") from exc
+
     if root.tag != "lexml":
-        raise ValueError(f"expected a <lexml> root, found <{root.tag}>")
+        raise FormatError(f"expected a <lexml> root, found <{root.tag}>")
 
     node = root.find("node")
     if node is None:
-        raise ValueError("<lexml> holds no <node>")
+        raise FormatError("<lexml> holds no <node>")
 
-    return _read_control(node), root.get("version", "6")
+    try:
+        return _read_control(node), root.get("version", "6")
+    except FormatError:
+        raise
+    except ValueError as exc:
+        # An enum refusing an unknown control type, or a field that will not
+        # parse. From the caller's side these are all the same statement: this
+        # document is not readable. Narrowing to FormatError cannot break an
+        # `except ValueError`, since FormatError is one.
+        raise FormatError(str(exc)) from exc

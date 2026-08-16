@@ -10,8 +10,11 @@ a script written first.
     py2tosc convert mixer.tosc -o mixer.xml
     py2tosc build params.json -o surface.tosc
 
-Exit codes follow the usual convention: 0 for success, 1 for a layout or a
-file that is wrong, 2 for a command line that is.
+Exit codes separate the two things that can go wrong, because a script that
+runs `py2tosc validate` in CI needs to tell "this layout is broken" from "the
+path is wrong". Those used to share code 1 and no longer do: 1 is now a
+statement about a layout, 2 is the command not having run. That is the same
+split `grep`, `diff` and `mypy` make.
 """
 
 from __future__ import annotations
@@ -22,6 +25,7 @@ import json
 import sys
 from collections.abc import Sequence
 from pathlib import Path
+from typing import NoReturn
 
 from . import surface
 from .codegen import to_python
@@ -31,15 +35,44 @@ from .validate import ERROR
 
 __all__ = ["main"]
 
+#: The command did what was asked.
+OK = 0
+
+#: The layout was read and is wrong: `validate` found an error in it. This is
+#: the only code that says anything about the contents of a file, and the only
+#: one that reports a result rather than a malfunction.
+INVALID = 1
+
+#: The command could not be carried out: a command line that will not parse, or
+#: input that cannot be read. Nothing was learned about any layout.
+#:
+#: These share a number rather than getting one each because no caller acts on
+#: the difference -- both mean a human typed something wrong -- and because it
+#: is where every comparable tool puts them. `grep`, `diff` and `mypy` all
+#: reserve 1 for "what you asked about is bad" and 2 for "I could not look".
+#: argparse also exits 2 of its own accord, before any code here runs.
+CANNOT_RUN = 2
+
+
+def _fail(message: str) -> NoReturn:
+    """Report a failure to read the input, and exit.
+
+    `SystemExit` given a string prints it and exits 1, which is the code
+    reserved for a layout that has errors. Printing here and exiting with an
+    explicit code keeps the message and frees the number.
+    """
+    print(message, file=sys.stderr)
+    raise SystemExit(CANNOT_RUN)
+
 
 def _load(path: Path) -> Document:
     """Read a layout, turning the usual failures into a message."""
     try:
         return load(path)
     except FileNotFoundError:
-        raise SystemExit(f"no such file: {path}") from None
+        _fail(f"no such file: {path}")
     except (OSError, ValueError) as exc:
-        raise SystemExit(f"{path}: not a readable layout ({exc})") from None
+        _fail(f"{path}: not a readable layout ({exc})")
 
 
 def _write(text: str, output: Path | None) -> None:
@@ -95,7 +128,7 @@ def show(args: argparse.Namespace) -> int:
 
     print()
     _tree(doc.root, 0, args.depth)
-    return 0
+    return OK
 
 
 def validate(args: argparse.Namespace) -> int:
@@ -105,13 +138,13 @@ def validate(args: argparse.Namespace) -> int:
         print(issue)
     if not issues:
         print(f"{args.file}: clean")
-    return 1 if any(issue.level == ERROR for issue in issues) else 0
+    return INVALID if any(issue.level == ERROR for issue in issues) else OK
 
 
 def decompile(args: argparse.Namespace) -> int:
     """Write the layout back out as the Python that would build it."""
     _write(to_python(_load(args.file)), args.output)
-    return 0
+    return OK
 
 
 def convert(args: argparse.Namespace) -> int:
@@ -120,7 +153,7 @@ def convert(args: argparse.Namespace) -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     doc.save(args.output)
     print(f"wrote {args.output}", file=sys.stderr)
-    return 0
+    return OK
 
 
 def _size(text: str) -> tuple[int, int]:
@@ -142,14 +175,14 @@ def build(args: argparse.Namespace) -> int:
     try:
         payload = json.loads(args.parameters.read_text())
     except FileNotFoundError:
-        raise SystemExit(f"no such file: {args.parameters}") from None
+        _fail(f"no such file: {args.parameters}")
     except UnicodeDecodeError:
-        raise SystemExit(
+        _fail(
             f"{args.parameters}: not text, so not a parameter list -- "
             f"`build` takes JSON, not a layout"
-        ) from None
+        )
     except json.JSONDecodeError as exc:
-        raise SystemExit(f"{args.parameters}: not valid JSON ({exc})") from None
+        _fail(f"{args.parameters}: not valid JSON ({exc})")
 
     try:
         parameters = surface.read(payload)
@@ -163,7 +196,7 @@ def build(args: argparse.Namespace) -> int:
             frame=(0, 0, *args.size),
         )
     except (TypeError, ValueError) as exc:
-        raise SystemExit(f"{args.parameters}: {exc}") from None
+        _fail(f"{args.parameters}: {exc}")
 
     output = args.output or Path("build") / f"{args.parameters.stem}.tosc"
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -174,7 +207,7 @@ def build(args: argparse.Namespace) -> int:
         f"{len(parameters)} parameters -> {pages} page{'s' * (pages != 1)}, "
         f"{len(list(doc.walk()))} controls -> {output}"
     )
-    return 0
+    return OK
 
 
 def parser() -> argparse.ArgumentParser:

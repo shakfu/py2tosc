@@ -12,6 +12,7 @@ from ._geometry import resolve, resolve_pending
 from .codec import from_xml, to_xml
 from .control import Control, group
 from .enums import ControlType
+from .errors import FormatError
 
 if TYPE_CHECKING:  # pragma: no cover
     from .validate import Issue
@@ -228,10 +229,14 @@ def loads(source: str | bytes) -> Document:
         The parsed document.
 
     Raises:
-        ValueError: If the input is neither valid XML nor a valid `.tosc`.
+        FormatError: If the input is neither valid XML nor a valid `.tosc`.
+            This is a `ValueError`, which is what earlier versions documented.
     """
     if isinstance(source, bytes) and source[:1] and source[0] == _ZLIB_MAGIC:
-        source = zlib.decompress(source)
+        try:
+            source = zlib.decompress(source)
+        except zlib.error as exc:
+            raise FormatError(f"not a readable .tosc stream: {exc}") from exc
     root, version = from_xml(source)
     return Document(root=root, version=version)
 
@@ -246,7 +251,10 @@ def load(path: _PathLike) -> Document:
         The parsed document.
 
     Raises:
-        ValueError: If the file is neither valid XML nor a valid `.tosc`.
+        FormatError: If the file is neither valid XML nor a valid `.tosc`.
+            This is a `ValueError`, which is what earlier versions documented.
+        OSError: If the file cannot be read. Left as the builtin, since
+            nothing about it is specific to this format.
     """
     with open(path, "rb") as file:
         return loads(file.read())

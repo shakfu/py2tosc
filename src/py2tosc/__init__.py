@@ -13,7 +13,7 @@ This project has no relation to Hexler, the developer of TouchOSC. Back up your
 layouts before editing them with third party tools.
 """
 
-from . import layout, ui
+from . import layout, properties, surface, ui
 from .codegen import to_python
 from .control import (
     Control,
@@ -40,6 +40,7 @@ from .enums import (
     PropertyType,
     TriggerCondition,
 )
+from .errors import FormatError, Py2toscError
 from .messages import (
     ALL_CONNECTIONS,
     ALL_GAMEPADS,
@@ -57,7 +58,7 @@ from .messages import (
 from .properties import Color, Frame, Property, to_color, to_frame
 from .validate import Issue, ValidationError, validate
 
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 
 # Sorted rather than grouped by topic, because RUF022 asks for it and the
 # grouping lives in the API reference instead. See docs/api/.
@@ -69,6 +70,7 @@ __all__ = [
     "ControlType",
     "Conversion",
     "Document",
+    "FormatError",
     "Frame",
     "GamepadMessage",
     "Issue",
@@ -83,6 +85,7 @@ __all__ = [
     "PartialType",
     "Property",
     "PropertyType",
+    "Py2toscError",
     "Trigger",
     "TriggerCondition",
     "ValidationError",
@@ -100,10 +103,12 @@ __all__ = [
     "load",
     "loads",
     "pager",
+    "properties",
     "radar",
     "radial",
     "radio",
     "save",
+    "surface",
     "text",
     "to_color",
     "to_frame",

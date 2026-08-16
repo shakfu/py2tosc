@@ -7,8 +7,36 @@ file-shaped, and none of it needs a script written first.
 $ py2tosc --help
 ```
 
-Exit codes follow the usual convention: `0` for success, `1` for a layout or a
-file that is wrong, `2` for a command line that is.
+## Exit codes
+
+| Code | Meaning |
+|------|---------|
+| `0` | The command did what was asked. |
+| `1` | The layout was read and `validate` found an error in it. |
+| `2` | The command could not run: a command line that will not parse, or input that cannot be read. |
+
+`1` and `2` are deliberately different. `1` is a result -- the file was read and
+judged, and the judgement is that TouchOSC will reject it. `2` means no
+judgement happened, because the path was wrong, the bytes were not a layout, or
+the flags made no sense. One is a layout to fix and the other is a pipeline to
+fix:
+
+```bash
+py2tosc validate layout.tosc
+case $? in
+  0) echo "clean" ;;
+  1) echo "layout has errors" ;;
+  *) echo "could not check it"; exit 1 ;;
+esac
+```
+
+This is the same split `grep`, `diff` and `mypy` make, and the numbers are the
+ones those tools use. A bad command line and an unreadable file share `2`
+because no caller acts on the difference, and because argparse exits `2` for
+the first of them whether or not we agree.
+
+Only `validate` returns `1`; every other subcommand returns `0` or fails with
+`2`. These codes are covered by the [stability policy](stability.md).
 
 ## show
 

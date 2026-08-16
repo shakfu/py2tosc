@@ -1,8 +1,38 @@
 # Changelog
 
-Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses [semantic versioning](https://semver.org/spec/v2.0.0.html) -- while the version is below 1.0, a minor bump may break the API.
+Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses [semantic versioning](https://semver.org/spec/v2.0.0.html) -- while the version is below 1.0, a minor bump may break the API. What is covered once 1.0 lands, and what stays provisional after it, is set out in the [stability policy](https://shakfu.github.io/py2tosc/stability/).
 
 ## [Unreleased]
+
+## [0.3.3]
+
+### Added
+
+- An exception hierarchy. `Py2toscError` is the base for everything the package raises on its own behalf, and `ValidationError` now inherits from it. Errors caused by passing a bad argument stay on the builtins: a `ValueError` for an unparseable colour already says what it means, and wrapping it would tell the caller nothing.
+
+- `FormatError`, raised when input cannot be read as a layout. Reading could fail in three unrelated ways -- the bytes are not XML, a `.tosc` stream will not decompress, or the XML parses but is not a `lexml` root holding one node -- and each reached the caller as a different type from a different module: `ParseError`, `zlib.error` and `ValueError`. None was a py2tosc type, so no single `except` could say "that file is not a layout", and the robustness tests had to assert `pytest.raises(Exception)` to cover it. They now name the type.
+
+  `FormatError` also inherits `ValueError`, which is what `load` and `loads` have documented themselves as raising since they were written. Both docstrings were wrong: neither `ParseError` nor `zlib.error` is a `ValueError`, so the promise was not kept. Narrowing to a subclass makes the older contract true rather than breaking it, so code that catches `ValueError` is unaffected.
+
+### Changed
+
+- **Breaking, for scripts reading exit codes.** A CLI failure to read the input exits `2` rather than `1`. `1` now means one thing only: the layout was read and `validate` found an error in it. Before this, `py2tosc validate layout.tosc` exited `1` whether the layout was invalid or the path was simply wrong, so a CI step could not tell a layout it should fix from a pipeline it should fix -- the first is a result, the second is the check never having run.
+
+  A bad command line already exited `2`, chosen by argparse, and unreadable input now joins it. They share a number because no caller acts on the difference, and because this is where comparable tools put them: `grep`, `diff` and `mypy` all reserve `1` for "what you asked about is bad" and `2` for "I could not look". An exit code nobody expects is worth no more than no exit code at all.
+
+  A script that only tests for zero is unaffected. One that treats any non-zero as failure is unaffected. One that tests `== 1` to mean "something went wrong" now needs `!= 0`.
+
+  The codes are named in `py2tosc.cli` as `OK`, `INVALID` and `CANNOT_RUN`, and are covered by the stability policy.
+
+### Fixed
+
+- `py2tosc.surface` is now bound by `import py2tosc`. The API reference documents `py2tosc.surface.read` and `py2tosc.cli` describes it as "the same thing from Python", but the package imported only `layout` and `ui` as attributes, so a reader following either page got an `AttributeError`. Nothing in the suite caught it because every caller in the repository reaches it as `from py2tosc import surface`, which has always worked.
+
+- `py2tosc.properties` is exported for the same reason. `to_camel` and `to_snake` are documented, and converting between the file's camelCase property names and Python's snake_case is part of using custom properties, so the module they live in is public whether or not it was declared.
+
+- `Message`, `ALL_CONNECTIONS` and `ALL_GAMEPADS` were exported but appeared nowhere in the API reference. `Message` is the union a caller annotates against, which made its absence the most consequential of the three.
+
+  `tests/test_api.py` now holds the checks that keep these from recurring: everything in `__all__` is documented, everything documented is reachable by attribute access from a bare `import py2tosc`, a submodule named in the reference is exported, and the reference never points at a private module. The second of those is the test the `surface` defect would have failed; the third is what found `properties`.
 
 ## [0.3.2]
 

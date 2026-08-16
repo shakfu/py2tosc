@@ -4,4 +4,5 @@
 
 ::: py2tosc.Issue
 
-::: py2tosc.ValidationError
+`ValidationError`, raised by `save(validate=True)`, is documented with the rest
+of the [errors](errors.md).

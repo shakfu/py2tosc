@@ -32,7 +32,13 @@ Nothing here adds vocabulary the format lacks, and nothing here can reach a
 file that a hand-built `OscMessage` could not -- the arrangement rides on a
 private attribute the codec cannot see. The module is separate from the core
 because it encodes opinions about how interfaces are best composed, and
-opinions age faster than a file format does. It is unstable below 1.0.
+opinions age faster than a file format does.
+
+This module is provisional. Unlike the rest of the public API it may change in
+a minor release, and the stability policy in `docs/stability.md` says so
+explicitly rather than leaving it to a version number. Everything it builds is
+an ordinary `Control` or message, so the escape route is always to write the
+dataclasses directly.
 """
 
 from __future__ import annotations

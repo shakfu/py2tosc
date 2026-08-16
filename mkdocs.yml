@@ -106,9 +106,11 @@ nav:
       - Layouts: api/layout.md
       - Enumerations: api/enums.md
       - Validation: api/validate.md
+      - Errors: api/errors.md
       - Generating Python: api/codegen.md
       - Control surfaces: api/surface.md
   - Coming from tosclib: migrating.md
+  - Stability: stability.md
   - Changelog: changelog.md
 
 extra:

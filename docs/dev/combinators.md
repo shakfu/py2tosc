@@ -1,6 +1,6 @@
 # High-level helpers and combinators
 
-**Status:** implemented in `py2tosc.ui`. The API is unstable below 1.0.
+**Status:** implemented in `py2tosc.ui`. The API is provisional and may change in a minor release; see `docs/stability.md`.
 
 The problem statement below is kept in its original present tense and describes the state before Tier 1 landed; the sections after it record what was built and what the corpus forced to change along the way.
 

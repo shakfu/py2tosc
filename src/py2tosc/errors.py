@@ -3,17 +3,17 @@
 Two rules decide what belongs here. An error the library defines is one a
 caller might reasonably want to catch as a group -- "this file is not a
 layout", "this document will not save" -- and those inherit from
-`Py2toscError`. An error caused by passing a bad argument stays on the
+`Py2ToscError`. An error caused by passing a bad argument stays on the
 builtins, because `ValueError` and `TypeError` already say exactly that and
 wrapping them would only make ordinary Python code harder to read.
 """
 
 from __future__ import annotations
 
-__all__ = ["FormatError", "Py2toscError"]
+__all__ = ["FormatError", "Py2ToscError"]
 
 
-class Py2toscError(Exception):
+class Py2ToscError(Exception):
     """Base class for every error py2tosc defines.
 
     Catching this catches anything the library treats as its own failure,
@@ -22,7 +22,7 @@ class Py2toscError(Exception):
     """
 
 
-class FormatError(Py2toscError, ValueError):
+class FormatError(Py2ToscError, ValueError):
     """Raised when input cannot be read as a TouchOSC layout.
 
     Reading a layout can fail in three unrelated ways -- the bytes are not

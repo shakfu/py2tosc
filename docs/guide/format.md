@@ -89,6 +89,26 @@ offsets, and its own layouts are full of frames like `<x>417.439</x>`. Rounding
 them moves the control, so py2tosc keeps them as floats and writes integral
 values back without a trailing `.0`.
 
+### Enumerated integers
+
+About a dozen `i` properties hold a number standing for a name. Hexler's manual
+lists the names in order but gives no numbers, and the two groups below do not
+start from the same one:
+
+| Numbered from 1 | Numbered from 0 |
+|-----------------|-----------------|
+| `shape`, `textAlignH`, `textAlignV` | `orientation`, `buttonType`, `outlineStyle`, `cursorDisplay`, `barDisplay`, `linesDisplay`, `font`, `response`, `radioType`, `pointerPriority` |
+
+So `shape` 1 is a rectangle and there is no shape 0, while `orientation` 0 is
+north. Reading the manual and counting from zero gets the first group wrong.
+
+The split is recoverable from the files themselves: a property numbered from 0
+writes a 0 somewhere across a large enough sample, and one numbered from 1 never
+can. `shape` confirms it independently -- `hexkeys.tosc` stores its 119
+hexagonal buttons as 6, and `HEXAGON` is the sixth name the manual lists.
+
+py2tosc names all of these; see [Named numbers](controls.md#named-numbers).
+
 The root node of a saved layout also carries `metaCreator` and `metaComments`,
 which the editor fills in from the document settings.
 

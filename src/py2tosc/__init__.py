@@ -33,14 +33,26 @@ from .control import (
 )
 from .document import Document, dumps, load, loads, save
 from .enums import (
+    AlignH,
+    AlignV,
+    ButtonType,
     ControlType,
     Conversion,
+    CursorDisplay,
+    Font,
+    GamepadInput,
     MidiType,
+    Orientation,
+    OutlineStyle,
     PartialType,
+    PointerPriority,
     PropertyType,
+    RadioType,
+    Response,
+    Shape,
     TriggerCondition,
 )
-from .errors import FormatError, Py2toscError
+from .errors import FormatError, Py2ToscError
 from .messages import (
     ALL_CONNECTIONS,
     ALL_GAMEPADS,
@@ -58,20 +70,26 @@ from .messages import (
 from .properties import Color, Frame, Property, to_color, to_frame
 from .validate import Issue, ValidationError, validate
 
-__version__ = "0.3.3"
+__version__ = "0.4.0"
 
 # Sorted rather than grouped by topic, because RUF022 asks for it and the
 # grouping lives in the API reference instead. See docs/api/.
 __all__ = [
     "ALL_CONNECTIONS",
     "ALL_GAMEPADS",
+    "AlignH",
+    "AlignV",
+    "ButtonType",
     "Color",
     "Control",
     "ControlType",
     "Conversion",
+    "CursorDisplay",
     "Document",
+    "Font",
     "FormatError",
     "Frame",
+    "GamepadInput",
     "GamepadMessage",
     "Issue",
     "LocalMessage",
@@ -80,12 +98,18 @@ __all__ = [
     "MidiMessage",
     "MidiType",
     "MidiValue",
+    "Orientation",
     "OscMessage",
+    "OutlineStyle",
     "Partial",
     "PartialType",
+    "PointerPriority",
     "Property",
     "PropertyType",
-    "Py2toscError",
+    "Py2ToscError",
+    "RadioType",
+    "Response",
+    "Shape",
     "Trigger",
     "TriggerCondition",
     "ValidationError",

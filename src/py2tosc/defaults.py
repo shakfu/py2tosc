@@ -12,7 +12,20 @@ from __future__ import annotations
 
 from typing import Any
 
-from .enums import ControlType
+from .enums import (
+    AlignH,
+    AlignV,
+    ButtonType,
+    ControlType,
+    CursorDisplay,
+    Font,
+    Orientation,
+    OutlineStyle,
+    PointerPriority,
+    RadioType,
+    Response,
+    Shape,
+)
 
 __all__ = ["allowed_properties", "defaults_for"]
 
@@ -24,11 +37,11 @@ _COMMON: dict[str, Any] = {
     "grabFocus": True,
     "interactive": True,
     "locked": False,
-    "orientation": 0,
+    "orientation": Orientation.NORTH,
     "outline": True,
-    "outlineStyle": 1,
-    "pointerPriority": 0,
-    "shape": 1,
+    "outlineStyle": OutlineStyle.CORNERS,
+    "pointerPriority": PointerPriority.OLDEST,
+    "shape": Shape.RECTANGLE,
     "visible": True,
 }
 
@@ -40,24 +53,24 @@ _GRID_LINES: dict[str, Any] = {
 }
 
 _RESPONSE: dict[str, Any] = {
-    "response": 0,
+    "response": Response.ABSOLUTE,
     "responseFactor": 100,
 }
 
 _CURSOR: dict[str, Any] = {
     "cursor": True,
-    "cursorDisplay": 0,
+    "cursorDisplay": CursorDisplay.ALWAYS,
 }
 
 _LINES: dict[str, Any] = {
     "lines": True,
-    "linesDisplay": 0,
+    "linesDisplay": CursorDisplay.ALWAYS,
 }
 
 _TEXT: dict[str, Any] = {
-    "font": 0,
-    "textAlignH": 2,
-    "textAlignV": 2,
+    "font": Font.DEFAULT,
+    "textAlignH": AlignH.CENTER,
+    "textAlignV": AlignV.MIDDLE,
     "textColor": (1.0, 1.0, 1.0, 1.0),
     "textSize": 14,
 }
@@ -78,20 +91,20 @@ _XY: dict[str, Any] = {
 #: editor-written instances of these four types says so.
 _INERT: dict[str, Any] = {"interactive": False}
 
-#: A RADIAL, ENCODER or RADAR is drawn round: all 171 in the corpus are shape 2
-#: while every rectangular type is 1, and `controls.tosc` -- one freshly made
-#: control of each type -- agrees.
-_ROUND: dict[str, Any] = {"shape": 2}
+#: A RADIAL, ENCODER or RADAR is drawn round: all 171 in the corpus are
+#: `CIRCLE` while every rectangular type is `RECTANGLE`, and `controls.tosc` --
+#: one freshly made control of each type -- agrees.
+_ROUND: dict[str, Any] = {"shape": Shape.CIRCLE}
 
 _CONTAINER: dict[str, Any] = {
     "grabFocus": False,
-    "outlineStyle": 0,
+    "outlineStyle": OutlineStyle.FULL,
 }
 
 _BY_TYPE: dict[ControlType, dict[str, Any]] = {
     ControlType.BOX: {**_INERT},
     ControlType.BUTTON: {
-        "buttonType": 0,
+        "buttonType": ButtonType.MOMENTARY,
         "press": True,
         "release": True,
         "valuePosition": False,
@@ -103,7 +116,7 @@ _BY_TYPE: dict[ControlType, dict[str, Any]] = {
         **_GRID_LINES,
         **_CURSOR,
         "bar": True,
-        "barDisplay": 0,
+        "barDisplay": CursorDisplay.ALWAYS,
         "gridSteps": 13,
     },
     ControlType.XY: {**_RESPONSE, **_CURSOR, **_LINES, **_XY},
@@ -113,7 +126,7 @@ _BY_TYPE: dict[ControlType, dict[str, Any]] = {
         **_CURSOR,
         **_ROUND,
         "gridSteps": 20,
-        "outlineStyle": 0,
+        "outlineStyle": OutlineStyle.FULL,
         "inverted": False,
         "centered": False,
     },
@@ -123,11 +136,16 @@ _BY_TYPE: dict[ControlType, dict[str, Any]] = {
         **_CURSOR,
         **_ROUND,
         "gridSteps": 20,
-        "outlineStyle": 0,
+        "outlineStyle": OutlineStyle.FULL,
     },
     ControlType.RADAR: {**_CURSOR, **_LINES, **_XY, **_ROUND},
-    # A radio runs horizontally or vertically; no instance in the corpus is 0.
-    ControlType.RADIO: {"steps": 5, "radioType": 0, "orientation": 1},
+    # A radio runs horizontally or vertically, never facing NORTH: no instance
+    # in the corpus does, so it defaults to EAST.
+    ControlType.RADIO: {
+        "steps": 5,
+        "radioType": RadioType.SELECT,
+        "orientation": Orientation.EAST,
+    },
     ControlType.GROUP: {**_CONTAINER, **_INERT},
     ControlType.GRID: {
         "grabFocus": False,

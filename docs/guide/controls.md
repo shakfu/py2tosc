@@ -115,6 +115,42 @@ fader.color = "#e76f51"              # hex, with or without the #
 fader.color = "#e76f51ff"            # hex with alpha
 ```
 
+## Named numbers
+
+A dozen properties hold a number that stands for a name. `shape` 2 is a circle, `orientation` 1 faces east, `buttonType` 0 is momentary. The [enumerations](../api/enums.md) name them, and because they are `IntEnum` the two spellings are one value:
+
+```python
+button.shape = py2tosc.Shape.HEXAGON
+button.shape = 6                        # identical, and still what the file stores
+
+button.shape == py2tosc.Shape.HEXAGON   #> True
+py2tosc.Shape(button.shape).name        #> 'HEXAGON'
+```
+
+Nothing requires you to use them. A layout written before they existed loads and compares against them unchanged, which is the point of their being integers underneath.
+
+| Property | Enumeration |
+|----------|-------------|
+| `shape` | [`Shape`](../api/enums.md#py2tosc.Shape) |
+| `text_align_h` | [`AlignH`](../api/enums.md#py2tosc.AlignH) |
+| `text_align_v` | [`AlignV`](../api/enums.md#py2tosc.AlignV) |
+| `orientation` | [`Orientation`](../api/enums.md#py2tosc.Orientation) |
+| `button_type` | [`ButtonType`](../api/enums.md#py2tosc.ButtonType) |
+| `outline_style` | [`OutlineStyle`](../api/enums.md#py2tosc.OutlineStyle) |
+| `cursor_display`, `bar_display`, `lines_display` | [`CursorDisplay`](../api/enums.md#py2tosc.CursorDisplay) |
+| `font` | [`Font`](../api/enums.md#py2tosc.Font) |
+| `response` | [`Response`](../api/enums.md#py2tosc.Response) |
+| `radio_type` | [`RadioType`](../api/enums.md#py2tosc.RadioType) |
+| `pointer_priority` | [`PointerPriority`](../api/enums.md#py2tosc.PointerPriority) |
+
+The reason to prefer the names is that the numbering is not uniform. `shape`, `text_align_h` and `text_align_v` count from 1; every other property here counts from 0. Hexler's manual lists the names in order without numbers, so reading it and counting from zero gets three of the twelve wrong -- `Shape.RECTANGLE` is 1, not 0.
+
+`GamepadInput` names the twenty-one buttons and axes a gamepad binding can use, and is a string rather than a number:
+
+```python
+control.messages.append(py2tosc.GamepadMessage(type=py2tosc.GamepadInput.BUTTON_A))
+```
+
 ## Values
 
 A control's values are its live state. `default` is what it starts at.

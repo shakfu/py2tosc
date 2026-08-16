@@ -1,6 +1,6 @@
 # Errors
 
-Everything py2tosc raises on its own behalf inherits from `Py2toscError`, so a
+Everything py2tosc raises on its own behalf inherits from `Py2ToscError`, so a
 caller that wants to treat any library failure alike can write one `except`.
 
 Errors caused by passing a bad argument are deliberately left on the builtins.
@@ -15,7 +15,7 @@ except py2tosc.FormatError as exc:
     print(f"{path}: not a layout ({exc})")
 ```
 
-::: py2tosc.Py2toscError
+::: py2tosc.Py2ToscError
 
 ::: py2tosc.FormatError
 

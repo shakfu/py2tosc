@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING
 from .control import Control
 from .defaults import allowed_properties, default_values_for
 from .enums import ControlType, PartialType
-from .errors import Py2toscError
+from .errors import Py2ToscError
 from .messages import GamepadMessage, LocalMessage
 from .properties import KNOWN_TYPES
 
@@ -73,7 +73,7 @@ class Issue:
         return f"{self.level}: {self.path}: {self.message}"
 
 
-class ValidationError(Py2toscError):
+class ValidationError(Py2ToscError):
     """Raised by `save(validate=True)` when a layout has errors.
 
     Attributes:

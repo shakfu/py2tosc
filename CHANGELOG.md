@@ -4,11 +4,47 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.4.0]
+
+### Added
+
+- Eleven enumerations naming the numbers a property already stored as a bare integer: `Shape`, `AlignH`, `AlignV`, `Orientation`, `ButtonType`, `OutlineStyle`, `CursorDisplay`, `Font`, `Response`, `RadioType` and `PointerPriority`. They are `IntEnum`, so `control.shape = 2` and `control.shape = Shape.CIRCLE` write the same file and a layout loaded from disk compares equal to them. Nothing is deprecated and no existing script changes.
+
+  The names come from the TouchOSC manual, which lists them in order and gives no numbers. The numbers come from the corpus, joined to the names by a single observation: a property numbered from 0 has to write a 0 somewhere across 45 files, and one numbered from 1 never can. TouchOSC is not consistent about which it uses -- `shape`, `textAlignH` and `textAlignV` count from 1, and everything else counts from 0 -- so reading the manual and numbering from zero gets three of the eleven wrong. That inconsistency is the reason these are worth having rather than a detail of how they were derived.
+
+  `shape` is the case that settles the method: the 119 hexagonal buttons in `hexkeys.tosc` are stored as 6, and `HEXAGON` is the sixth name the manual lists. `tests/test_enums.py` pins every value the corpus contains against these members.
+
+  Four values the bundled examples never write -- `Shape.DIAMOND`, `Shape.PENTAGON`, `AlignV.BOTTOM` and `CursorDisplay.INACTIVE` -- were settled by drawing them in the editor rather than left as inferences. That file is `tests/data/enums.tosc`, where each control is named after the setting it was given, so it checks itself: a button called `3-diamond` has to read back as `DIAMOND`. It round-trips byte for byte like the rest of the corpus.
+
+- `GamepadInput`, naming the twenty-one buttons and axes a `GamepadMessage` can bind to. All twenty-one appear in `gamepad.tosc`, so every spelling is one the editor wrote.
+
+### Changed
+
+- The control defaults now name their values instead of spelling them as numbers: `"shape": Shape.RECTANGLE` where it said `"shape": 1`, and so on for seventeen values across `orientation`, `outlineStyle`, `pointerPriority`, `response`, `cursorDisplay`, `barDisplay`, `linesDisplay`, `font`, `textAlignH`, `textAlignV`, `buttonType` and `radioType`. Files are unaffected: `Property` stores the plain integer its declared type calls for, and every corpus layout still round-trips byte for byte.
+
+  These are the numbers 0.3.2 found four defects in, and they are now readable without the manual open. The RADIO default in particular used to be `"orientation": 1` under a comment explaining that a radio never faces the first direction; it now says `Orientation.EAST`.
+
+- Where an east-facing pager puts its tab bar is now verified rather than guessed. Which edge a tab bar occupies is recorded nowhere in the file -- it follows from `orientation`, and the only evidence is where the pages end up. The bundled examples hold 126 pagers facing north, south and west, and none facing east, so that edge had been inferred as the one left over.
+
+  The inference was right, and the layout code is unchanged. What changed is that `tests/data/pagers.tosc` now holds one pager per orientation drawn in the editor, and each is checked both as read and as rebuilt through `ui.pager`. This was the last claim in the package resting on inference rather than on a file.
+
+  Worth saying why it was worth confirming: getting it wrong would have been invisible to everything else. The document stays structurally valid, round-trips byte for byte and validates clean; only TouchOSC drawing it would show every page in the wrong place.
+
+- `MidiType` is confirmed complete at eight members, and now says so. Four of them -- `NOTE_OFF`, `POLYPRESSURE`, `CHANNELPRESSURE` and `SYSTEMEXCLUSIVE` -- were previously documented as inferred from the MIDI specification and never seen in a file. The editor's own Type menu lists exactly these eight and no others, so all four are now corroborated and the caveat is gone.
+
+  The manual's scripting reference names a longer `MIDIMessageType` including `CLOCK`, `START`, `STOP` and the other system messages. Those are for `sendMIDI` inside a script and cannot be stored on a message binding, so they are deliberately absent. Worth knowing when reading the manual: a layout cannot express "send MIDI Start on press" as a binding, only as a script.
+
+### Removed
+
+- **Breaking.** `Py2toscError`, added in 0.3.3, is now `Py2ToscError`. The old spelling is gone rather than aliased, on the grounds that it existed for one release and the package is below 1.0, where the changelog has always said a minor may break the API.
+
+  The reason for the change is consistency with the names around it: `OscMessage` and `MidiMessage` title-case their acronyms rather than flattening them, and `Py2toscError` was the one name in the package that did not. Catching it is a one-word edit, and `except ValueError` around `load` is unaffected either way.
+
 ## [0.3.3]
 
 ### Added
 
-- An exception hierarchy. `Py2toscError` is the base for everything the package raises on its own behalf, and `ValidationError` now inherits from it. Errors caused by passing a bad argument stay on the builtins: a `ValueError` for an unparseable colour already says what it means, and wrapping it would tell the caller nothing.
+- An exception hierarchy. `Py2ToscError` is the base for everything the package raises on its own behalf, and `ValidationError` now inherits from it. Errors caused by passing a bad argument stay on the builtins: a `ValueError` for an unparseable colour already says what it means, and wrapping it would tell the caller nothing.
 
 - `FormatError`, raised when input cannot be read as a layout. Reading could fail in three unrelated ways -- the bytes are not XML, a `.tosc` stream will not decompress, or the XML parses but is not a `lexml` root holding one node -- and each reached the caller as a different type from a different module: `ParseError`, `zlib.error` and `ValueError`. None was a py2tosc type, so no single `except` could say "that file is not a layout", and the robustness tests had to assert `pytest.raises(Exception)` to cover it. They now name the type.
 

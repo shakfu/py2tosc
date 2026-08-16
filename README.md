@@ -278,7 +278,7 @@ $ py2tosc build params.json -o surface.tosc
 
 | Module | Holds |
 |--------|-------|
-| `enums` | TouchOSC's own vocabulary: control types, property types, conversions |
+| `enums` | TouchOSC's own vocabulary: control types, property types, conversions, and the names behind the numbers a property stores |
 | `properties` | `Property`, `Frame`, `Color`, and the `snake_case` to camelCase mapping |
 | `messages` | `Value`, `OscMessage`, `MidiMessage`, `LocalMessage`, `GamepadMessage` and their parts |
 | `defaults` | The default property set for each control type |

@@ -126,8 +126,8 @@ def test_a_format_error_is_still_a_value_error():
 
 
 def test_everything_the_package_raises_shares_a_base():
-    assert issubclass(py2tosc.FormatError, py2tosc.Py2toscError)
-    assert issubclass(py2tosc.ValidationError, py2tosc.Py2toscError)
+    assert issubclass(py2tosc.FormatError, py2tosc.Py2ToscError)
+    assert issubclass(py2tosc.ValidationError, py2tosc.Py2ToscError)
 
 
 def test_minimal_document_round_trips():

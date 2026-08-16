@@ -495,6 +495,45 @@ def test_pages_sit_below_the_tab_bar():
     assert frames(pages) == [(0, 40, 320, 440)]
 
 
+@pytest.mark.parametrize(
+    ("name", "expected"),
+    [
+        ("north", (0, 40, 240, 200)),
+        ("east", (0, 0, 200, 240)),
+        ("south", (0, 0, 240, 200)),
+        ("west", (40, 0, 200, 240)),
+    ],
+)
+def test_the_tab_bar_takes_the_edge_the_orientation_names(name, expected):
+    """Every orientation, against a pager the editor drew for each.
+
+    Which edge a tab bar occupies is not recorded anywhere in the file: it
+    follows from `orientation`, and the only evidence is where the pages end up.
+    The bundled examples cover three of the four and never use `EAST`, so that
+    edge was inferred as the one left over until `pagers.tosc` settled it.
+
+    Getting this wrong is invisible to everything else this suite checks. The
+    document stays structurally valid, round-trips byte for byte and validates
+    clean; only TouchOSC drawing it shows every page in the wrong place.
+    """
+    pager = next(
+        c
+        for c in py2tosc.load(DATA / "pagers.tosc").walk()
+        if c.control_type is py2tosc.ControlType.PAGER and c.get("name") == name
+    )
+    assert tuple(int(v) for v in pager.children[0].frame) == expected
+
+    # The same pager, rebuilt rather than read: `resolve` has to agree with it.
+    ours = ui.pager(
+        ui.row(py2tosc.fader(), name="1"),
+        name=name,
+        tabbar_size=int(pager.get("tabbarSize")),
+        orientation=int(pager.get("orientation")),
+    )
+    ui.resolve(ours, (0, 0, 240, 240))
+    assert frames(ours) == [expected]
+
+
 def test_a_pager_without_a_tab_bar_gives_pages_everything():
     pages = ui.pager(ui.row(py2tosc.fader(), name="1"), tabbar=False)
     ui.resolve(pages, (0, 0, 320, 480))

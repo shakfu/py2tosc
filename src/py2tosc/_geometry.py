@@ -18,6 +18,7 @@ from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 
 from .control import Control
+from .enums import Orientation
 from .properties import Frame
 
 #: The arrangements a `_layout` can describe.
@@ -199,15 +200,22 @@ class Layout:
 
 
 #: Which edge a pager's tab bar occupies, by its `orientation`, as multipliers
-#: for left, top, right and bottom. The corpus attests 0 on 122 pagers, 3 on
-#: two and 2 on one; 1 is the only edge left over and is inferred rather than
-#: observed. Read as a clockwise order from the top, which is also the order
-#: `pad` and `inset` take their four numbers in.
-_TAB_EDGES = {
-    0: (0, 1, 0, 0),  # top
-    1: (0, 0, 1, 0),  # right, inferred
-    2: (0, 0, 0, 1),  # bottom
-    3: (1, 0, 0, 0),  # left
+#: for left, top, right and bottom. Read as a clockwise order from the top,
+#: which is also the order `pad` and `inset` take their four numbers in.
+#:
+#: All four are attested. The bundled examples cover three -- `NORTH` on 123
+#: pagers, `WEST` on two and `SOUTH` on one -- and never use `EAST`, which was
+#: inferred as the only edge left over until `tests/data/pagers.tosc` settled
+#: it: one pager per orientation, drawn in the editor, each page frame showing
+#: which edge lost its pixels.
+#: Keyed by `int` rather than by `Orientation` on purpose: the lookup below
+#: takes whatever number the file holds and falls back to the top edge, so a
+#: layout carrying an orientation this enum does not name still loads.
+_TAB_EDGES: dict[int, tuple[int, int, int, int]] = {
+    Orientation.NORTH: (0, 1, 0, 0),  # top
+    Orientation.EAST: (0, 0, 1, 0),  # right
+    Orientation.SOUTH: (0, 0, 0, 1),  # bottom
+    Orientation.WEST: (1, 0, 0, 0),  # left
 }
 
 

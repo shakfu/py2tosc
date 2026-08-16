@@ -16,7 +16,7 @@
         <link rel="prev" href="../enums/">
       
       
-        <link rel="next" href="../codegen/">
+        <link rel="next" href="../errors/">
       
       
         
@@ -680,6 +680,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../demos/controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    One of every control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../demos/custom-property/" class="md-nav__link">
         
   
@@ -1281,21 +1309,38 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#py2tosc.ValidationError" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ValidationError
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1379,6 +1424,33 @@
     
   
     Coming from tosclib
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stability
   
 
     
@@ -1499,17 +1571,6 @@
     <span class="md-ellipsis">
       
         Issue
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#py2tosc.ValidationError" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ValidationError
       
     </span>
   </a>
@@ -1662,8 +1723,7 @@ something it tolerates but probably did not intend.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/py2tosc/validate.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-56">56</a></span>
-<span class="normal"><a href="#__codelineno-0-57">57</a></span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-57">57</a></span>
 <span class="normal"><a href="#__codelineno-0-58">58</a></span>
 <span class="normal"><a href="#__codelineno-0-59">59</a></span>
 <span class="normal"><a href="#__codelineno-0-60">60</a></span>
@@ -1678,23 +1738,24 @@ something it tolerates but probably did not intend.</p>
 <span class="normal"><a href="#__codelineno-0-69">69</a></span>
 <span class="normal"><a href="#__codelineno-0-70">70</a></span>
 <span class="normal"><a href="#__codelineno-0-71">71</a></span>
-<span class="normal"><a href="#__codelineno-0-72">72</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="k">class</span><span class="w"> </span><span class="nc">Issue</span><span class="p">:</span>
-<a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;One finding from [`validate`][py2tosc.validate].</span>
-<a id="__codelineno-0-59" name="__codelineno-0-59"></a>
-<a id="__codelineno-0-60" name="__codelineno-0-60"></a><span class="sd">    Attributes:</span>
-<a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="sd">        level: `error` for something TouchOSC cannot load, `warning` for</span>
-<a id="__codelineno-0-62" name="__codelineno-0-62"></a><span class="sd">            something it tolerates but probably did not intend.</span>
-<a id="__codelineno-0-63" name="__codelineno-0-63"></a><span class="sd">        path: Slash-separated control names from the root, for locating it.</span>
-<a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="sd">        message: What is wrong.</span>
-<a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-66" name="__codelineno-0-66"></a>
-<a id="__codelineno-0-67" name="__codelineno-0-67"></a>    <span class="n">level</span><span class="p">:</span> <span class="nb">str</span>
-<a id="__codelineno-0-68" name="__codelineno-0-68"></a>    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span>
-<a id="__codelineno-0-69" name="__codelineno-0-69"></a>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
-<a id="__codelineno-0-70" name="__codelineno-0-70"></a>
-<a id="__codelineno-0-71" name="__codelineno-0-71"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-72" name="__codelineno-0-72"></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="normal"><a href="#__codelineno-0-72">72</a></span>
+<span class="normal"><a href="#__codelineno-0-73">73</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="k">class</span><span class="w"> </span><span class="nc">Issue</span><span class="p">:</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;One finding from [`validate`][py2tosc.validate].</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a>
+<a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="sd">    Attributes:</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62"></a><span class="sd">        level: `error` for something TouchOSC cannot load, `warning` for</span>
+<a id="__codelineno-0-63" name="__codelineno-0-63"></a><span class="sd">            something it tolerates but probably did not intend.</span>
+<a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="sd">        path: Slash-separated control names from the root, for locating it.</span>
+<a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="sd">        message: What is wrong.</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-67" name="__codelineno-0-67"></a>
+<a id="__codelineno-0-68" name="__codelineno-0-68"></a>    <span class="n">level</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-0-69" name="__codelineno-0-69"></a>    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70"></a>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71"></a>
+<a id="__codelineno-0-72" name="__codelineno-0-72"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73"></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -1732,7 +1793,7 @@ something it tolerates but probably did not intend.</p>
 
     <div class="doc doc-contents ">
             <p class="doc doc-class-bases">
-              Bases: <code><span title="Exception">Exception</span></code></p>
+              Bases: <code><a class="autorefs autorefs-internal" title="Py2ToscError (py2tosc.errors.Py2ToscError)" href="../errors/#py2tosc.Py2ToscError">Py2ToscError</a></code></p>
 
 
 
@@ -1772,8 +1833,7 @@ can report the warnings too.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/py2tosc/validate.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-75">75</a></span>
-<span class="normal"><a href="#__codelineno-0-76">76</a></span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-76">76</a></span>
 <span class="normal"><a href="#__codelineno-0-77">77</a></span>
 <span class="normal"><a href="#__codelineno-0-78">78</a></span>
 <span class="normal"><a href="#__codelineno-0-79">79</a></span>
@@ -1786,21 +1846,22 @@ can report the warnings too.</p>
 <span class="normal"><a href="#__codelineno-0-86">86</a></span>
 <span class="normal"><a href="#__codelineno-0-87">87</a></span>
 <span class="normal"><a href="#__codelineno-0-88">88</a></span>
-<span class="normal"><a href="#__codelineno-0-89">89</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="k">class</span><span class="w"> </span><span class="nc">ValidationError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-<a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised by `save(validate=True)` when a layout has errors.</span>
-<a id="__codelineno-0-77" name="__codelineno-0-77"></a>
-<a id="__codelineno-0-78" name="__codelineno-0-78"></a><span class="sd">    Attributes:</span>
-<a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="sd">        issues: Every finding, not only the errors, so a caller catching this</span>
-<a id="__codelineno-0-80" name="__codelineno-0-80"></a><span class="sd">            can report the warnings too.</span>
-<a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-82" name="__codelineno-0-82"></a>
-<a id="__codelineno-0-83" name="__codelineno-0-83"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issues</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Issue</span><span class="p">]):</span>
-<a id="__codelineno-0-84" name="__codelineno-0-84"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">issues</span> <span class="o">=</span> <span class="n">issues</span>
-<a id="__codelineno-0-85" name="__codelineno-0-85"></a>        <span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">issues</span> <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">level</span> <span class="o">==</span> <span class="n">ERROR</span><span class="p">]</span>
-<a id="__codelineno-0-86" name="__codelineno-0-86"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-87" name="__codelineno-0-87"></a>            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span><span class="si">}</span><span class="s2"> error(s) in the layout:</span><span class="se">\n</span><span class="s2">&quot;</span>
-<a id="__codelineno-0-88" name="__codelineno-0-88"></a>            <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">)</span>
-<a id="__codelineno-0-89" name="__codelineno-0-89"></a>        <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-89">89</a></span>
+<span class="normal"><a href="#__codelineno-0-90">90</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="k">class</span><span class="w"> </span><span class="nc">ValidationError</span><span class="p">(</span><span class="n">Py2ToscError</span><span class="p">):</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised by `save(validate=True)` when a layout has errors.</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78"></a>
+<a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="sd">    Attributes:</span>
+<a id="__codelineno-0-80" name="__codelineno-0-80"></a><span class="sd">        issues: Every finding, not only the errors, so a caller catching this</span>
+<a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="sd">            can report the warnings too.</span>
+<a id="__codelineno-0-82" name="__codelineno-0-82"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-83" name="__codelineno-0-83"></a>
+<a id="__codelineno-0-84" name="__codelineno-0-84"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issues</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Issue</span><span class="p">]):</span>
+<a id="__codelineno-0-85" name="__codelineno-0-85"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">issues</span> <span class="o">=</span> <span class="n">issues</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86"></a>        <span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">issues</span> <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">level</span> <span class="o">==</span> <span class="n">ERROR</span><span class="p">]</span>
+<a id="__codelineno-0-87" name="__codelineno-0-87"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-88" name="__codelineno-0-88"></a>            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span><span class="si">}</span><span class="s2"> error(s) in the layout:</span><span class="se">\n</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-89" name="__codelineno-0-89"></a>            <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">)</span>
+<a id="__codelineno-0-90" name="__codelineno-0-90"></a>        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -1939,23 +2000,7 @@ reports a destination it cannot see. Validate the whole
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/py2tosc/validate.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-266">266</a></span>
-<span class="normal"><a href="#__codelineno-0-267">267</a></span>
-<span class="normal"><a href="#__codelineno-0-268">268</a></span>
-<span class="normal"><a href="#__codelineno-0-269">269</a></span>
-<span class="normal"><a href="#__codelineno-0-270">270</a></span>
-<span class="normal"><a href="#__codelineno-0-271">271</a></span>
-<span class="normal"><a href="#__codelineno-0-272">272</a></span>
-<span class="normal"><a href="#__codelineno-0-273">273</a></span>
-<span class="normal"><a href="#__codelineno-0-274">274</a></span>
-<span class="normal"><a href="#__codelineno-0-275">275</a></span>
-<span class="normal"><a href="#__codelineno-0-276">276</a></span>
-<span class="normal"><a href="#__codelineno-0-277">277</a></span>
-<span class="normal"><a href="#__codelineno-0-278">278</a></span>
-<span class="normal"><a href="#__codelineno-0-279">279</a></span>
-<span class="normal"><a href="#__codelineno-0-280">280</a></span>
-<span class="normal"><a href="#__codelineno-0-281">281</a></span>
-<span class="normal"><a href="#__codelineno-0-282">282</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-282">282</a></span>
 <span class="normal"><a href="#__codelineno-0-283">283</a></span>
 <span class="normal"><a href="#__codelineno-0-284">284</a></span>
 <span class="normal"><a href="#__codelineno-0-285">285</a></span>
@@ -1987,55 +2032,71 @@ reports a destination it cannot see. Validate the whole
 <span class="normal"><a href="#__codelineno-0-311">311</a></span>
 <span class="normal"><a href="#__codelineno-0-312">312</a></span>
 <span class="normal"><a href="#__codelineno-0-313">313</a></span>
-<span class="normal"><a href="#__codelineno-0-314">314</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-266" name="__codelineno-0-266"></a><span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="n">target</span><span class="p">:</span> <span class="n">Control</span> <span class="o">|</span> <span class="n">Document</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Issue</span><span class="p">]:</span>
-<a id="__codelineno-0-267" name="__codelineno-0-267"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Check a control tree for things TouchOSC will reject or ignore.</span>
-<a id="__codelineno-0-268" name="__codelineno-0-268"></a>
-<a id="__codelineno-0-269" name="__codelineno-0-269"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-270" name="__codelineno-0-270"></a><span class="sd">        target: A [`Document`][py2tosc.Document] or any</span>
-<a id="__codelineno-0-271" name="__codelineno-0-271"></a><span class="sd">            [`Control`][py2tosc.Control]; a control is checked along with</span>
-<a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="sd">            everything beneath it.</span>
-<a id="__codelineno-0-273" name="__codelineno-0-273"></a>
-<a id="__codelineno-0-274" name="__codelineno-0-274"></a><span class="sd">    Local message destinations are resolved against `target` and nothing above</span>
-<a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="sd">    it, so validating a subtree that is wired to a control outside itself</span>
-<a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">    reports a destination it cannot see. Validate the whole</span>
-<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">    [`Document`][py2tosc.Document] to avoid that.</span>
-<a id="__codelineno-0-278" name="__codelineno-0-278"></a>
-<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">        Every finding, errors first, then in tree order. An empty list means</span>
-<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="sd">        nothing was found -- it is not a guarantee the layout opens.</span>
-<a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-283" name="__codelineno-0-283"></a>    <span class="n">root</span> <span class="o">=</span> <span class="n">target</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">Control</span><span class="p">)</span> <span class="k">else</span> <span class="n">target</span><span class="o">.</span><span class="n">root</span>
-<a id="__codelineno-0-284" name="__codelineno-0-284"></a>    <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&lt;root&gt;&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-285" name="__codelineno-0-285"></a>
-<a id="__codelineno-0-286" name="__codelineno-0-286"></a>    <span class="n">known</span> <span class="o">=</span> <span class="p">{</span><span class="n">control</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="n">control</span> <span class="k">for</span> <span class="n">control</span> <span class="ow">in</span> <span class="n">root</span><span class="o">.</span><span class="n">walk</span><span class="p">()}</span>
-<a id="__codelineno-0-287" name="__codelineno-0-287"></a>    <span class="n">issues</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_check_control</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">known</span><span class="p">))</span>
-<a id="__codelineno-0-288" name="__codelineno-0-288"></a>
-<a id="__codelineno-0-289" name="__codelineno-0-289"></a>    <span class="c1"># The root node is the canvas, and TouchOSC gives it none of the behaviour</span>
-<a id="__codelineno-0-290" name="__codelineno-0-290"></a>    <span class="c1"># its type would otherwise have: a PAGER there draws its tab bar but never</span>
-<a id="__codelineno-0-291" name="__codelineno-0-291"></a>    <span class="c1"># pages, stacking every child instead. All 35 layouts in the corpus root at</span>
-<a id="__codelineno-0-292" name="__codelineno-0-292"></a>    <span class="c1"># a GROUP, and no PAGER appears above depth 1. Only checked for a document,</span>
-<a id="__codelineno-0-293" name="__codelineno-0-293"></a>    <span class="c1"># since validating a subtree says nothing about what sits at the top of it.</span>
-<a id="__codelineno-0-294" name="__codelineno-0-294"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">Control</span><span class="p">)</span> <span class="ow">and</span> <span class="n">root</span><span class="o">.</span><span class="n">control_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">ControlType</span><span class="o">.</span><span class="n">GROUP</span><span class="p">:</span>
-<a id="__codelineno-0-295" name="__codelineno-0-295"></a>        <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-<a id="__codelineno-0-296" name="__codelineno-0-296"></a>            <span class="n">Issue</span><span class="p">(</span>
-<a id="__codelineno-0-297" name="__codelineno-0-297"></a>                <span class="n">WARNING</span><span class="p">,</span>
-<a id="__codelineno-0-298" name="__codelineno-0-298"></a>                <span class="n">name</span><span class="p">,</span>
-<a id="__codelineno-0-299" name="__codelineno-0-299"></a>                <span class="sa">f</span><span class="s2">&quot;the root is a </span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">control_type</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">; TouchOSC treats the &quot;</span>
-<a id="__codelineno-0-300" name="__codelineno-0-300"></a>                <span class="sa">f</span><span class="s2">&quot;root as a plain container, so put it inside a GROUP instead&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-301" name="__codelineno-0-301"></a>            <span class="p">)</span>
-<a id="__codelineno-0-302" name="__codelineno-0-302"></a>        <span class="p">)</span>
-<a id="__codelineno-0-303" name="__codelineno-0-303"></a>
-<a id="__codelineno-0-304" name="__codelineno-0-304"></a>    <span class="c1"># Node ids must be unique across the whole layout, so this cannot be done</span>
-<a id="__codelineno-0-305" name="__codelineno-0-305"></a>    <span class="c1"># per control.</span>
-<a id="__codelineno-0-306" name="__codelineno-0-306"></a>    <span class="n">counts</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">control</span> <span class="ow">in</span> <span class="n">root</span><span class="o">.</span><span class="n">walk</span><span class="p">())</span>
-<a id="__codelineno-0-307" name="__codelineno-0-307"></a>    <span class="k">for</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
-<a id="__codelineno-0-308" name="__codelineno-0-308"></a>        <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-<a id="__codelineno-0-309" name="__codelineno-0-309"></a>            <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-<a id="__codelineno-0-310" name="__codelineno-0-310"></a>                <span class="n">Issue</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;node id </span><span class="si">{</span><span class="n">node_id</span><span class="si">}</span><span class="s2"> is used by </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2"> controls&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-311" name="__codelineno-0-311"></a>            <span class="p">)</span>
-<a id="__codelineno-0-312" name="__codelineno-0-312"></a>
-<a id="__codelineno-0-313" name="__codelineno-0-313"></a>    <span class="n">issues</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">i</span><span class="o">.</span><span class="n">level</span> <span class="o">!=</span> <span class="n">ERROR</span><span class="p">)</span>
-<a id="__codelineno-0-314" name="__codelineno-0-314"></a>    <span class="k">return</span> <span class="n">issues</span>
+<span class="normal"><a href="#__codelineno-0-314">314</a></span>
+<span class="normal"><a href="#__codelineno-0-315">315</a></span>
+<span class="normal"><a href="#__codelineno-0-316">316</a></span>
+<span class="normal"><a href="#__codelineno-0-317">317</a></span>
+<span class="normal"><a href="#__codelineno-0-318">318</a></span>
+<span class="normal"><a href="#__codelineno-0-319">319</a></span>
+<span class="normal"><a href="#__codelineno-0-320">320</a></span>
+<span class="normal"><a href="#__codelineno-0-321">321</a></span>
+<span class="normal"><a href="#__codelineno-0-322">322</a></span>
+<span class="normal"><a href="#__codelineno-0-323">323</a></span>
+<span class="normal"><a href="#__codelineno-0-324">324</a></span>
+<span class="normal"><a href="#__codelineno-0-325">325</a></span>
+<span class="normal"><a href="#__codelineno-0-326">326</a></span>
+<span class="normal"><a href="#__codelineno-0-327">327</a></span>
+<span class="normal"><a href="#__codelineno-0-328">328</a></span>
+<span class="normal"><a href="#__codelineno-0-329">329</a></span>
+<span class="normal"><a href="#__codelineno-0-330">330</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="n">target</span><span class="p">:</span> <span class="n">Control</span> <span class="o">|</span> <span class="n">Document</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Issue</span><span class="p">]:</span>
+<a id="__codelineno-0-283" name="__codelineno-0-283"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Check a control tree for things TouchOSC will reject or ignore.</span>
+<a id="__codelineno-0-284" name="__codelineno-0-284"></a>
+<a id="__codelineno-0-285" name="__codelineno-0-285"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="sd">        target: A [`Document`][py2tosc.Document] or any</span>
+<a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="sd">            [`Control`][py2tosc.Control]; a control is checked along with</span>
+<a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="sd">            everything beneath it.</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289"></a>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="sd">    Local message destinations are resolved against `target` and nothing above</span>
+<a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="sd">    it, so validating a subtree that is wired to a control outside itself</span>
+<a id="__codelineno-0-292" name="__codelineno-0-292"></a><span class="sd">    reports a destination it cannot see. Validate the whole</span>
+<a id="__codelineno-0-293" name="__codelineno-0-293"></a><span class="sd">    [`Document`][py2tosc.Document] to avoid that.</span>
+<a id="__codelineno-0-294" name="__codelineno-0-294"></a>
+<a id="__codelineno-0-295" name="__codelineno-0-295"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-296" name="__codelineno-0-296"></a><span class="sd">        Every finding, errors first, then in tree order. An empty list means</span>
+<a id="__codelineno-0-297" name="__codelineno-0-297"></a><span class="sd">        nothing was found -- it is not a guarantee the layout opens.</span>
+<a id="__codelineno-0-298" name="__codelineno-0-298"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-299" name="__codelineno-0-299"></a>    <span class="n">root</span> <span class="o">=</span> <span class="n">target</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">Control</span><span class="p">)</span> <span class="k">else</span> <span class="n">target</span><span class="o">.</span><span class="n">root</span>
+<a id="__codelineno-0-300" name="__codelineno-0-300"></a>    <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&lt;root&gt;&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-301" name="__codelineno-0-301"></a>
+<a id="__codelineno-0-302" name="__codelineno-0-302"></a>    <span class="n">known</span> <span class="o">=</span> <span class="p">{</span><span class="n">control</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="n">control</span> <span class="k">for</span> <span class="n">control</span> <span class="ow">in</span> <span class="n">root</span><span class="o">.</span><span class="n">walk</span><span class="p">()}</span>
+<a id="__codelineno-0-303" name="__codelineno-0-303"></a>    <span class="n">issues</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_check_control</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">known</span><span class="p">))</span>
+<a id="__codelineno-0-304" name="__codelineno-0-304"></a>
+<a id="__codelineno-0-305" name="__codelineno-0-305"></a>    <span class="c1"># The root node is the canvas, and TouchOSC gives it none of the behaviour</span>
+<a id="__codelineno-0-306" name="__codelineno-0-306"></a>    <span class="c1"># its type would otherwise have: a PAGER there draws its tab bar but never</span>
+<a id="__codelineno-0-307" name="__codelineno-0-307"></a>    <span class="c1"># pages, stacking every child instead. All 35 layouts in the corpus root at</span>
+<a id="__codelineno-0-308" name="__codelineno-0-308"></a>    <span class="c1"># a GROUP, and no PAGER appears above depth 1. Only checked for a document,</span>
+<a id="__codelineno-0-309" name="__codelineno-0-309"></a>    <span class="c1"># since validating a subtree says nothing about what sits at the top of it.</span>
+<a id="__codelineno-0-310" name="__codelineno-0-310"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">Control</span><span class="p">)</span> <span class="ow">and</span> <span class="n">root</span><span class="o">.</span><span class="n">control_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">ControlType</span><span class="o">.</span><span class="n">GROUP</span><span class="p">:</span>
+<a id="__codelineno-0-311" name="__codelineno-0-311"></a>        <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<a id="__codelineno-0-312" name="__codelineno-0-312"></a>            <span class="n">Issue</span><span class="p">(</span>
+<a id="__codelineno-0-313" name="__codelineno-0-313"></a>                <span class="n">WARNING</span><span class="p">,</span>
+<a id="__codelineno-0-314" name="__codelineno-0-314"></a>                <span class="n">name</span><span class="p">,</span>
+<a id="__codelineno-0-315" name="__codelineno-0-315"></a>                <span class="sa">f</span><span class="s2">&quot;the root is a </span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">control_type</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">; TouchOSC treats the &quot;</span>
+<a id="__codelineno-0-316" name="__codelineno-0-316"></a>                <span class="sa">f</span><span class="s2">&quot;root as a plain container, so put it inside a GROUP instead&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-317" name="__codelineno-0-317"></a>            <span class="p">)</span>
+<a id="__codelineno-0-318" name="__codelineno-0-318"></a>        <span class="p">)</span>
+<a id="__codelineno-0-319" name="__codelineno-0-319"></a>
+<a id="__codelineno-0-320" name="__codelineno-0-320"></a>    <span class="c1"># Node ids must be unique across the whole layout, so this cannot be done</span>
+<a id="__codelineno-0-321" name="__codelineno-0-321"></a>    <span class="c1"># per control.</span>
+<a id="__codelineno-0-322" name="__codelineno-0-322"></a>    <span class="n">counts</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">control</span> <span class="ow">in</span> <span class="n">root</span><span class="o">.</span><span class="n">walk</span><span class="p">())</span>
+<a id="__codelineno-0-323" name="__codelineno-0-323"></a>    <span class="k">for</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+<a id="__codelineno-0-324" name="__codelineno-0-324"></a>        <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+<a id="__codelineno-0-325" name="__codelineno-0-325"></a>            <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<a id="__codelineno-0-326" name="__codelineno-0-326"></a>                <span class="n">Issue</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;node id </span><span class="si">{</span><span class="n">node_id</span><span class="si">}</span><span class="s2"> is used by </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2"> controls&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-327" name="__codelineno-0-327"></a>            <span class="p">)</span>
+<a id="__codelineno-0-328" name="__codelineno-0-328"></a>
+<a id="__codelineno-0-329" name="__codelineno-0-329"></a>    <span class="n">issues</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">i</span><span class="o">.</span><span class="n">level</span> <span class="o">!=</span> <span class="n">ERROR</span><span class="p">)</span>
+<a id="__codelineno-0-330" name="__codelineno-0-330"></a>    <span class="k">return</span> <span class="n">issues</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2128,8 +2189,7 @@ something it tolerates but probably did not intend.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/py2tosc/validate.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-56">56</a></span>
-<span class="normal"><a href="#__codelineno-0-57">57</a></span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-57">57</a></span>
 <span class="normal"><a href="#__codelineno-0-58">58</a></span>
 <span class="normal"><a href="#__codelineno-0-59">59</a></span>
 <span class="normal"><a href="#__codelineno-0-60">60</a></span>
@@ -2144,23 +2204,24 @@ something it tolerates but probably did not intend.</p>
 <span class="normal"><a href="#__codelineno-0-69">69</a></span>
 <span class="normal"><a href="#__codelineno-0-70">70</a></span>
 <span class="normal"><a href="#__codelineno-0-71">71</a></span>
-<span class="normal"><a href="#__codelineno-0-72">72</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="k">class</span><span class="w"> </span><span class="nc">Issue</span><span class="p">:</span>
-<a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;One finding from [`validate`][py2tosc.validate].</span>
-<a id="__codelineno-0-59" name="__codelineno-0-59"></a>
-<a id="__codelineno-0-60" name="__codelineno-0-60"></a><span class="sd">    Attributes:</span>
-<a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="sd">        level: `error` for something TouchOSC cannot load, `warning` for</span>
-<a id="__codelineno-0-62" name="__codelineno-0-62"></a><span class="sd">            something it tolerates but probably did not intend.</span>
-<a id="__codelineno-0-63" name="__codelineno-0-63"></a><span class="sd">        path: Slash-separated control names from the root, for locating it.</span>
-<a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="sd">        message: What is wrong.</span>
-<a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-66" name="__codelineno-0-66"></a>
-<a id="__codelineno-0-67" name="__codelineno-0-67"></a>    <span class="n">level</span><span class="p">:</span> <span class="nb">str</span>
-<a id="__codelineno-0-68" name="__codelineno-0-68"></a>    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span>
-<a id="__codelineno-0-69" name="__codelineno-0-69"></a>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
-<a id="__codelineno-0-70" name="__codelineno-0-70"></a>
-<a id="__codelineno-0-71" name="__codelineno-0-71"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-72" name="__codelineno-0-72"></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="normal"><a href="#__codelineno-0-72">72</a></span>
+<span class="normal"><a href="#__codelineno-0-73">73</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="k">class</span><span class="w"> </span><span class="nc">Issue</span><span class="p">:</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;One finding from [`validate`][py2tosc.validate].</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a>
+<a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="sd">    Attributes:</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62"></a><span class="sd">        level: `error` for something TouchOSC cannot load, `warning` for</span>
+<a id="__codelineno-0-63" name="__codelineno-0-63"></a><span class="sd">            something it tolerates but probably did not intend.</span>
+<a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="sd">        path: Slash-separated control names from the root, for locating it.</span>
+<a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="sd">        message: What is wrong.</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-67" name="__codelineno-0-67"></a>
+<a id="__codelineno-0-68" name="__codelineno-0-68"></a>    <span class="n">level</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-0-69" name="__codelineno-0-69"></a>    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70"></a>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71"></a>
+<a id="__codelineno-0-72" name="__codelineno-0-72"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73"></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -2183,113 +2244,8 @@ something it tolerates but probably did not intend.</p>
 
     </div>
 
-</div>
-
-<div class="doc doc-object doc-class">
-
-
-
-<h2 id="py2tosc.ValidationError" class="doc doc-heading">
-            <span class="doc doc-object-name doc-class-name">ValidationError</span>
-
-
-<a href="#py2tosc.ValidationError" class="headerlink" title="Permanent link">&para;</a></h2>
-
-
-    <div class="doc doc-contents first">
-            <p class="doc doc-class-bases">
-              Bases: <code><span title="Exception">Exception</span></code></p>
-
-
-
-        <p>Raised by <code>save(validate=True)</code> when a layout has errors.</p>
-
-
-<p><span class="doc-section-title">Attributes:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td><code><span title="py2tosc.ValidationError.issues">issues</span></code></td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Every finding, not only the errors, so a caller catching this
-can report the warnings too.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-
-
-
-
-
-
-              <details class="mkdocstrings-source">
-                <summary>Source code in <code>src/py2tosc/validate.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-75">75</a></span>
-<span class="normal"><a href="#__codelineno-0-76">76</a></span>
-<span class="normal"><a href="#__codelineno-0-77">77</a></span>
-<span class="normal"><a href="#__codelineno-0-78">78</a></span>
-<span class="normal"><a href="#__codelineno-0-79">79</a></span>
-<span class="normal"><a href="#__codelineno-0-80">80</a></span>
-<span class="normal"><a href="#__codelineno-0-81">81</a></span>
-<span class="normal"><a href="#__codelineno-0-82">82</a></span>
-<span class="normal"><a href="#__codelineno-0-83">83</a></span>
-<span class="normal"><a href="#__codelineno-0-84">84</a></span>
-<span class="normal"><a href="#__codelineno-0-85">85</a></span>
-<span class="normal"><a href="#__codelineno-0-86">86</a></span>
-<span class="normal"><a href="#__codelineno-0-87">87</a></span>
-<span class="normal"><a href="#__codelineno-0-88">88</a></span>
-<span class="normal"><a href="#__codelineno-0-89">89</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="k">class</span><span class="w"> </span><span class="nc">ValidationError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-<a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised by `save(validate=True)` when a layout has errors.</span>
-<a id="__codelineno-0-77" name="__codelineno-0-77"></a>
-<a id="__codelineno-0-78" name="__codelineno-0-78"></a><span class="sd">    Attributes:</span>
-<a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="sd">        issues: Every finding, not only the errors, so a caller catching this</span>
-<a id="__codelineno-0-80" name="__codelineno-0-80"></a><span class="sd">            can report the warnings too.</span>
-<a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-82" name="__codelineno-0-82"></a>
-<a id="__codelineno-0-83" name="__codelineno-0-83"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issues</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Issue</span><span class="p">]):</span>
-<a id="__codelineno-0-84" name="__codelineno-0-84"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">issues</span> <span class="o">=</span> <span class="n">issues</span>
-<a id="__codelineno-0-85" name="__codelineno-0-85"></a>        <span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">issues</span> <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">level</span> <span class="o">==</span> <span class="n">ERROR</span><span class="p">]</span>
-<a id="__codelineno-0-86" name="__codelineno-0-86"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-87" name="__codelineno-0-87"></a>            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span><span class="si">}</span><span class="s2"> error(s) in the layout:</span><span class="se">\n</span><span class="s2">&quot;</span>
-<a id="__codelineno-0-88" name="__codelineno-0-88"></a>            <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">)</span>
-<a id="__codelineno-0-89" name="__codelineno-0-89"></a>        <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-              </details>
-
-
-
-<div class="doc doc-children">
-
-
-
-
-
-
-
-
-
-
-
-
-  </div>
-
-    </div>
-
-</div>
+</div><p><code>ValidationError</code>, raised by <code>save(validate=True)</code>, is documented with the rest
+of the <a href="../errors/">errors</a>.</p>
 
 
 

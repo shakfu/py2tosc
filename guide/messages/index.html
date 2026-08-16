@@ -806,6 +806,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../demos/controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    One of every control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../demos/custom-property/" class="md-nav__link">
         
   
@@ -1313,6 +1341,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/codegen/" class="md-nav__link">
         
   
@@ -1384,6 +1440,33 @@
     
   
     Coming from tosclib
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stability
   
 
     
@@ -1739,7 +1822,7 @@ MIDI binding it produced was invalid.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keyboard</span><span class="p">:</span>
 <a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="n">key</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">midi_note</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)))</span>
 </code></pre></div>
-<p>Nothing there reaches a file that a hand-written <code>OscMessage</code> could not, and the two styles mix freely. The module is unstable below 1.0.</p>
+<p>Nothing there reaches a file that a hand-written <code>OscMessage</code> could not, and the two styles mix freely. The module is <a href="../../stability/#the-py2toscui-carve-out">provisional</a>: it may change in a minor release, where the rest of the API may not. Since the two styles mix, a message written the long way is always available as a fallback.</p>
 
 
 

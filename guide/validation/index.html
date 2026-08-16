@@ -773,6 +773,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../demos/controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    One of every control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../demos/custom-property/" class="md-nav__link">
         
   
@@ -1280,6 +1308,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/codegen/" class="md-nav__link">
         
   
@@ -1351,6 +1407,33 @@
     
   
     Coming from tosclib
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stability
   
 
     
@@ -1520,9 +1603,16 @@ a <code>message</code>. Errors sort first.</p>
 <li>a <code>GRID</code> holding a different number of controls than its <code>grid_x</code> and <code>grid_y</code> claim</li>
 <li>a local binding writing a value or property the destination does not have</li>
 <li>a layout the combinators described that nobody has resolved</li>
+<li>a custom property named after one of the control's own values</li>
 </ul>
-<p>The last four are worth knowing about, because each describes a layout that
+<p>The last six are worth knowing about, because each describes a layout that
 loads, round-trips and looks entirely well formed while not working.</p>
+<p>The value-shadowing warning catches one specific slip: <code>label.text = "hi"</code>
+writes a custom property called <code>text</code>, but what a label <em>says</em> is its <code>text</code>
+<strong>value</strong>, so the property is stored, ignored by TouchOSC, and drawn as
+nothing. Nothing else can catch it -- inventing a property is what the format
+lets a script do, so a typo cannot be told from a feature -- except when the
+name collides with a value the control already has, which is never deliberate.</p>
 <p>The unresolved-layout warning is the odd one out, since it is not about the
 file: <code>save</code> places whatever is still unplaced, so a layout that draws this
 warning will still be written correctly. It reports the tree <em>in hand</em>, where
@@ -1562,7 +1652,7 @@ not the editor: it cannot tell you a frame is off-canvas, a script has a syntax
 error, or an OSC address collides with another.</p>
 <h2 id="where-the-rules-come-from">Where the rules come from<a class="headerlink" href="#where-the-rules-come-from" title="Permanent link">&para;</a></h2>
 <p>Every rule is corroborated against layouts the TouchOSC editor itself wrote. The
-test suite requires all 23 layouts in the corpus to validate without errors, and
+test suite requires all 45 layouts in the corpus to validate without errors, and
 the editor-written ones to produce no warnings at all -- a validator that fires
 on real files trains you to ignore it.</p>
 <p>Two candidate rules were dropped for failing that bar. One flagged OSC bindings
@@ -1577,7 +1667,7 @@ than when TouchOSC refuses to open it.</p>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1">#&gt;   error: root/panel/oops: BOX controls cannot hold children; this one has 1</span>
 </code></pre></div>
 <p>Nothing is written when it raises. The
-<a class="autorefs autorefs-internal" title="ValidationError" href="../../api/validate/#py2tosc.ValidationError"><code>ValidationError</code></a> carries every finding on <code>.issues</code>,
+<a class="autorefs autorefs-internal" title="ValidationError" href="../../api/errors/#py2tosc.ValidationError"><code>ValidationError</code></a> carries every finding on <code>.issues</code>,
 warnings included, so a caller can report them all.</p>
 <p>Warnings alone never block a save. <code>dumps(validate=True)</code> does the same for the
 string form.</p>

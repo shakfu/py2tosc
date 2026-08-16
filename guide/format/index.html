@@ -601,6 +601,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enumerated-integers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enumerated integers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -764,6 +781,34 @@
     
   
     Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    One of every control
   
 
     
@@ -1291,6 +1336,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/codegen/" class="md-nav__link">
         
   
@@ -1362,6 +1435,33 @@
     
   
     Coming from tosclib
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stability
   
 
     
@@ -1457,6 +1557,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enumerated-integers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enumerated integers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1602,6 +1719,31 @@ all, rather than an empty one.</p>
 offsets, and its own layouts are full of frames like <code>&lt;x&gt;417.439&lt;/x&gt;</code>. Rounding
 them moves the control, so py2tosc keeps them as floats and writes integral
 values back without a trailing <code>.0</code>.</p>
+<h3 id="enumerated-integers">Enumerated integers<a class="headerlink" href="#enumerated-integers" title="Permanent link">&para;</a></h3>
+<p>About a dozen <code>i</code> properties hold a number standing for a name. Hexler's manual
+lists the names in order but gives no numbers, and the two groups below do not
+start from the same one:</p>
+<table>
+<thead>
+<tr>
+<th>Numbered from 1</th>
+<th>Numbered from 0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>shape</code>, <code>textAlignH</code>, <code>textAlignV</code></td>
+<td><code>orientation</code>, <code>buttonType</code>, <code>outlineStyle</code>, <code>cursorDisplay</code>, <code>barDisplay</code>, <code>linesDisplay</code>, <code>font</code>, <code>response</code>, <code>radioType</code>, <code>pointerPriority</code></td>
+</tr>
+</tbody>
+</table>
+<p>So <code>shape</code> 1 is a rectangle and there is no shape 0, while <code>orientation</code> 0 is
+north. Reading the manual and counting from zero gets the first group wrong.</p>
+<p>The split is recoverable from the files themselves: a property numbered from 0
+writes a 0 somewhere across a large enough sample, and one numbered from 1 never
+can. <code>shape</code> confirms it independently -- <code>hexkeys.tosc</code> stores its 119
+hexagonal buttons as 6, and <code>HEXAGON</code> is the sixth name the manual lists.</p>
+<p>py2tosc names all of these; see <a href="../controls/#named-numbers">Named numbers</a>.</p>
 <p>The root node of a saved layout also carries <code>metaCreator</code> and <code>metaComments</code>,
 which the editor fills in from the document settings.</p>
 <h2 id="values">Values<a class="headerlink" href="#values" title="Permanent link">&para;</a></h2>

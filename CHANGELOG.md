@@ -4,6 +4,28 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- A JSON encoding of a layout, alongside the `.tosc` and the `.xml`. It is documented in [The .json format](https://shakfu.github.io/py2tosc/guide/json/), and three names are new in the public API: `py2tosc.to_json`, `py2tosc.from_json` and the `py2tosc.json_codec` module behind them.
+
+  It is a second encoding of the same model rather than a second model, and it is held to the bar the XML is held to. All 42 editor-written layouts in the corpus go out to JSON and come back byte for byte, with the same two exclusions the XML path already carries for numbers that are normalised on read: a `-0` frame coordinate and a `-nan(ind)` colour component. `tests/test_json_codec.py` runs that over the whole corpus, since a representation that fails to carry something changes the bytes `dumps` produces -- which is the entire correctness argument for the format.
+
+  Two jobs it does that the XML does badly. Emitting a layout from something that is not Python, which otherwise means getting CDATA sections, sorted property order and omitted-when-empty elements right. And reading a diff: the same one-fader layout is 72 lines of JSON against 254 lines of the XML export, one line per property rather than five.
+
+  Three decisions carry the round trip, and each is a decision rather than a convenience. Every property is written with the type tag the file stores it under, because `infer_type` cannot recover all of them from a Python value -- four numbers are a frame or a colour, `gridX` is an element count on a GRID and a switch on an XY, and a custom property has no table to consult at all. A field is omitted only when it is *identically* at its default, since `0.0 == False` in Python and a fader whose `x` default came back as `false` would be a different file. And type defaults are not applied when decoding, exactly as reading the XML does not apply them.
+
+  JSON has no notation for a non-finite number, and the `Infinity` that Python writes is not JSON, so one is written as `{"$float": "inf"}`. This is not hypothetical: `o_custom.xml` in the corpus holds ninety `inf` colour components, written by some TouchOSC build and carried faithfully by the XML codec ever since. Refusing them would have made the JSON path less faithful than the XML one. An object never appears where a number belongs otherwise, so the escape is unambiguous without a reader having to know what type it expected.
+
+  A key nothing reads is refused rather than ignored, with a suggested spelling where there is a near match. This is the failure a hand-authored format has to close: a `childs` that is quietly skipped drops a whole subtree, and the layout that comes back looks exactly like one that read correctly. Every message names the node it gave up on -- `root.children[1].properties.frame: a frame needs 4 values (x, y, w, h), got 2` -- because a layout is a deep tree and 4715 controls is a real size for one.
+
+### Changed
+
+- `Document.save` writes a `.json` where it already wrote a `.xml` or a `.tosc`, and `load` and `loads` read one. The extension chooses on the way out; on the way in the content decides, since a layout in JSON opens with its envelope object and one in XML with a tag. Nothing about the existing two formats changes.
+
+- `py2tosc convert mixer.tosc -o mixer.json` writes the JSON encoding, and `show`, `validate` and `decompile` accept a `.json` layout wherever they accepted a `.tosc`. That falls out of the reading above rather than being wired per subcommand.
+
+- The [stability policy](https://shakfu.github.io/py2tosc/stability/) now covers the JSON encoding under the same byte-exact guarantee, with the same two exceptions. That encoding carries a `schema` number of its own: a change that would stop an already written file from reading gets a new one, and a file declaring an older schema keeps reading.
+
 ## [0.4.0]
 
 ### Added

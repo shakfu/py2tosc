@@ -88,6 +88,13 @@ integer `0`, and a colour component of `-nan(ind)`, which a Windows build of
 TouchOSC wrote and which is repaired to `0`. Reproducing either exactly would
 mean carrying damage forward. These will not grow without a major bump.
 
+The [JSON encoding](guide/json.md) is held to the same bar and carries the same
+two exceptions, since it round-trips the model rather than the file: a layout
+written to JSON and read back reproduces the bytes it started as. That encoding
+carries a `schema` number of its own. A change that would stop an already
+written file from reading gets a new one, and a file declaring an older schema
+keeps reading.
+
 **Loading never rejects a layout TouchOSC accepts.** The format permits
 properties nobody has heard of -- that is what makes custom properties useful
 -- so unknown properties are read and written back rather than refused.

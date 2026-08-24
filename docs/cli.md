@@ -84,12 +84,19 @@ Useful when the layout exists and the script does not. See
 
 ## convert
 
-Rewrites a layout in the other format, chosen by the output's extension: `.xml`
-for the readable export the editor also writes, `.tosc` for the compressed one.
+Rewrites a layout in another format, chosen by the output's extension: `.tosc`
+for the compressed file TouchOSC opens, `.xml` for the readable export the
+editor also writes, `.json` for the [JSON encoding](guide/json.md).
 
 ```console
 $ py2tosc convert mixer.tosc -o mixer.xml
+$ py2tosc convert mixer.tosc -o mixer.json
+$ py2tosc convert mixer.json -o mixer.tosc
 ```
+
+The input is read the same way wherever it comes from, so every subcommand on
+this page takes a `.json` layout where it takes a `.tosc`. The format is
+decided by what the file holds rather than by its name.
 
 ## build
 

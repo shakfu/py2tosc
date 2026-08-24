@@ -1,4 +1,10 @@
-"""The `.tosc` file itself: loading, saving and creating layouts."""
+"""The `.tosc` file itself: loading, saving and creating layouts.
+
+Three encodings of the same tree are read and written here: the compressed
+`.tosc` TouchOSC opens, the `.xml` the editor exports, and the `.json` of `py2tosc.json_codec`. The
+extension chooses on the way out and
+the content decides on the way in.
+"""
 
 from __future__ import annotations
 
@@ -176,13 +182,17 @@ class Document:
     ) -> None:
         """Write the layout to disk.
 
-        The format follows the file extension: `.xml` writes readable XML, and
-        anything else writes a zlib-compressed `.tosc` that TouchOSC can open.
+        The format follows the file extension: `.xml` writes the readable XML
+        export, `.json` writes the JSON encoding of
+        [`to_json`][py2tosc.to_json], and anything else writes a
+        zlib-compressed `.tosc` that TouchOSC can open.
 
         Args:
-            path: Where to write. A `.xml` suffix selects the XML export.
-            pretty: Override the line-per-element formatting that the extension
-                would otherwise choose.
+            path: Where to write. A `.xml` or `.json` suffix selects that
+                format; anything else is a `.tosc`.
+            pretty: Override the formatting the extension would otherwise
+                choose: one element per line for XML, one line per property
+                for JSON.
             validate: Check the layout first and write nothing if it has errors.
                 This is the checkpoint worth using it at: the mistake is caught
                 before the file exists, rather than when TouchOSC refuses it.
@@ -202,12 +212,23 @@ class Document:
         resolve_pending(self.root)
         if validate:
             self._raise_on_errors()
-        as_xml = str(path).lower().endswith(".xml")
+
+        suffix = str(path).lower()
+        as_xml, as_json = suffix.endswith(".xml"), suffix.endswith(".json")
         if pretty is None:
-            pretty = as_xml
-        text = self.dumps(pretty=pretty).encode("utf-8")
+            pretty = as_xml or as_json
+
+        if as_json:
+            # Imported here rather than at the top, because `json_codec` reads
+            # `Document` from this module and the cycle would not resolve.
+            from .json_codec import to_json
+
+            text = to_json(self, indent=2 if pretty else None).encode("utf-8")
+        else:
+            text = self.dumps(pretty=pretty).encode("utf-8")
+
         with open(path, "wb") as file:
-            file.write(text if as_xml else zlib.compress(text))
+            file.write(text if as_xml or as_json else zlib.compress(text))
 
     def __repr__(self) -> str:
         count = sum(1 for _ in self.walk()) - 1
@@ -216,42 +237,67 @@ class Document:
         )
 
 
-def loads(source: str | bytes) -> Document:
-    """Parse a layout from XML text or from raw `.tosc` bytes.
+def _is_json(source: str | bytes) -> bool:
+    """Whether the input is the JSON encoding rather than the XML one.
 
-    Compressed input is detected and decompressed automatically, so this accepts
-    either form without being told which it was given.
+    A layout in JSON opens with its envelope object and one in XML with a tag
+    or a declaration, so the first character that is not space settles it. No
+    format is guessed at beyond that: what follows either parses or is an
+    error naming the format it was read as.
+    """
+    if isinstance(source, bytes):
+        return source.lstrip().removeprefix(b"\xef\xbb\xbf").lstrip()[:1] == b"{"
+    return source.lstrip().removeprefix("\ufeff").lstrip()[:1] == "{"
+
+
+def loads(source: str | bytes) -> Document:
+    """Parse a layout from XML text, JSON text, or raw `.tosc` bytes.
+
+    Compressed input is detected and decompressed automatically, and JSON is
+    told from XML by its first character, so this accepts any of the three
+    without being told which it was given.
 
     Args:
-        source: XML text, XML bytes, or the contents of a `.tosc` file.
+        source: XML text or bytes, JSON text or bytes, or the contents of a
+            `.tosc` file.
 
     Returns:
         The parsed document.
 
     Raises:
-        FormatError: If the input is neither valid XML nor a valid `.tosc`.
-            This is a `ValueError`, which is what earlier versions documented.
+        FormatError: If the input is not a readable layout in any of the three
+            forms. This is a `ValueError`, which is what earlier versions
+            documented.
     """
     if isinstance(source, bytes) and source[:1] and source[0] == _ZLIB_MAGIC:
         try:
             source = zlib.decompress(source)
         except zlib.error as exc:
             raise FormatError(f"not a readable .tosc stream: {exc}") from exc
+
+    if _is_json(source):
+        # See `save` for why this import is not at the top of the module.
+        from .json_codec import from_json
+
+        return from_json(source)
+
     root, version = from_xml(source)
     return Document(root=root, version=version)
 
 
 def load(path: _PathLike) -> Document:
-    """Read a layout from a `.tosc` or `.xml` file.
+    """Read a layout from a `.tosc`, `.xml` or `.json` file.
 
     Args:
-        path: The file to read. Either format is accepted.
+        path: The file to read. Any of the three formats is accepted, and the
+            contents rather than the extension decides which it is.
 
     Returns:
         The parsed document.
 
     Raises:
-        FormatError: If the file is neither valid XML nor a valid `.tosc`.
+        FormatError: If the file is not a readable layout in any of the three
+            formats.
             This is a `ValueError`, which is what earlier versions documented.
         OSError: If the file cannot be read. Left as the builtin, since
             nothing about it is specific to this format.
@@ -278,7 +324,7 @@ def save(document: Document, path: _PathLike, *, pretty: bool | None = None) -> 
 
     Args:
         document: The layout to write.
-        path: Where to write. A `.xml` suffix selects the XML export.
+        path: Where to write. A `.xml` or `.json` suffix selects that format.
         pretty: Override the formatting the extension would choose.
     """
     document.save(path, pretty=pretty)

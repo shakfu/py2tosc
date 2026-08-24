@@ -39,7 +39,7 @@ doc.save("mixer.tosc")
 
 It reads them back too, so a layout someone else drew is as editable as one you generated. Three things make that safe to do to a file you care about:
 
-- **It round-trips exactly.** Loading a file and saving it again reproduces the editor's own bytes, in both the compressed `.tosc` and the exported `.xml`. Everything in the corpus is checked that way on every commit, so an edit changes what you edited and nothing else.
+- **It round-trips exactly.** Loading a file and saving it again reproduces the editor's own bytes, in the compressed `.tosc`, the exported `.xml` and the [JSON encoding](https://shakfu.github.io/py2tosc/guide/json/) py2tosc adds. Everything in the corpus is checked that way on every commit, so an edit changes what you edited and nothing else.
 
 - **It covers the whole format.** All thirteen control types, OSC, MIDI, local and gamepad bindings, Lua scripts, custom properties, and the two container types with rules of their own.
 
@@ -250,7 +250,7 @@ GROUP  (0, 0, 640, 860)  2 children
 | `show` | What is in a layout, and its tree. |
 | `validate` | What TouchOSC will reject, exiting non-zero if any of it is an error. |
 | `decompile` | The layout written out as the Python that builds it. |
-| `convert` | The same layout as `.tosc` or `.xml`, chosen by the output's extension. |
+| `convert` | The same layout as `.tosc`, `.xml` or `.json`, chosen by the output's extension. |
 | `build` | A control surface generated from a list of parameters. |
 
 `validate` is the one worth wiring into something. It exits `0` clean, `1` on a
@@ -284,6 +284,7 @@ $ py2tosc build params.json -o surface.tosc
 | `defaults` | The default property set for each control type |
 | `control` | `Control`, the node model, plus a factory per control type |
 | `codec` | Reading and writing the `.tosc` XML dialect, CDATA included |
+| `json_codec` | The same tree as JSON, for emitting a layout from elsewhere or reading a diff of one |
 | `document` | `Document`, `load`, `save`, `dumps` |
 | `layout` | Eager `row`, `column` and `matrix`: make the children and size them now |
 | `ui` | Message and layout combinators, described now and sized by `resolve` |

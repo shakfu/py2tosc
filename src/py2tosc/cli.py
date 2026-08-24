@@ -7,7 +7,7 @@ a script written first.
     py2tosc show mixer.tosc
     py2tosc validate mixer.tosc
     py2tosc decompile mixer.tosc
-    py2tosc convert mixer.tosc -o mixer.xml
+    py2tosc convert mixer.tosc -o mixer.json
     py2tosc build params.json -o surface.tosc
 
 Exit codes separate the two things that can go wrong, because a script that
@@ -148,7 +148,7 @@ def decompile(args: argparse.Namespace) -> int:
 
 
 def convert(args: argparse.Namespace) -> int:
-    """Rewrite a layout in the other format, chosen by the output's extension."""
+    """Rewrite a layout in another format, chosen by the output's extension."""
     doc = _load(args.file)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     doc.save(args.output)
@@ -244,9 +244,12 @@ def parser() -> argparse.ArgumentParser:
     source.set_defaults(run=decompile)
 
     swap = commands.add_parser(
-        "convert", help="rewrite a layout as .tosc or .xml, whichever the output is"
+        "convert",
+        help="rewrite a layout as .tosc, .xml or .json, whichever the output is",
     )
-    swap.add_argument("file", type=Path, help="the layout to read")
+    swap.add_argument(
+        "file", type=Path, help="the layout to read, in any of the three formats"
+    )
     swap.add_argument(
         "-o", "--output", type=Path, required=True, help="where to write it"
     )

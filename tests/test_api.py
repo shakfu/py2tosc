@@ -17,7 +17,7 @@ import py2tosc
 #: Documented by their members rather than by a `::: py2tosc.<name>` directive
 #: of their own. `py2tosc.ui.row` appears in the reference; `py2tosc.ui` does
 #: not, and should not, since the module docstring is not the interesting part.
-SUBMODULES = {"json_codec", "layout", "properties", "surface", "ui"}
+SUBMODULES = {"json_codec", "layout", "properties", "surface", "ui", "ui_json"}
 
 
 def documented():

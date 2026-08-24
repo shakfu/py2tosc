@@ -56,14 +56,13 @@ unambiguous without the reader having to know what type it was expecting.
 
 from __future__ import annotations
 
-import difflib
 import json
 import math
-from collections.abc import Collection
 from dataclasses import MISSING, fields, is_dataclass
 from enum import Enum
 from typing import Any
 
+from ._reading import as_list, as_object, check_keys, describe
 from .control import Control
 from .document import Document
 from .enums import ControlType, PropertyType
@@ -82,7 +81,16 @@ from .messages import (
 )
 from .properties import Color, Frame, Property
 
-__all__ = ["FORMAT", "SCHEMA", "decode", "encode", "from_json", "to_json"]
+__all__ = [
+    "FORMAT",
+    "NON_FINITE",
+    "SCHEMA",
+    "build",
+    "decode",
+    "encode",
+    "from_json",
+    "to_json",
+]
 
 #: What the envelope calls itself, so a file can be told from any other JSON.
 FORMAT = "py2tosc.layout"
@@ -345,56 +353,10 @@ def _expand(value: Any, where: str) -> Any:
     return value
 
 
-def _object(data: Any, where: str) -> dict[str, Any]:
-    """Insist on an object, since everything below reads one."""
-    if not isinstance(data, dict):
-        raise FormatError(f"{where} should be an object, found {_describe(data)}")
-    return data
-
-
-def _sequence(data: Any, where: str) -> list[Any]:
-    """Insist on a list, so a mistyped one is a message and not a strange loop."""
-    if not isinstance(data, list):
-        raise FormatError(f"{where} should be a list, found {_describe(data)}")
-    return data
-
-
-def _describe(value: Any) -> str:
-    """What a reader wants to be told they wrote instead."""
-    return {
-        dict: "an object",
-        list: "a list",
-        str: "a string",
-        bool: "a boolean",
-        int: "a number",
-        float: "a number",
-        type(None): "null",
-    }.get(type(value), type(value).__name__)
-
-
-def _keys(entry: dict[str, Any], allowed: Collection[str], where: str) -> None:
-    """Refuse a key nobody will read.
-
-    Ignoring one is the worst failure this format has: a `childs` that silently
-    drops a subtree looks exactly like a layout that came back right. The
-    envelope carries a `schema` for the case where a key is genuinely new.
-    """
-    for key in entry:
-        if key in allowed:
-            continue
-        near = difflib.get_close_matches(key, sorted(allowed), n=1)
-        hint = (
-            f"did you mean {near[0]!r}?"
-            if near
-            else "expected one of " + ", ".join(sorted(allowed))
-        )
-        raise FormatError(f"{where}: unknown key {key!r}; {hint}")
-
-
 def _instance(cls: type[Any], data: Any, where: str) -> Any:
     """Build one dataclass from an object, once its keys are known to be real."""
-    entry = _object(data, where)
-    _keys(entry, {field.name for field in fields(cls)}, where)
+    entry = as_object(data, where)
+    check_keys(entry, {field.name for field in fields(cls)}, where)
     return cls(**_expand(entry, where))
 
 
@@ -402,7 +364,7 @@ def _read_property(key: str, entry: Any, where: str) -> Property:
     """One `[type tag, value]` pair back into a typed property."""
     if not isinstance(entry, list) or len(entry) != 2:
         raise FormatError(
-            f"{where}: a property is a [type, value] pair, found {_describe(entry)}"
+            f"{where}: a property is a [type, value] pair, found {describe(entry)}"
         )
     tag, value = entry
     try:
@@ -432,7 +394,7 @@ def _read_value(data: Any, where: str) -> Value:
 
 def _read_message(data: Any, where: str) -> Message:
     """One binding, dispatched on its `kind`."""
-    entry = _object(data, where)
+    entry = as_object(data, where)
     kind = entry.get("kind")
     cls = _MESSAGES.get(kind) if isinstance(kind, str) else None
     if cls is None:
@@ -440,7 +402,7 @@ def _read_message(data: Any, where: str) -> Message:
         raise FormatError(
             f"{where}: {kind!r} is not a binding kind; expected one of {kinds}"
         )
-    _keys(entry, {field.name for field in fields(cls)} | {"kind"}, where)
+    check_keys(entry, {field.name for field in fields(cls)} | {"kind"}, where)
 
     arguments: dict[str, Any] = {}
     for key, value in entry.items():
@@ -454,7 +416,7 @@ def _read_message(data: Any, where: str) -> Message:
         else:
             arguments[key] = [
                 _instance(nested, item, f"{where}.{key}[{index}]")
-                for index, item in enumerate(_sequence(value, f"{where}.{key}"))
+                for index, item in enumerate(as_list(value, f"{where}.{key}"))
             ]
 
     message: Message = cls(**arguments)
@@ -482,8 +444,8 @@ def decode(node: Any, where: str = "root") -> Control:
             one, holds a key nothing reads, or holds a property, value or
             binding that cannot be read.
     """
-    entry = _object(node, where)
-    _keys(entry, _NODE_KEYS, where)
+    entry = as_object(node, where)
+    check_keys(entry, _NODE_KEYS, where)
 
     if "type" not in entry:
         raise FormatError(f"{where}: a node needs a type")
@@ -498,7 +460,7 @@ def decode(node: Any, where: str = "root") -> Control:
     identifier = entry.get("id")
     if identifier is not None and not isinstance(identifier, str):
         raise FormatError(
-            f"{where}: id should be a string, found {_describe(identifier)}"
+            f"{where}: id should be a string, found {describe(identifier)}"
         )
 
     control = Control(
@@ -513,23 +475,21 @@ def decode(node: Any, where: str = "root") -> Control:
     # property the file leaves out is one the control does not have.
     control.properties.clear()
 
-    properties = _object(entry.get("properties", {}), f"{where}.properties")
+    properties = as_object(entry.get("properties", {}), f"{where}.properties")
     for key, value in properties.items():
         prop = _read_property(key, value, f"{where}.properties.{key}")
         control.properties[prop.key] = prop
 
-    for index, value in enumerate(
-        _sequence(entry.get("values", []), f"{where}.values")
-    ):
+    for index, value in enumerate(as_list(entry.get("values", []), f"{where}.values")):
         control.values.append(_read_value(value, f"{where}.values[{index}]"))
 
     for index, message in enumerate(
-        _sequence(entry.get("messages", []), f"{where}.messages")
+        as_list(entry.get("messages", []), f"{where}.messages")
     ):
         control.messages.append(_read_message(message, f"{where}.messages[{index}]"))
 
     for index, child in enumerate(
-        _sequence(entry.get("children", []), f"{where}.children")
+        as_list(entry.get("children", []), f"{where}.children")
     ):
         control.children.append(decode(child, f"{where}.children[{index}]"))
 
@@ -554,12 +514,30 @@ def from_json(source: str | bytes) -> Document:
             cannot be read. The message names the node it gave up on.
     """
     try:
-        data = json.loads(source)
+        return build(json.loads(source))
     except json.JSONDecodeError as exc:
         raise FormatError(f"not valid JSON: {exc}") from exc
 
-    document = _object(data, "the layout")
-    _keys(document, _ENVELOPE_KEYS, "the layout")
+
+def build(data: Any) -> Document:
+    """Read a layout from already-parsed JSON.
+
+    `from_json` is this with the parsing in front. This is the entry `load`
+    uses, having parsed once to decide which of the two JSON dialects it was
+    handed.
+
+    Args:
+        data: The decoded JSON.
+
+    Returns:
+        The document.
+
+    Raises:
+        FormatError: If it is not a py2tosc layout, declares a schema this
+            release does not read, or holds a node that cannot be read.
+    """
+    document = as_object(data, "the layout")
+    check_keys(document, _ENVELOPE_KEYS, "the layout")
 
     # Both markers are optional on the way in, so a file written by hand or by
     # another tool is readable without ceremony. Wrong is still wrong.
@@ -578,6 +556,6 @@ def from_json(source: str | bytes) -> Document:
 
     version = document.get("lexml", "6")
     if not isinstance(version, str):
-        raise FormatError(f"lexml should be a string, found {_describe(version)}")
+        raise FormatError(f"lexml should be a string, found {describe(version)}")
 
     return Document(root=decode(document["root"]), version=version)

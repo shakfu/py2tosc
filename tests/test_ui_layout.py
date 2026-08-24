@@ -915,3 +915,12 @@ def test_dumps_does_not_place_an_unresolved_layout():
 
     assert "<x>0</x>\n<y>0</y>\n<w>100</w>\n<h>100</h>" in xml
     assert frames(doc.root) == [(0, 0, 100, 100)] * 4
+
+
+def test_tiles_refuses_a_grid_with_no_cells():
+    """The geometry divides by both, so a zero here is a ZeroDivisionError at
+    `resolve` rather than a message at the call that caused it."""
+    with pytest.raises(ValueError, match="at least one column"):
+        ui.tiles(py2tosc.fader(), columns=0)
+    with pytest.raises(ValueError, match="at least one row"):
+        ui.tiles(py2tosc.fader(), rows=0)

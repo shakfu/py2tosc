@@ -1,0 +1,16 @@
+{
+  "format": "py2tosc.ui",
+  "root": {
+    "column": [
+      {"row": [
+        {"repeat": 8, "of": {"fader": "ch$i", "messages": [
+          {"osc": "/mixer/{name}"},
+          {"midi_cc": "$i0"}
+        ]}}
+      ], "gap": 4},
+      {"grid": "BUTTON", "columns": 8, "rows": 2, "name": "mutes"}
+    ],
+    "sizes": [3, 1], "gap": 8, "pad": 8, "name": "mixer",
+    "frame": [0, 0, 1024, 768]
+  }
+}

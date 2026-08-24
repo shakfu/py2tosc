@@ -96,7 +96,13 @@ $ py2tosc convert mixer.json -o mixer.tosc
 
 The input is read the same way wherever it comes from, so every subcommand on
 this page takes a `.json` layout where it takes a `.tosc`. The format is
-decided by what the file holds rather than by its name.
+decided by what the file holds rather than by its name, which includes telling
+the two JSON dialects apart: a file whose envelope says `py2tosc.ui` is a
+[layout description](guide/ui-json.md) and is built before it is read.
+
+There is no `-o mixer.ui.json`, and there cannot be. A description says how the
+space is divided; a layout that has been resolved has frames instead, and no
+memory of the row that placed them.
 
 ## build
 

@@ -687,7 +687,18 @@ def tiles(
 
     Returns:
         A `GROUP` holding the children, waiting to be resolved.
+
+    Raises:
+        ValueError: If `columns`, or `rows` when it is given, is less than
+            one. Checked here rather than left to the geometry, which divides
+            by both and would otherwise fail at `resolve` with a
+            `ZeroDivisionError` a long way from the call that caused it.
     """
+    if columns < 1:
+        raise ValueError(f"tiles needs at least one column, asked for {columns}")
+    if rows is not None and rows < 1:
+        raise ValueError(f"tiles needs at least one row, asked for {rows}")
+
     return _arranged(
         Layout(TILES, columns=columns, rows=rows, gap=to_gap(gap), pad=to_pad(pad)),
         children,

@@ -13,7 +13,7 @@ This project has no relation to Hexler, the developer of TouchOSC. Back up your
 layouts before editing them with third party tools.
 """
 
-from . import json_codec, layout, properties, surface, ui
+from . import json_codec, layout, properties, surface, ui, ui_json
 from .codegen import to_python
 from .control import (
     Control,
@@ -142,6 +142,7 @@ __all__ = [
     "to_json",
     "to_python",
     "ui",
+    "ui_json",
     "validate",
     "xy",
 ]

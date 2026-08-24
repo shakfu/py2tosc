@@ -18,6 +18,23 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
 
   A key nothing reads is refused rather than ignored, with a suggested spelling where there is a near match. This is the failure a hand-authored format has to close: a `childs` that is quietly skipped drops a whole subtree, and the layout that comes back looks exactly like one that read correctly. Every message names the node it gave up on -- `root.children[1].properties.frame: a frame needs 4 values (x, y, w, h), got 2` -- because a layout is a deep tree and 4715 controls is a real size for one.
 
+- A JSON dialect that *describes* a layout for the combinators to build, where the encoding above holds one the file already has. It is documented in [Describing a layout in JSON](https://shakfu.github.io/py2tosc/guide/ui-json/), read by `py2tosc.load` like any other layout, and reached directly as `py2tosc.ui_json`.
+
+  ```json
+  {"format": "py2tosc.ui", "root": {"column": [
+    {"row": [{"repeat": 8, "of": {"fader": "ch$i", "messages": [{"midi_cc": "$i0"}]}}], "gap": 4},
+    {"grid": "BUTTON", "columns": 8, "rows": 2, "name": "mutes"}
+  ], "sizes": [3, 1], "gap": 8, "pad": 8, "frame": [0, 0, 1024, 768]}}
+  ```
+
+  Four rules are the whole of it. One key names the thing, and everything else is an argument to it: `{"row": [...], "gap": 4}` is `ui.row(*children, gap=4)`. The value is that tag's one positional argument -- children, a control type, the control being wrapped, or a control's name. `repeat` expands in place, as a child rather than a setting on its parent, so a list can mix repeated and hand-written children. And a sibling key that is not an argument is a property, checked against what the type accepts, so a mistyped `gpa` is a message rather than a custom property nobody asked for.
+
+  Repetition binds two counters, `$i` from wherever `from` says and `$i0` from zero, and a string that is nothing but a counter keeps its type -- which is the only reason a controller number can be repeated at all. Repeats nest, each naming its own counter with `as`, and the outer pass leaves the inner pass's counters alone so both are readable in the innermost node. A `$` is only special inside a repeat, so an OSC address written `/mixer/{name}` is untouched: that is TouchOSC's templating, resolved on the device, and the two syntaxes are different so neither can consume the other.
+
+  A `connect` binding names the control it writes to rather than carrying a node id, and every name is looked up once the whole tree exists, so a binding can point forwards, backwards or out of its own branch. A name matching no control, or more than one, is an error that says which.
+
+  It is read and never written. A resolved layout has frames and no memory of the `row` that placed them, so `save` always writes the faithful encoding whatever the document was built from. Being a description of what `py2tosc.ui` does, it inherits that module's carve-out from the stability policy: it may change in a minor release, where the encoding above may not.
+
 ### Changed
 
 - `Document.save` writes a `.json` where it already wrote a `.xml` or a `.tosc`, and `load` and `loads` read one. The extension chooses on the way out; on the way in the content decides, since a layout in JSON opens with its envelope object and one in XML with a tag. Nothing about the existing two formats changes.
@@ -25,6 +42,10 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
 - `py2tosc convert mixer.tosc -o mixer.json` writes the JSON encoding, and `show`, `validate` and `decompile` accept a `.json` layout wherever they accepted a `.tosc`. That falls out of the reading above rather than being wired per subcommand.
 
 - The [stability policy](https://shakfu.github.io/py2tosc/stability/) now covers the JSON encoding under the same byte-exact guarantee, with the same two exceptions. That encoding carries a `schema` number of its own: a change that would stop an already written file from reading gets a new one, and a file declaring an older schema keeps reading.
+
+### Fixed
+
+- `ui.tiles` refused nothing, so `columns=0` divided by zero inside the geometry at `resolve` -- a `ZeroDivisionError` from a long way away from the call that caused it. It now raises a `ValueError` naming the argument, as `ui.grid` already did for the same mistake.
 
 ## [0.4.0]
 

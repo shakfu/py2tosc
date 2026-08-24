@@ -4,8 +4,6 @@ Open items only, in the order they are worth doing. Completed work is recorded i
 
 ## Next
 
-- [ ] implement a higher-level .json variant which maps to py2tosc combinators for easier ui definitions.
-
 ## Deliberately not yet
 
 - **A gamepad demo.** `GamepadMessage` is read, round-tripped and validated, but nothing in the library ever authors one -- structurally the gap that `controls.py` closed for the six unauthored control types, one layer up. What holds it back is not a game controller: `gamepad.tosc` carries 43 editor-written bindings to model on, and building a layout and confirming it loads needs no hardware at all. It is that only hardware can confirm the last step, that the input actually drives the control, and a demo here exists to be opened rather than to be asserted about. The defect class that made the control sweep pay off is already foreclosed: those six types had no editor-written reference, where a from-scratch `GamepadMessage()` matches the editor's own instance on every field.

@@ -8,6 +8,7 @@ the content decides on the way in.
 
 from __future__ import annotations
 
+import json
 import zlib
 from collections.abc import Iterator
 from dataclasses import dataclass
@@ -254,8 +255,10 @@ def loads(source: str | bytes) -> Document:
     """Parse a layout from XML text, JSON text, or raw `.tosc` bytes.
 
     Compressed input is detected and decompressed automatically, and JSON is
-    told from XML by its first character, so this accepts any of the three
-    without being told which it was given.
+    told from XML by its first character, so this accepts any of them without
+    being told which it was given. Either JSON dialect is read: the faithful
+    encoding of `py2tosc.json_codec`, and the layout description of
+    `py2tosc.ui_json`, which the envelope's `format` distinguishes.
 
     Args:
         source: XML text or bytes, JSON text or bytes, or the contents of a
@@ -276,10 +279,20 @@ def loads(source: str | bytes) -> Document:
             raise FormatError(f"not a readable .tosc stream: {exc}") from exc
 
     if _is_json(source):
-        # See `save` for why this import is not at the top of the module.
-        from .json_codec import from_json
+        # See `save` for why these imports are not at the top of the module.
+        from . import json_codec, ui_json
 
-        return from_json(source)
+        try:
+            data = json.loads(source)
+        except json.JSONDecodeError as exc:
+            raise FormatError(f"not valid JSON: {exc}") from exc
+
+        # Two JSON dialects reach here: the faithful encoding, and the
+        # description that `ui` builds from. The envelope says which, and the
+        # faithful one is the default because its own marker is optional.
+        if isinstance(data, dict) and data.get("format") == ui_json.DIALECT:
+            return ui_json.build(data)
+        return json_codec.build(data)
 
     root, version = from_xml(source)
     return Document(root=root, version=version)

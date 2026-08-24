@@ -85,6 +85,7 @@ nav:
       - Layout sizes: guide/sizes.md
       - The .tosc format: guide/format.md
       - The .json format: guide/json.md
+      - Describing a layout in JSON: guide/ui-json.md
       - Custom properties: guide/custom-properties.md
       - Validation: guide/validation.md
   - Demos:
@@ -109,6 +110,7 @@ nav:
       - Validation: api/validate.md
       - Errors: api/errors.md
       - The JSON encoding: api/json.md
+      - Layout descriptions: api/ui-json.md
       - Generating Python: api/codegen.md
       - Control surfaces: api/surface.md
   - Coming from tosclib: migrating.md

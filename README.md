@@ -285,6 +285,7 @@ $ py2tosc build params.json -o surface.tosc
 | `control` | `Control`, the node model, plus a factory per control type |
 | `codec` | Reading and writing the `.tosc` XML dialect, CDATA included |
 | `json_codec` | The same tree as JSON, for emitting a layout from elsewhere or reading a diff of one |
+| `ui_json` | A layout *described* in JSON and built by the combinators, for when the layout is decided by a config file rather than by code |
 | `document` | `Document`, `load`, `save`, `dumps` |
 | `layout` | Eager `row`, `column` and `matrix`: make the children and size them now |
 | `ui` | Message and layout combinators, described now and sized by `resolve` |

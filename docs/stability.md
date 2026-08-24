@@ -9,8 +9,9 @@ something, this page is the contract.
 ```text
 Covered by the guarantee          Not covered
 --------------------------------  ----------------------------------------
-py2tosc.<name> for every name     py2tosc.ui.*  -- provisional, see below
-  in __all__                      Anything whose name starts with _
+py2tosc.<name> for every name     py2tosc.ui.*, py2tosc.ui_json
+  in __all__                        -- provisional, see below
+                                  Anything whose name starts with _
 py2tosc.layout, .properties,      Anything not in __all__ and not in the
   .surface                          API reference
 The API reference, docs/api/      The wording of CLI output
@@ -66,6 +67,11 @@ code rather than only in this document. The top-level `py2tosc.grid`,
 Nothing unstable leaks into the top-level API by accident, so the rule you have
 to remember is the whole of it: **if you reached it through `py2tosc.ui`, it is
 provisional.**
+
+`py2tosc.ui_json` is provisional for the same reason and by the same rule. It is
+a JSON description of what the combinators do, so it cannot be steadier than
+what it describes. It carries a `schema` number of its own for the case where a
+change would stop an already written description from building.
 
 Everything `ui` builds is an ordinary `Control`, `OscMessage` or `MidiMessage`.
 Nothing it produces can reach a file that hand-written code could not. If a

@@ -6,6 +6,8 @@
 
 ::: py2tosc.loads
 
+::: py2tosc.edit
+
 ::: py2tosc.save
 
 ::: py2tosc.dumps

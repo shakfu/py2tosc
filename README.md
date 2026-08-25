@@ -83,6 +83,16 @@ doc.save("mixer.tosc")
 
 `row`, `column`, `tiles` and `stack` arrange controls inside a group; `pager` and `grid` build the two containers the format names. `resolve` hands the frame at the top down the tree.
 
+A child may be a control, a list of them, or a generator, at any depth, so a comprehension goes in as it is and nested lists flatten:
+
+```python
+banks = [[py2tosc.button(name=f"b{i}{j}") for j in range(2)] for i in range(2)]
+
+ui.row(banks, py2tosc.fader(name="master"))    # b00, b01, b10, b11, master
+```
+
+A group stays one child rather than the controls inside it, so a row you already built nests as a single thing. [Layouts](https://shakfu.github.io/py2tosc/guide/layouts/) covers the rest.
+
 ```python
 pads = [py2tosc.button(name=f"pad{n}") for n in range(1, 17)]
 faders = [py2tosc.fader(name=f"ch{n}") for n in range(1, 9)]
@@ -167,17 +177,16 @@ When the data is already a JSON file, `py2tosc build` does this without a script
 
 ## Editing an existing layout
 
-`load` reads a `.tosc` or an exported `.xml` without being told which, and the tree it returns is the same one you would have built:
+`edit` reads a `.tosc` or an exported `.xml` without being told which, hands you the tree -- the same one you would have built -- and writes it back when the block ends:
 
 ```python
-doc = py2tosc.load("mixer.tosc")
-
-for fader in doc.find_all(type="FADER"):
-    fader.color = "#e76f51"
-    fader.corner_radius = 2.0
-
-doc.save("mixer-restyled.tosc")
+with py2tosc.edit("mixer.tosc", save_as="mixer-restyled.tosc") as doc:
+    for fader in doc.find_all(type="FADER"):
+        fader.color = "#e76f51"
+        fader.corner_radius = 2.0
 ```
+
+Without `save_as` it writes back over the file it read, which is the usual case and means the path is named once rather than twice. Nothing is written if the block raises. `load` and `save` remain for when the two halves belong apart.
 
 ### Finding things
 

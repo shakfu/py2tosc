@@ -176,7 +176,8 @@ Nothing is written when it raises. The
 warnings included, so a caller can report them all.
 
 Warnings alone never block a save. `dumps(validate=True)` does the same for the
-string form.
+string form, and [`edit`][py2tosc.edit] takes the same argument, applying the
+check when its block ends and leaving the file it read untouched if it fails.
 
 It is off by default, deliberately. A rule in the checker being wrong should not
 stop you writing a file -- and these rules have been wrong before, 108 times on

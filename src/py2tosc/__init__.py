@@ -31,7 +31,7 @@ from .control import (
     text,
     xy,
 )
-from .document import Document, dumps, load, loads, save
+from .document import Document, dumps, edit, load, loads, save
 from .enums import (
     AlignH,
     AlignV,
@@ -71,7 +71,7 @@ from .messages import (
 from .properties import Color, Frame, Property, to_color, to_frame
 from .validate import Issue, ValidationError, validate
 
-__version__ = "0.5.0"
+__version__ = "0.5.1"
 
 # Sorted rather than grouped by topic, because RUF022 asks for it and the
 # grouping lives in the API reference instead. See docs/api/.
@@ -119,6 +119,7 @@ __all__ = [
     "box",
     "button",
     "dumps",
+    "edit",
     "encoder",
     "fader",
     "from_json",

@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import zlib
 from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from os import PathLike
 from typing import TYPE_CHECKING, Any
@@ -24,7 +25,7 @@ from .errors import FormatError
 if TYPE_CHECKING:  # pragma: no cover
     from .validate import Issue
 
-__all__ = ["Document", "dumps", "load", "loads", "save"]
+__all__ = ["Document", "dumps", "edit", "load", "loads", "save"]
 
 _PathLike = str | PathLike[str]
 
@@ -341,3 +342,58 @@ def save(document: Document, path: _PathLike, *, pretty: bool | None = None) -> 
         pretty: Override the formatting the extension would choose.
     """
     document.save(path, pretty=pretty)
+
+
+@contextmanager
+def edit(
+    path: _PathLike,
+    *,
+    save_as: _PathLike | None = None,
+    validate: bool = False,
+    pretty: bool | None = None,
+) -> Iterator[Document]:
+    """Open a layout, change it, and write it back.
+
+    The file is read on the way in and written on the way out, so the two lines
+    that bracket an editing script become the `with` itself:
+
+    ```python
+    with py2tosc.edit("mixer.tosc") as doc:
+        for fader in doc.find_all(type="FADER"):
+            fader.set("color", "#e76f51")
+    ```
+
+    The path is named once rather than twice, which is the mistake this is
+    mostly here to prevent: a `load` and a `save` far apart in a script are two
+    places for a filename to be wrong, and the one that writes is the one that
+    matters. Nothing is written if the block raises, so a `save` in the middle
+    of a script cannot leave a half-edited layout on disk either.
+
+    Anything the combinators described and nobody resolved is placed on the way
+    out, since [`Document.save`][py2tosc.Document.save] does that. Editing a
+    loaded layout is unaffected: a loaded control carries no layout.
+
+    Args:
+        path: The layout to read. Any of the three formats, as
+            [`load`][py2tosc.load].
+        save_as: Where to write, if not back over `path`. The extension chooses
+            the format, so this is also how a `.tosc` is edited out to `.xml`.
+        validate: Check before writing and write nothing if the layout has
+            errors, as [`Document.save`][py2tosc.Document.save].
+        pretty: Override the formatting the extension would choose.
+
+    Yields:
+        The document, to be edited in place.
+
+    Raises:
+        FormatError: If the file is not a readable layout.
+        ValidationError: If `validate` is set and the layout has errors.
+            Nothing is written.
+        ValueError: If a layout cannot fit its children into its space.
+        OSError: If the file cannot be read or written.
+    """
+    document = load(path)
+    yield document
+    document.save(
+        path if save_as is None else save_as, pretty=pretty, validate=validate
+    )

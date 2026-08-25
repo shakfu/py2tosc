@@ -957,3 +957,94 @@ def test_tiles_refuses_a_grid_with_no_cells():
         ui.tiles(py2tosc.fader(), columns=0)
     with pytest.raises(ValueError, match="at least one row"):
         ui.tiles(py2tosc.fader(), rows=0)
+
+
+# -- what counts as a child --------------------------------------------------
+
+
+def test_a_generator_of_controls_needs_no_unpacking():
+    row = ui.row(
+        (py2tosc.fader(name=f"ch{n}") for n in range(1, 4)), frame=(0, 0, 300, 100)
+    )
+    ui.resolve(row)
+
+    assert [c.get("name") for c in row.children] == ["ch1", "ch2", "ch3"]
+    assert frames(row) == [(0, 0, 100, 100), (100, 0, 100, 100), (200, 0, 100, 100)]
+
+
+def test_a_list_of_controls_is_the_same_as_unpacking_it():
+    faders = [py2tosc.fader(name=f"ch{n}") for n in range(1, 4)]
+    packed = ui.row(faders, gap=4, frame=(0, 0, 300, 100))
+    unpacked = ui.row(*faders, gap=4, frame=(0, 0, 300, 100))
+
+    assert len(packed.children) == len(unpacked.children) == 3
+    assert ui.resolve(packed)._layout == ui.resolve(unpacked)._layout
+
+
+def test_nesting_is_flattened_to_any_depth_and_mixes_with_bare_controls():
+    banks = [
+        [py2tosc.button(name=f"b{bank}{n}") for n in range(2)] for bank in range(2)
+    ]
+    row = ui.row(banks, py2tosc.fader(name="master"))
+
+    assert [c.get("name") for c in row.children] == [
+        "b00",
+        "b01",
+        "b10",
+        "b11",
+        "master",
+    ]
+
+
+def test_a_group_is_a_child_rather_than_the_controls_inside_it():
+    """`Control` is iterable, so the order of the isinstance checks is load bearing."""
+    inner = py2tosc.group(name="panel").add(py2tosc.fader(name="ch1"))
+    row = ui.row(inner)
+
+    assert row.children == [inner]
+    assert [c.get("name") for c in row.children] == ["panel"]
+
+
+def test_sizes_are_counted_after_flattening():
+    faders = [py2tosc.fader(name=f"ch{n}") for n in range(1, 4)]
+    row = ui.row(faders, sizes=(1, 2, 1), frame=(0, 0, 400, 100))
+    ui.resolve(row)
+
+    assert frames(row) == [(0, 0, 100, 100), (100, 0, 200, 100), (300, 0, 100, 100)]
+
+
+@pytest.mark.parametrize(
+    "combinator", [ui.row, ui.column, ui.tiles, ui.stack, ui.pager]
+)
+def test_something_that_is_not_a_control_is_refused_at_the_call(combinator):
+    """The failure used to be an `AttributeError` raised from `resolve`.
+
+    That is a long way from the call that caused it, and names neither the
+    combinator nor the argument.
+    """
+    with pytest.raises(TypeError, match="takes controls, or iterables of them"):
+        combinator(3)
+
+
+def test_a_string_is_refused_rather_than_iterated():
+    """Iterating a string yields strings, so nothing would terminate."""
+    with pytest.raises(TypeError, match="got str"):
+        ui.row("fader")
+
+
+def test_a_generator_is_read_once_at_the_call():
+    """Nothing is deferred, so a generator cannot be consumed twice or late."""
+    consumed = (py2tosc.fader(name=f"ch{n}") for n in range(1, 4))
+    row = ui.row(consumed)
+
+    assert len(row.children) == 3
+    assert list(consumed) == []
+
+
+def test_pages_may_be_a_list_and_still_get_their_tab_labels():
+    pages = [ui.row(py2tosc.fader(name=f"f{n}"), name=f"page{n}") for n in range(2)]
+    pager = ui.pager(pages, frame=(0, 0, 400, 300))
+    ui.resolve(pager)
+
+    assert pager.control_type is py2tosc.ControlType.PAGER
+    assert [p.get("tabLabel") for p in pager.children] == ["page0", "page1"]

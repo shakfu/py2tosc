@@ -36,6 +36,8 @@ The same four constructors describe an OSC argument, a MIDI slot and either end 
 
 These describe an arrangement instead of applying one. Each returns the container it built, so the result goes wherever a control goes and layouts nest by ordinary composition. Frames are assigned later, by `resolve`.
 
+Children are controls, or any nesting of lists and generators of them -- the `Children` alias in the signatures below. A group is a child rather than the controls inside it, and anything that is neither a control nor a sequence of them is a `TypeError` at the call.
+
 The first four build a `GROUP`, arranging controls you already have.
 
 ::: py2tosc.ui.row

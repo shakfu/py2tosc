@@ -28,6 +28,18 @@ panel = ui.column(
 ui.resolve(panel)
 ```
 
+A child may be a control or any nesting of iterables of them, so a comprehension
+goes in as it is:
+
+```python
+ui.row(fader(name=f"ch{n}") for n in range(1, 9))
+```
+
+That is mostly `*` elided, since unpacking a generator has always worked. What
+it adds is the nested case -- a list of banks, each a list of controls -- which
+otherwise needs `itertools.chain`, and an argument that is neither a control nor
+a sequence of them now fails at the call that made it rather than at `resolve`.
+
 Nothing here adds vocabulary the format lacks, and nothing here can reach a
 file that a hand-built `OscMessage` could not -- the arrangement rides on a
 private attribute the codec cannot see. The module is separate from the core
@@ -43,8 +55,8 @@ dataclasses directly.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import Any
+from collections.abc import Iterable, Sequence
+from typing import Any, TypeAlias
 
 from ._geometry import (
     CELLS,
@@ -74,6 +86,7 @@ from .messages import (
 )
 
 __all__ = [
+    "Children",
     "column",
     "connect",
     "const",
@@ -619,6 +632,34 @@ def connect(
 # -- layout ------------------------------------------------------------------
 
 
+#: What a layout combinator takes as a child: a control, or any nesting of
+#: iterables of them. A generator is read once, at the call.
+Children: TypeAlias = "Control | Iterable[Children]"
+
+
+def _flatten(children: Iterable[Any], what: str) -> list[Control]:
+    """Controls out of controls, lists of them, and generators of them.
+
+    A `Control` is itself iterable -- over its own children -- so it has to be
+    recognised before the iterable case, or a group would be replaced by the
+    controls inside it and the arrangement would lose a level. Strings are
+    excluded for the other reason: iterating one yields strings, so nothing
+    would terminate.
+    """
+    out: list[Control] = []
+    for child in children:
+        if isinstance(child, Control):
+            out.append(child)
+        elif isinstance(child, Iterable) and not isinstance(child, (str, bytes)):
+            out.extend(_flatten(child, what))
+        else:
+            raise TypeError(
+                f"{what} takes controls, or iterables of them; "
+                f"got {type(child).__name__}"
+            )
+    return out
+
+
 def _arranged(
     spec: Layout,
     children: Sequence[Control],
@@ -631,7 +672,7 @@ def _arranged(
 
 
 def row(
-    *children: Control,
+    *children: Children,
     sizes: int | Sequence[float] | None = None,
     gap: float | Sequence[float] = 0,
     pad: float | Sequence[float] = 0,
@@ -651,8 +692,11 @@ def row(
     what lets a layout be described from the inside out.
 
     Args:
-        *children: The controls to arrange, in order.
-        sizes: Relative widths, one per child. Omitted, they share equally.
+        *children: The controls to arrange, in order. A list or a generator of
+            controls counts as its contents, at any depth, so a comprehension
+            goes in without being unpacked.
+        sizes: Relative widths, one per child once iterables are flattened.
+            Omitted, they share equally.
         gap: Space between children, in pixels.
         pad: Inset around the whole row -- a number, a `(horizontal, vertical)`
             pair, or `(left, top, right, bottom)`.
@@ -662,12 +706,14 @@ def row(
         A `GROUP` holding the children, waiting to be resolved.
     """
     return _arranged(
-        Layout(ROW, sizes=sizes, gap=to_gap(gap), pad=to_pad(pad)), children, props
+        Layout(ROW, sizes=sizes, gap=to_gap(gap), pad=to_pad(pad)),
+        _flatten(children, "row"),
+        props,
     )
 
 
 def column(
-    *children: Control,
+    *children: Children,
     sizes: int | Sequence[float] | None = None,
     gap: float | Sequence[float] = 0,
     pad: float | Sequence[float] = 0,
@@ -676,8 +722,10 @@ def column(
     """Arrange controls top to bottom inside a group.
 
     Args:
-        *children: The controls to arrange, in order.
-        sizes: Relative heights, one per child. Omitted, they share equally.
+        *children: The controls to arrange, in order, as [`row`][py2tosc.ui.row]
+            takes them.
+        sizes: Relative heights, one per child once iterables are flattened.
+            Omitted, they share equally.
         gap: Space between children, in pixels.
         pad: Inset around the whole column.
         **props: Properties to set on the group.
@@ -686,12 +734,14 @@ def column(
         A `GROUP` holding the children, waiting to be resolved.
     """
     return _arranged(
-        Layout(COLUMN, sizes=sizes, gap=to_gap(gap), pad=to_pad(pad)), children, props
+        Layout(COLUMN, sizes=sizes, gap=to_gap(gap), pad=to_pad(pad)),
+        _flatten(children, "column"),
+        props,
     )
 
 
 def tiles(
-    *children: Control,
+    *children: Children,
     columns: int = 4,
     rows: int | None = None,
     gap: float | Sequence[float] = 0,
@@ -701,7 +751,8 @@ def tiles(
     """Tile controls in a grid, filling row by row.
 
     Args:
-        *children: The controls to arrange, in row-major order.
+        *children: The controls to arrange, in row-major order, as
+            [`row`][py2tosc.ui.row] takes them.
         columns: How many columns.
         rows: How many rows, or `None` to take just enough for the children.
         gap: Space between cells, in pixels.
@@ -724,13 +775,13 @@ def tiles(
 
     return _arranged(
         Layout(TILES, columns=columns, rows=rows, gap=to_gap(gap), pad=to_pad(pad)),
-        children,
+        _flatten(children, "tiles"),
         props,
     )
 
 
 def stack(
-    *children: Control,
+    *children: Children,
     pad: float | Sequence[float] = 0,
     **props: Any,
 ) -> Control:
@@ -741,14 +792,15 @@ def stack(
     rather than share it. The last child is on top.
 
     Args:
-        *children: The controls to overlay, back to front.
+        *children: The controls to overlay, back to front, as
+            [`row`][py2tosc.ui.row] takes them.
         pad: Inset applied to every child.
         **props: Properties to set on the group.
 
     Returns:
         A `GROUP` holding the children, waiting to be resolved.
     """
-    return _arranged(Layout(STACK, pad=to_pad(pad)), children, props)
+    return _arranged(Layout(STACK, pad=to_pad(pad)), _flatten(children, "stack"), props)
 
 
 def resolve(control: Control, frame: Sequence[float] | None = None) -> Control:
@@ -847,7 +899,7 @@ def labelled(
 
 
 def pager(
-    *pages: Control,
+    *pages: Children,
     pad: float | Sequence[float] = 0,
     **props: Any,
 ) -> Control:
@@ -889,14 +941,16 @@ def pager(
     loads them either way.
 
     Args:
-        *pages: The pages, in tab order.
+        *pages: The pages, in tab order, as [`row`][py2tosc.ui.row] takes its
+            children.
         pad: Inset applied to every page, on top of the tab bar.
         **props: Properties to set on the pager.
 
     Returns:
         A `PAGER` holding the pages, waiting to be resolved.
     """
-    for page in pages:
+    flat = _flatten(pages, "pager")
+    for page in flat:
         # Only groups: a tab property on anything else is one that control type
         # has no use for, which `validate` would rightly report.
         if page.control_type is not ControlType.GROUP:
@@ -906,7 +960,7 @@ def pager(
         for key, colour in _PAGE_TAB_STYLE.items():
             if not page.has(key):
                 page.set(key, colour)
-    return _arranged(Layout(PAGES, pad=to_pad(pad)), pages, props, ControlType.PAGER)
+    return _arranged(Layout(PAGES, pad=to_pad(pad)), flat, props, ControlType.PAGER)
 
 
 def grid(

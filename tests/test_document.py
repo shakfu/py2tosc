@@ -177,3 +177,102 @@ def test_special_characters_are_escaped(text):
     doc = py2tosc.Document.new()
     doc.add(py2tosc.group(tag=text))
     assert py2tosc.loads(doc.dumps()).find_all()[0].tag == text
+
+
+def _one_fader(tmp_path, name="layout.tosc"):
+    """A saved layout with a single named fader, for the `edit` tests."""
+    doc = py2tosc.Document.new(frame=(0, 0, 640, 480))
+    doc.add(py2tosc.fader(name="ch1"))
+    path = tmp_path / name
+    doc.save(path)
+    return path
+
+
+def test_edit_writes_the_change_back_to_the_same_file(tmp_path):
+    path = _one_fader(tmp_path)
+
+    with py2tosc.edit(path) as doc:
+        doc.find("ch1").set("name", "kick")
+
+    assert py2tosc.load(path).find("kick") is not None
+
+
+def test_edit_writes_nothing_when_the_block_raises(tmp_path):
+    path = _one_fader(tmp_path)
+    before = path.read_bytes()
+
+    with pytest.raises(RuntimeError, match="boom"):
+        with py2tosc.edit(path) as doc:
+            doc.find("ch1").set("name", "kick")
+            raise RuntimeError("boom")
+
+    assert path.read_bytes() == before
+
+
+def test_edit_round_trips_a_file_it_does_not_change(tmp_path):
+    path = _one_fader(tmp_path)
+    before = path.read_bytes()
+
+    with py2tosc.edit(path):
+        pass
+
+    assert path.read_bytes() == before
+
+
+def test_edit_save_as_leaves_the_source_alone(tmp_path):
+    path = _one_fader(tmp_path)
+    before = path.read_bytes()
+    other = tmp_path / "copy.xml"
+
+    with py2tosc.edit(path, save_as=other) as doc:
+        doc.find("ch1").set("name", "kick")
+
+    assert path.read_bytes() == before
+    assert py2tosc.load(other).find("kick") is not None
+    # The extension chooses the format on the way out, as `save` does.
+    assert other.read_bytes().startswith(b"<?xml")
+
+
+def test_edit_validate_refuses_to_write_a_broken_layout(tmp_path):
+    from py2tosc.validate import ValidationError
+
+    path = _one_fader(tmp_path)
+    before = path.read_bytes()
+
+    with pytest.raises(ValidationError):
+        with py2tosc.edit(path, validate=True) as doc:
+            # A FADER cannot hold children, which `validate` reports as an error.
+            doc.find("ch1").add(py2tosc.label(name="nope"))
+
+    assert path.read_bytes() == before
+
+
+def test_edit_places_a_layout_described_inside_the_block(tmp_path):
+    from py2tosc import ui
+
+    path = _one_fader(tmp_path)
+
+    with py2tosc.edit(path) as doc:
+        doc.add(
+            ui.row(
+                py2tosc.button(name="a"),
+                py2tosc.button(name="b"),
+                frame=(0, 0, 200, 50),
+                name="pads",
+            )
+        )
+
+    # `save` resolves what nobody resolved, so the buttons are not both at the
+    # origin -- the same guarantee `Document.save` already makes.
+    reloaded = py2tosc.load(path)
+    assert reloaded.find("a").frame == (0, 0, 100, 50)
+    assert reloaded.find("b").frame == (100, 0, 100, 50)
+
+
+def test_edit_reports_a_file_it_cannot_read(tmp_path):
+    path = tmp_path / "broken.tosc"
+    path.write_bytes(b"not a layout")
+
+    with pytest.raises(py2tosc.FormatError):
+        with py2tosc.edit(path):
+            pytest.fail("the block must not run when the file cannot be read")

@@ -98,6 +98,42 @@ doc.resolve()
 
 Each combinator returns the group it made rather than the children, so the result goes wherever a control goes and nesting is ordinary function composition -- `row(column(a, b), c)`. A row can hold a fader and a label, since it takes controls rather than a control type.
 
+### What counts as a child
+
+A child may be a control, a list of them, or a generator, so these three build the same row:
+
+```python
+faders = [py2tosc.fader(name=f"ch{n}") for n in range(1, 4)]
+
+ui.row(*faders, frame=(0, 0, 300, 100))                    # unpacked
+ui.row(faders, frame=(0, 0, 300, 100))                     # the list itself
+ui.row((py2tosc.fader(name=f"ch{n}") for n in range(1, 4)),
+       frame=(0, 0, 300, 100))                             # a generator
+```
+
+Resolved, each is the same three faders side by side:
+
+```python
+[("ch1", (0, 0, 100, 100)), ("ch2", (100, 0, 100, 100)), ("ch3", (200, 0, 100, 100))]
+```
+
+Unpacking with `*` has always worked, so the single-list case is mostly punctuation. What it adds is nesting, at any depth, mixed with controls written out:
+
+```python
+banks = [[py2tosc.button(name=f"b{i}{j}") for j in range(2)] for i in range(2)]
+
+ui.row(banks, py2tosc.fader(name="master"))
+#> children: b00, b01, b10, b11, master
+```
+
+which otherwise takes `itertools.chain.from_iterable`. And it moves the failure to where the mistake is: `ui.row(3)` raises `TypeError: row takes controls, or iterables of them; got int` at the call, rather than failing later inside `resolve`, a long way from the call that caused it and naming neither the combinator nor the argument.
+
+Two things it deliberately does not do. A group is a child rather than the controls inside it, even though a `Control` is iterable over its own children -- otherwise nesting a row you already built inside another one would silently lose a level. And a string is refused rather than iterated, since iterating one yields strings and nothing would terminate.
+
+`sizes` counts children after flattening, so `ui.row(faders, sizes=(1, 2, 1))` above is three slots, not one.
+
+Whether to name the children first is a judgement rather than a rule. `faders = [...]` above the tree is a name and a place to test, and a comprehension buried three levels in is neither; the inline form earns its place when the row is a one-off.
+
 `ui.stack` overlays its children, each filling the group. That is the button-with-a-label idiom, and it is the reason the numpad demo needs a helper of its own.
 
 ### Resolving

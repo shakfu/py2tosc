@@ -102,6 +102,18 @@ doc.save("mixer.xml")      # readable, useful in diffs
 text = doc.dumps()         # the XML as a string
 ```
 
+When you are doing both -- reading a layout, changing it, writing it back --
+[`edit`][py2tosc.edit] is that pair in one statement:
+
+```python
+with py2tosc.edit("mixer.tosc") as doc:
+    doc.find("cutoff").color = "#e76f51"
+```
+
+The path is named once, and nothing is written if the block raises. `save_as`
+writes somewhere else, and `validate` checks before writing, both as `save`
+does.
+
 ## A complete example
 
 ```python

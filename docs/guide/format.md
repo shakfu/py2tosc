@@ -141,7 +141,6 @@ Relative to the version 3 files older tooling produced:
 py2tosc reads both. A file keeps the version it was saved with, so editing an older layout will not silently change its format; new documents are version 6. To upgrade an old layout deliberately, set the version before saving:
 
 ```python
-doc = py2tosc.load("old.tosc")
-doc.version = "6"
-doc.save("new.tosc")
+with py2tosc.edit("old.tosc", save_as="new.tosc") as doc:
+    doc.version = "6"
 ```

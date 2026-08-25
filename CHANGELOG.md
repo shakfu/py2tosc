@@ -4,6 +4,36 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.5.1]
+
+### Added
+
+- `py2tosc.edit`, a context manager that reads a layout on the way in and writes it back on the way out:
+
+  ```python
+  with py2tosc.edit("mixer.tosc") as doc:
+      for fader in doc.find_all(type="FADER"):
+          fader.set("color", "#e76f51")
+  ```
+
+  It replaces the `load` and `save` pair that brackets every editing script, and the point of it is that the path is named once. Two places for a filename is one place for it to be wrong, and the one that writes is the one that costs something: a `save` addressed to the wrong file overwrites a layout nobody meant to touch, and a `save` addressed to the file that was never loaded is a script that silently does nothing. `save_as` covers the case where the two really are different, and picks its format from its own extension the way `save` does, so a `.tosc` can be edited out to `.xml` in one line.
+
+  Nothing is written if the block raises. In the usual script this changes nothing, since the `save` is the last statement and a failure above it already skips the write -- it matters when a `save` sits in the middle, where the file otherwise ends up holding half of what was intended. `validate=True` is passed through to `Document.save` and is the checkpoint worth using: a layout the checker rejects leaves the file it came from untouched.
+
+  This is the only context manager in the public API, and the boundary is deliberate. A `with` block scopes time -- something is true for the duration and false afterwards -- and the only thing in this library with a before and an after is the file. A control tree is a value, which is why the layout combinators compose by returning controls rather than by nesting blocks; a block-structured builder would need ambient state to know which parent is current, and that state would have to live in `Control`, where nothing global lives today.
+
+- The layout combinators -- `ui.row`, `ui.column`, `ui.tiles`, `ui.stack` and `ui.pager` -- take a list or a generator of controls wherever they took a control, at any depth, so a comprehension goes in without being unpacked:
+
+  ```python
+  ui.row(py2tosc.fader(name=f"ch{n}") for n in range(1, 9))
+  ```
+
+  Mostly this is the `*` elided, since unpacking a generator into a call has always worked. Two things are new. A nesting of lists -- a list of banks, each a list of controls -- flattens instead of needing `itertools.chain`. And an argument that is neither a control nor a sequence of them is now a `TypeError` naming the combinator that was called, where it used to be `AttributeError: 'generator' object has no attribute 'set'` raised from inside `resolve`, several steps away from the call that caused it and naming neither.
+
+  A `Control` is itself iterable, over its own children, so a group is a child rather than the controls inside it -- the check for a control comes before the check for an iterable, and a test pins that order. Strings are refused rather than iterated, since iterating one yields strings and nothing would terminate. `sizes` counts children after flattening.
+
+  The widening is `ui.Children`, a new name in that module's `__all__`. It stays inside `py2tosc.ui` deliberately: `Control.add` and `Document.add` still take controls alone, because the convenience is not worth widening what the stable layer promises.
+
 ## [0.5.0]
 
 ### Added

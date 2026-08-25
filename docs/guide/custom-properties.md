@@ -11,9 +11,8 @@ Scripts are similarly constrained to [the documented functions](https://hexler.n
 ```python
 import py2tosc
 
-doc = py2tosc.load("layout.tosc")
-doc.root.set("CustomProperty", "1007")
-doc.save("out.tosc")
+with py2tosc.edit("layout.tosc", save_as="out.tosc") as doc:
+    doc.root.set("CustomProperty", "1007")
 ```
 
 The type is inferred from the Python value, so a string is stored as `s` and a float as `f`. Force it if you need to:

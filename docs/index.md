@@ -20,14 +20,15 @@ No dependencies. Python 3.10 or newer.
 ```python
 import py2tosc
 
-doc = py2tosc.load("mixer.tosc")
-
-for fader in doc.find_all(type="FADER"):
-    fader.color = "#e76f51"
-    fader.corner_radius = 2.0
-
-doc.save("mixer-restyled.tosc")
+with py2tosc.edit("mixer.tosc", save_as="mixer-restyled.tosc") as doc:
+    for fader in doc.find_all(type="FADER"):
+        fader.color = "#e76f51"
+        fader.corner_radius = 2.0
 ```
+
+[`edit`](api/document.md) reads the layout on the way in and writes it back on
+the way out. Without `save_as` it writes over the file it read, so the path is
+named once.
 
 ## Building one from scratch
 

@@ -537,6 +537,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../guide/json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The .json format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/ui-json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Describing a layout in JSON
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../guide/custom-properties/" class="md-nav__link">
         
   
@@ -1243,6 +1299,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../api/json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The JSON encoding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/ui-json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layout descriptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../api/codegen/" class="md-nav__link">
         
   
@@ -1678,13 +1790,14 @@ something, this page is the contract.</p>
 <h2 id="the-short-version">The short version<a class="headerlink" href="#the-short-version" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Covered by the guarantee          Not covered
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>--------------------------------  ----------------------------------------
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>py2tosc.&lt;name&gt; for every name     py2tosc.ui.*  -- provisional, see below
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  in __all__                      Anything whose name starts with _
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>py2tosc.layout, .properties,      Anything not in __all__ and not in the
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  .surface                          API reference
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>The API reference, docs/api/      The wording of CLI output
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>CLI names, flags and exit codes   The wording of validation messages
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>Byte-exact round trips            Which layouts validate warns about
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>py2tosc.&lt;name&gt; for every name     py2tosc.ui.*, py2tosc.ui_json
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  in __all__                        -- provisional, see below
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                                  Anything whose name starts with _
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>py2tosc.layout, .properties,      Anything not in __all__ and not in the
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  .surface                          API reference
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>The API reference, docs/api/      The wording of CLI output
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>CLI names, flags and exit codes   The wording of validation messages
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>Byte-exact round trips            Which layouts validate warns about
 </code></pre></div>
 <h2 id="versioning">Versioning<a class="headerlink" href="#versioning" title="Permanent link">&para;</a></h2>
 <p>The project follows <a href="https://semver.org/spec/v2.0.0.html">semantic versioning</a>.
@@ -1725,6 +1838,10 @@ code rather than only in this document. The top-level <code>py2tosc.grid</code>,
 Nothing unstable leaks into the top-level API by accident, so the rule you have
 to remember is the whole of it: <strong>if you reached it through <code>py2tosc.ui</code>, it is
 provisional.</strong></p>
+<p><code>py2tosc.ui_json</code> is provisional for the same reason and by the same rule. It is
+a JSON description of what the combinators do, so it cannot be steadier than
+what it describes. It carries a <code>schema</code> number of its own for the case where a
+change would stop an already written description from building.</p>
 <p>Everything <code>ui</code> builds is an ordinary <code>Control</code>, <code>OscMessage</code> or <code>MidiMessage</code>.
 Nothing it produces can reach a file that hand-written code could not. If a
 change to <code>ui</code> is ever inconvenient, the documents it built remain valid and
@@ -1741,6 +1858,12 @@ that should not be preserved: a frame coordinate of <code>-0</code>, which survi
 integer <code>0</code>, and a colour component of <code>-nan(ind)</code>, which a Windows build of
 TouchOSC wrote and which is repaired to <code>0</code>. Reproducing either exactly would
 mean carrying damage forward. These will not grow without a major bump.</p>
+<p>The <a href="../guide/json/">JSON encoding</a> is held to the same bar and carries the same
+two exceptions, since it round-trips the model rather than the file: a layout
+written to JSON and read back reproduces the bytes it started as. That encoding
+carries a <code>schema</code> number of its own. A change that would stop an already
+written file from reading gets a new one, and a file declaring an older schema
+keeps reading.</p>
 <p><strong>Loading never rejects a layout TouchOSC accepts.</strong> The format permits
 properties nobody has heard of -- that is what makes custom properties useful
 -- so unknown properties are read and written back rather than refused.

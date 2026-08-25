@@ -582,6 +582,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#what-counts-as-a-child" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What counts as a child
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#resolving" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -693,6 +704,62 @@
     
   
     The .tosc format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The .json format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ui-json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Describing a layout in JSON
   
 
     
@@ -1419,6 +1486,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The JSON encoding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/ui-json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layout descriptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/codegen/" class="md-nav__link">
         
   
@@ -1650,6 +1773,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#what-counts-as-a-child" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What counts as a child
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#resolving" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1790,6 +1924,28 @@
 <a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="n">doc</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
 </code></pre></div>
 <p>Each combinator returns the group it made rather than the children, so the result goes wherever a control goes and nesting is ordinary function composition -- <code>row(column(a, b), c)</code>. A row can hold a fader and a label, since it takes controls rather than a control type.</p>
+<h3 id="what-counts-as-a-child">What counts as a child<a class="headerlink" href="#what-counts-as-a-child" title="Permanent link">&para;</a></h3>
+<p>A child may be a control, a list of them, or a generator, so these three build the same row:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">faders</span> <span class="o">=</span> <span class="p">[</span><span class="n">py2tosc</span><span class="o">.</span><span class="n">fader</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;ch</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)]</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">ui</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="o">*</span><span class="n">faders</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>                    <span class="c1"># unpacked</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">ui</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">faders</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>                     <span class="c1"># the list itself</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="n">ui</span><span class="o">.</span><span class="n">row</span><span class="p">((</span><span class="n">py2tosc</span><span class="o">.</span><span class="n">fader</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;ch</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>       <span class="n">frame</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>                             <span class="c1"># a generator</span>
+</code></pre></div>
+<p>Resolved, each is the same three faders side by side:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">[(</span><span class="s2">&quot;ch1&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">)),</span> <span class="p">(</span><span class="s2">&quot;ch2&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">)),</span> <span class="p">(</span><span class="s2">&quot;ch3&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">))]</span>
+</code></pre></div>
+<p>Unpacking with <code>*</code> has always worked, so the single-list case is mostly punctuation. What it adds is nesting, at any depth, mixed with controls written out:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">banks</span> <span class="o">=</span> <span class="p">[[</span><span class="n">py2tosc</span><span class="o">.</span><span class="n">button</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;b</span><span class="si">{</span><span class="n">i</span><span class="si">}{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">ui</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">banks</span><span class="p">,</span> <span class="n">py2tosc</span><span class="o">.</span><span class="n">fader</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;master&quot;</span><span class="p">))</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="c1">#&gt; children: b00, b01, b10, b11, master</span>
+</code></pre></div>
+<p>which otherwise takes <code>itertools.chain.from_iterable</code>. And it moves the failure to where the mistake is: <code>ui.row(3)</code> raises <code>TypeError: row takes controls, or iterables of them; got int</code> at the call, rather than failing later inside <code>resolve</code>, a long way from the call that caused it and naming neither the combinator nor the argument.</p>
+<p>Two things it deliberately does not do. A group is a child rather than the controls inside it, even though a <code>Control</code> is iterable over its own children -- otherwise nesting a row you already built inside another one would silently lose a level. And a string is refused rather than iterated, since iterating one yields strings and nothing would terminate.</p>
+<p><code>sizes</code> counts children after flattening, so <code>ui.row(faders, sizes=(1, 2, 1))</code> above is three slots, not one.</p>
+<p>Whether to name the children first is a judgement rather than a rule. <code>faders = [...]</code> above the tree is a name and a place to test, and a comprehension buried three levels in is neither; the inline form earns its place when the row is a one-off.</p>
 <p><code>ui.stack</code> overlays its children, each filling the group. That is the button-with-a-label idiom, and it is the reason the numpad demo needs a helper of its own.</p>
 <h3 id="resolving">Resolving<a class="headerlink" href="#resolving" title="Permanent link">&para;</a></h3>
 <p>Nothing has a frame until <code>resolve</code> runs. It walks the tree from the top, because a layout can only divide a frame it knows, and a parent decides its children's frames outright -- a control inside a layout does not keep a frame it was built with. To place something by hand, leave it out of a layout group.</p>
@@ -1802,27 +1958,27 @@
 <p>Both are whole pixels, and the arithmetic is exact: each slot ends exactly <code>gap</code> before the next begins, and the last reaches the content edge. A layout whose padding and gaps do not fit raises rather than silently producing zero-width controls.</p>
 <h3 id="captions-and-insets">Captions and insets<a class="headerlink" href="#captions-and-insets" title="Permanent link">&para;</a></h3>
 <p>A label sitting on a button is the commonest control idiom in TouchOSC, and <code>ui.labelled</code> is the whole of it:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">key</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">labelled</span><span class="p">(</span><span class="n">py2tosc</span><span class="o">.</span><span class="n">button</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;7&quot;</span><span class="p">),</span> <span class="s2">&quot;7&quot;</span><span class="p">,</span> <span class="n">inset</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">key</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">labelled</span><span class="p">(</span><span class="n">py2tosc</span><span class="o">.</span><span class="n">button</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;7&quot;</span><span class="p">),</span> <span class="s2">&quot;7&quot;</span><span class="p">,</span> <span class="n">inset</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 </code></pre></div>
 <p>The caption is not interactive and has no background, so the button beneath receives the touch and shows through. It takes the button's colour, and its name is the caption -- which is what a local message sends when the key is pressed.</p>
 <p><code>inset</code> is a fraction rather than a pixel count, because a deferred layout has no pixels to work from: the size to take a fraction of is not known until the frame arrives from above. <code>ui.inset</code> applies one to any single control, which is the one thing a group's <code>pad</code> cannot say -- <code>pad</code> insets every child alike, and a key wants its caption padded but not the button underneath.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">ui</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">button</span><span class="p">,</span> <span class="n">ui</span><span class="o">.</span><span class="n">inset</span><span class="p">(</span><span class="n">caption</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">ui</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">button</span><span class="p">,</span> <span class="n">ui</span><span class="o">.</span><span class="n">inset</span><span class="p">(</span><span class="n">caption</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">))</span>
 </code></pre></div>
 <p>The inset belongs to the control rather than to a wrapper group, so padding a caption costs no extra node.</p>
 <h3 id="pages">Pages<a class="headerlink" href="#pages" title="Permanent link">&para;</a></h3>
 <p><code>ui.pager</code> is <code>stack</code> on a <code>PAGER</code> rather than a <code>GROUP</code>: a pager shows one page at a time and switches between them itself, so every page fills it.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">ui</span><span class="o">.</span><span class="n">pager</span><span class="p">(</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    <span class="n">ui</span><span class="o">.</span><span class="n">tiles</span><span class="p">(</span><span class="o">*</span><span class="n">first_twelve</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;1-12&quot;</span><span class="p">),</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>    <span class="n">ui</span><span class="o">.</span><span class="n">tiles</span><span class="p">(</span><span class="o">*</span><span class="n">next_twelve</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;13-24&quot;</span><span class="p">),</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="n">frame</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">768</span><span class="p">),</span>
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">ui</span><span class="o">.</span><span class="n">pager</span><span class="p">(</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>    <span class="n">ui</span><span class="o">.</span><span class="n">tiles</span><span class="p">(</span><span class="o">*</span><span class="n">first_twelve</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;1-12&quot;</span><span class="p">),</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>    <span class="n">ui</span><span class="o">.</span><span class="n">tiles</span><span class="p">(</span><span class="o">*</span><span class="n">next_twelve</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;13-24&quot;</span><span class="p">),</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>    <span class="n">frame</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">768</span><span class="p">),</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="p">)</span>
 </code></pre></div>
 <p>Pages should be groups, which the other combinators already return, and a page's name is its tab label. A page that is not a group is reported by <a href="../validation/">validation</a> rather than refused, since TouchOSC tolerates it.</p>
 <h3 id="grids-of-one-control">Grids of one control<a class="headerlink" href="#grids-of-one-control" title="Permanent link">&para;</a></h3>
 <p><code>ui.tiles</code> arranges controls you already have. The format also has a <code>GRID</code> <em>control</em>, which holds many copies of a single control type and is what a multitoggle or a bank of faders is made from. <code>ui.grid</code> builds one:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">pads</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="s2">&quot;BUTTON&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">rows</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;multitoggle&quot;</span><span class="p">)</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">pads</span><span class="p">:</span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    <span class="n">cell</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">midi_note</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)))</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="n">pads</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="s2">&quot;BUTTON&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">rows</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;multitoggle&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">pads</span><span class="p">:</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>    <span class="n">cell</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">midi_note</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)))</span>
 </code></pre></div>
 <p>Cells are named <code>1</code> upwards and reached through the returned control, so each can carry its own bindings.</p>
 <p>A <code>GRID</code> tiles rather than divides. Every cell is the same size, with a three-point margin around and between them, and whatever will not divide evenly is left at the far edge instead of being shared out -- which is the opposite of what <code>ui.tiles</code> and the eager layout functions do, where the last slot always reaches the edge.</p>

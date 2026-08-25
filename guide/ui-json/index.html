@@ -1,0 +1,2425 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A python tool/library to generate and edit TouchOSC (.tosc) files.">
+      
+      
+      
+        <link rel="canonical" href="https://shakfu.github.io/py2tosc/guide/ui-json/">
+      
+      
+        <link rel="prev" href="../json/">
+      
+      
+        <link rel="next" href="../custom-properties/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Describing a layout in JSON - py2tosc</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#describing-a-layout-in-json" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="py2tosc" class="md-header__button md-logo" aria-label="py2tosc" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            py2tosc
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Describing a layout in JSON
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/shakfu/py2tosc" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    shakfu/py2tosc
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="py2tosc" class="md-nav__button md-logo" aria-label="py2tosc" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    py2tosc
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/shakfu/py2tosc" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    shakfu/py2tosc
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command line
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Controls and properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../messages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Messages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../layouts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layouts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sizes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layout sizes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The .tosc format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The .json format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Describing a layout in JSON
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Describing a layout in JSON
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-same-layout-twice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The same layout twice
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reading-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading one
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#four-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Four rules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-tags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The tags
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#repeating" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repeating
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Repeating">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#repeating-over-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repeating over data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arithmetic-and-what-to-do-instead" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Arithmetic, and what to do instead
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comments
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bindings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bindings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Bindings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#partials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Partials
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sizes-and-the-canvas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sizes and the canvas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shapes-worth-copying" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shapes worth copying
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-it-will-not-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When it will not build
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stability
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom-properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Demos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Demos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    One of every control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/custom-property/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom property
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/copy-scripts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Copy scripts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/from-json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faders from JSON
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/control-surface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Control surface
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/image-converter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Image converter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/numpad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Numpad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/simple-mk2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rebuilding a template
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../demos/reaper/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reaper to TouchOSC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/document/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/control/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/messages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Values and messages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Message combinators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/layout/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layouts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/enums/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Enumerations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/validate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The JSON encoding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/ui-json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layout descriptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/codegen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generating Python
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/surface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Control surfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../migrating/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coming from tosclib
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-same-layout-twice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The same layout twice
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reading-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading one
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#four-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Four rules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-tags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The tags
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#repeating" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repeating
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Repeating">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#repeating-over-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repeating over data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arithmetic-and-what-to-do-instead" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Arithmetic, and what to do instead
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comments
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bindings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bindings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Bindings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#partials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Partials
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sizes-and-the-canvas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sizes and the canvas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shapes-worth-copying" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shapes worth copying
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-it-will-not-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When it will not build
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stability
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="describing-a-layout-in-json">Describing a layout in JSON<a class="headerlink" href="#describing-a-layout-in-json" title="Permanent link">&para;</a></h1>
+<p>There are two JSON dialects here, and they are opposites. <a href="../json/">The .json format</a> is the node tree exactly as the file holds it, frames and all, and it round-trips byte for byte. This one describes a layout that does not exist yet -- what nests in what, and how the space gets divided -- and hands it to <a href="../layouts/"><code>py2tosc.ui</code></a> to build and size.</p>
+<h2 id="the-same-layout-twice">The same layout twice<a class="headerlink" href="#the-same-layout-twice" title="Permanent link">&para;</a></h2>
+<p>A mixer: eight faders bound to both MIDI and OSC, a row of mute buttons under them, in a canvas divided three to one.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;format&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;py2tosc.ui&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&quot;//&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eight channels over a bank of mutes, in a canvas divided three to one&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">&quot;root&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nt">&quot;column&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">      </span><span class="p">{</span><span class="nt">&quot;row&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="p">{</span><span class="nt">&quot;fader&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ch$i&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">          </span><span class="p">{</span><span class="nt">&quot;osc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/mixer/{name}&quot;</span><span class="p">},</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">          </span><span class="p">{</span><span class="nt">&quot;midi_cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$i0&quot;</span><span class="p">}</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">        </span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">}</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">      </span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;gap&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">},</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">      </span><span class="p">{</span><span class="nt">&quot;grid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BUTTON&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;columns&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rows&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mutes&quot;</span><span class="p">}</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="p">],</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="nt">&quot;sizes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;gap&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;pad&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mixer&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="nt">&quot;frame&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1024</span><span class="p">,</span><span class="w"> </span><span class="mi">768</span><span class="p">]</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="p">}</span>
+</code></pre></div>
+<!-- checked: the same layout in Python -->
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">py2tosc</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">py2tosc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ui</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">faders</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">py2tosc</span><span class="o">.</span><span class="n">fader</span><span class="p">(</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;ch</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="n">messages</span><span class="o">=</span><span class="p">[</span><span class="n">ui</span><span class="o">.</span><span class="n">osc</span><span class="p">(</span><span class="s2">&quot;/mixer/</span><span class="si">{name}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="n">ui</span><span class="o">.</span><span class="n">midi_cc</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)],</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="p">)</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="p">]</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="n">doc</span> <span class="o">=</span> <span class="n">py2tosc</span><span class="o">.</span><span class="n">Document</span><span class="p">(</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">root</span><span class="o">=</span><span class="n">ui</span><span class="o">.</span><span class="n">column</span><span class="p">(</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="n">ui</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="o">*</span><span class="n">faders</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>        <span class="n">ui</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="s2">&quot;BUTTON&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">rows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mutes&quot;</span><span class="p">),</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>        <span class="n">sizes</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>        <span class="n">gap</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>        <span class="n">pad</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mixer&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>        <span class="n">frame</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">768</span><span class="p">),</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>    <span class="p">)</span>
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+</code></pre></div>
+<p>Both produce the same 27 controls, with the same names, the same frames and the same bindings. <code>tests/test_ui_json.py</code> builds each of them and compares, so the two halves of this page cannot drift apart.</p>
+<p>Line for line the mapping is mechanical:</p>
+<table>
+<thead>
+<tr>
+<th>JSON</th>
+<th>Python</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>{"column": [...], "sizes": [3, 1]}</code></td>
+<td><code>ui.column(*children, sizes=(3, 1))</code></td>
+</tr>
+<tr>
+<td><code>{"row": [...], "gap": 4}</code></td>
+<td><code>ui.row(*children, gap=4)</code></td>
+</tr>
+<tr>
+<td><code>"repeat": 8</code> on the node</td>
+<td>the list comprehension</td>
+</tr>
+<tr>
+<td><code>{"fader": "ch$i"}</code></td>
+<td><code>py2tosc.fader(name=f"ch{n}")</code></td>
+</tr>
+<tr>
+<td><code>{"osc": "/mixer/{name}"}</code></td>
+<td><code>ui.osc("/mixer/{name}")</code></td>
+</tr>
+<tr>
+<td><code>{"midi_cc": "$i0"}</code></td>
+<td><code>ui.midi_cc(n - 1)</code></td>
+</tr>
+<tr>
+<td><code>{"grid": "BUTTON", "columns": 8, "rows": 2}</code></td>
+<td><code>ui.grid("BUTTON", columns=8, rows=2)</code></td>
+</tr>
+<tr>
+<td>the envelope, and <code>load</code></td>
+<td><code>Document(root=...).resolve()</code></td>
+</tr>
+<tr>
+<td><code>"//"</code></td>
+<td>the comment above it</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The Python is more capable, and if you are writing Python, write Python.</strong> It has names, arithmetic and f-strings, where a description has counters, <a href="#repeating-over-data">rows of data</a> and no way to add two numbers -- which is the difference that decides between them. Length is not the difference: the JSON above is 17 lines to the Python's 22. This dialect is for when the layout is decided by something that is not code: a config file that people who do not write Python have to review, a web tool emitting layouts, another program generating them. What it saves those callers is not typing -- it is having to get CDATA sections, sorted property order and the geometry right in a language that has no py2tosc.</p>
+<h2 id="reading-one">Reading one<a class="headerlink" href="#reading-one" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">py2tosc</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">doc</span> <span class="o">=</span> <span class="n">py2tosc</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;mixer.ui.json&quot;</span><span class="p">)</span>   <span class="c1"># built and resolved, ready to save</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">doc</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;mixer.tosc&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p><code>py2tosc.ui_json.from_json(text)</code> is the same without a file. From the command line every subcommand takes one, because what a file holds rather than what it is called decides how it is read:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>show<span class="w"> </span>mixer.ui.json
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>validate<span class="w"> </span>mixer.ui.json
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>convert<span class="w"> </span>mixer.ui.json<span class="w"> </span>-o<span class="w"> </span>mixer.tosc
+</code></pre></div>
+<p>Which of the two JSON dialects a file is written in is decided by its <code>format</code>, which is why this one is required where the faithful encoding's is optional.</p>
+<p><strong>It is read and never written.</strong> A resolved layout has frames and no memory of the <code>row</code> that placed them, so there is no way back: <code>save</code> writes the faithful encoding whatever the document was built from. This is the only asymmetry in the library, and it is a property of the problem rather than an omission.</p>
+<h2 id="four-rules">Four rules<a class="headerlink" href="#four-rules" title="Permanent link">&para;</a></h2>
+<p><strong>One key names the thing.</strong> Every node carries exactly one key from the tag table, and everything else is an argument to it. <code>{"row": [...], "gap": 4}</code> is <code>ui.row(*children, gap=4)</code>, mechanically. Where a key could be either a tag or a property -- <code>grid</code> is a control <em>and</em> the switch that draws grid lines on a fader -- the tag loses if something else in the object is already one, so <code>{"fader": "ch1", "grid": false}</code> is a fader with its grid lines off.</p>
+<p><strong>The value is the tag's one positional argument.</strong> Children for the combinators that arrange them, the control type for <code>grid</code>, the control being wrapped for <code>labelled</code> and <code>inset</code>, and the <em>name</em> for a plain control, since a name is what a control almost always has. <code>{"fader": "ch1"}</code> is <code>fader(name="ch1")</code>.</p>
+<p><strong><code>repeat</code> expands in place.</strong> It is a child rather than a setting on its parent, so it works anywhere children are accepted, and a list can mix repeated and hand-written children freely. A node repeats <em>itself</em> -- <code>{"fader": "ch$i", "repeat": 8}</code> -- or holds the node it repeats under <code>of</code>.</p>
+<p><strong>A sibling key that is not an argument is a property.</strong> Checked against what the type accepts, in either <code>snake_case</code> or camelCase, so a mistyped <code>gpa</code> is a message rather than a custom property nobody asked for. Genuinely custom keys go under <code>props</code>.</p>
+<p>Which means a node's siblings are two different things wearing the same clothes. In <code>{"row": [...], "gap": 4, "color": "ff0000ff"}</code>, <code>gap</code> is an argument to <code>ui.row</code> and <code>color</code> is a TouchOSC property that ends up in the file; nothing marks them apart. That is deliberate. A reader almost never needs to know which is which -- both are "something about this node" -- and a key that is neither gets an error naming the nearest of both sets. Nesting the arguments to separate them (<code>{"row": {"children": [...], "gap": 4}}</code>) would cost a level of structure on every node to document a distinction that only the reader of <code>ui_json.py</code> has to care about.</p>
+<h2 id="the-tags">The tags<a class="headerlink" href="#the-tags" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>Value</th>
+<th>Arguments</th>
+<th>Builds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>row</code>, <code>column</code></td>
+<td>children</td>
+<td><code>sizes</code>, <code>gap</code>, <code>pad</code></td>
+<td>a <code>GROUP</code>, divided along one axis</td>
+</tr>
+<tr>
+<td><code>tiles</code></td>
+<td>children</td>
+<td><code>columns</code>, <code>rows</code>, <code>gap</code>, <code>pad</code></td>
+<td>a <code>GROUP</code>, filled row by row</td>
+</tr>
+<tr>
+<td><code>stack</code></td>
+<td>children</td>
+<td><code>pad</code></td>
+<td>a <code>GROUP</code>, children overlaid</td>
+</tr>
+<tr>
+<td><code>pager</code></td>
+<td>pages</td>
+<td><code>pad</code></td>
+<td>a <code>PAGER</code></td>
+</tr>
+<tr>
+<td><code>grid</code></td>
+<td>control type</td>
+<td><code>columns</code>, <code>rows</code></td>
+<td>a <code>GRID</code>, filled with its own cells</td>
+</tr>
+<tr>
+<td><code>group</code></td>
+<td>children</td>
+<td>--</td>
+<td>a <code>GROUP</code> that arranges nothing</td>
+</tr>
+<tr>
+<td><code>labelled</code></td>
+<td>one node</td>
+<td><code>caption</code>, <code>size</code>, <code>inset</code></td>
+<td>the control with a label under it</td>
+</tr>
+<tr>
+<td><code>inset</code></td>
+<td>one node</td>
+<td><code>by</code></td>
+<td>the control, shrunk within its frame</td>
+</tr>
+<tr>
+<td><code>box</code>, <code>button</code>, <code>encoder</code>, <code>fader</code>, <code>label</code>, <code>radar</code>, <code>radial</code>, <code>radio</code>, <code>text</code>, <code>xy</code></td>
+<td>the name</td>
+<td>--</td>
+<td>that control</td>
+</tr>
+</tbody>
+</table>
+<p>Each is the <a href="../../api/ui/"><code>ui</code></a> function of the same name, so what a tag does and what its arguments mean is documented once, there, rather than twice.</p>
+<p>Two argument names differ from <code>ui</code>'s, and both follow one rule: <strong>an argument is renamed when its natural name is already a tag.</strong> <code>labelled</code> calls its text <code>caption</code>, because <code>text</code> is a control. <code>inset</code> takes its amount as <code>by</code>, because <code>inset</code> is a combinator -- and that amount is a fraction of the frame rather than a number of points, exactly as <code>ui.inset</code> is. Nothing else collides, so nothing else is renamed.</p>
+<p>A collision can be settled the other way instead, by making the <em>tag</em> lose: <code>{"fader": "ch1", "grid": false}</code> is a fader with its grid lines off, and <code>{"label": "readout", "text": "Hello"}</code> is a label with something to say. Which way a collision goes is fixed and small -- three tags lose, two arguments are renamed -- and a test pins the list, so it cannot grow without someone deciding that it should.</p>
+<p>Any node may also carry:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Pin a node id rather than have one minted. Needed only when something outside the file refers to it.</td>
+</tr>
+<tr>
+<td><code>values</code></td>
+<td>Replace the control's live state, as <code>[{"key": "x", "default": 0.5}]</code>.</td>
+</tr>
+<tr>
+<td><code>text</code></td>
+<td>What a <code>LABEL</code> says, which is a <em>value</em> rather than a property: <code>{"label": "readout", "text": "Hello"}</code>. Only on the types that carry one, and not alongside <code>values</code>, which sets the same thing the long way. A <code>TEXT</code> control sets its own with <code>values</code>, since the tag has taken the key.</td>
+</tr>
+<tr>
+<td><code>messages</code></td>
+<td>The control's bindings.</td>
+</tr>
+<tr>
+<td><code>props</code></td>
+<td>Properties the type does not declare -- the <a href="../custom-properties/">custom properties</a> escape hatch, and the only place an unrecognised key is allowed.</td>
+</tr>
+</tbody>
+</table>
+<p><code>messages</code> on a node lands on whatever that node builds, which for <code>labelled</code> is the <em>group</em> holding the control and its caption rather than the control. That is worth knowing because a binding left on its default trigger fires on <code>x</code>, and a group carries only <code>touch</code> -- <a href="../validation/">validation</a> reports it. Put the binding on the node inside <code>labelled</code> unless the group is what you meant.</p>
+<h2 id="repeating">Repeating<a class="headerlink" href="#repeating" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span><span class="nt">&quot;row&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;fader&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;master&quot;</span><span class="p">},</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;fader&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ch$i&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;midi_cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$i0&quot;</span><span class="p">}],</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">}</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">],</span><span class="w"> </span><span class="nt">&quot;gap&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">}</span>
+</code></pre></div>
+<p>builds nine faders: <code>master</code>, then <code>ch1</code> through <code>ch8</code> on controllers 0 to 7.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>repeat</code></td>
+<td>How many. Required, and at least one.</td>
+</tr>
+<tr>
+<td><code>of</code></td>
+<td>The node to repeat. Optional: without it, the node carrying <code>repeat</code> is the one repeated.</td>
+</tr>
+<tr>
+<td><code>from</code></td>
+<td>Where the counter starts. Defaults to 1.</td>
+</tr>
+<tr>
+<td><code>as</code></td>
+<td>What to call the counter. Defaults to <code>i</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>A repeat is the node it repeats, or holds one under <code>of</code>.</strong> These are the same eight faders:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span><span class="nt">&quot;fader&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ch$i&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;of&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;fader&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ch$i&quot;</span><span class="p">}}</span>
+</code></pre></div>
+<p>The short form puts the thing being built first, which is the same instinct as one key naming the thing, and costs a nesting level less. The long form keeps a large template separate from the count, which reads better once the template is more than a line or two. A node cannot do both -- a <code>repeat</code> beside both a tag and an <code>of</code> is refused rather than guessed at -- and <code>repeat</code> outside a list of children is refused too, since there is nowhere for the copies to go.</p>
+<p>A repeat binds two counters: <code>$i</code> counting from <code>from</code>, and <code>$i0</code> counting from zero whatever <code>from</code> says. <code>$name</code> and <code>${name}</code> are both accepted, and the braces are how a counter is written with a digit after it -- <code>${i}0</code> gives <code>10</code>, <code>20</code>, where <code>$i0</code> is the zero-based counter itself.</p>
+<p><strong>A lone counter keeps its type.</strong> <code>"$i0"</code> becomes the number <code>0</code>, which is what a controller number wants, while <code>"ch$i"</code> becomes the string <code>"ch1"</code>. This is the only reason a controller number can be repeated at all.</p>
+<p><strong>A <code>$</code> is only special inside a repeat -- but inside one it is special everywhere.</strong> Outside, it is an ordinary character and nothing looks at it, so a Lua script full of them needs no thought. Inside, <em>every</em> string in the repeated node is substituted into, including a <code>script</code> and the text of a label, so a <code>$</code> that is not a counter has to be written <code>$$</code> there and only there. A name nobody bound is an error rather than a <code>$</code> left standing, which is what makes the rule safe: a script carried into a repeat cannot silently lose a character.</p>
+<p><strong>Repeats nest, and each names its own counter.</strong> The outer pass leaves the inner pass's counters alone, so both are readable in the innermost node:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span><span class="nt">&quot;row&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;button&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;b$bank-$i&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">}],</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;as&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bank&quot;</span><span class="p">}</span>
+</code></pre></div>
+<p>builds <code>b1-1</code>, <code>b1-2</code>, <code>b1-3</code>, <code>b2-1</code>, <code>b2-2</code>, <code>b2-3</code>, and does the same written the long way round:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;as&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bank&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;of&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">&quot;row&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;of&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;button&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;b$bank-$i&quot;</span><span class="p">}}]</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="p">}}</span>
+</code></pre></div>
+<p>The forms mix freely, since which one an inner repeat uses is its own business.</p>
+<h3 id="repeating-over-data">Repeating over data<a class="headerlink" href="#repeating-over-data" title="Permanent link">&para;</a></h3>
+<p>Counting only reaches layouts that <em>are</em> a sequence. A numpad's keys read 7, 4, 1, 8, 5, 2, 9, 6, 3, and a mixer's channels have names rather than numbers. <strong><code>each</code> walks a list of rows instead of counting</strong>, binding every field of the current row the way <code>repeat</code> binds its counter:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span><span class="nt">&quot;each&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;n&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kick&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">},</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;n&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;snare&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">24</span><span class="p">},</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;n&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hat&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">31</span><span class="p">}</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="p">],</span><span class="w"> </span><span class="nt">&quot;of&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;fader&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$n&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;midi_cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$cc&quot;</span><span class="p">}]}}</span>
+</code></pre></div>
+<p>builds three faders named for their drums, each on its own controller. It takes the short form too, which is usually what you want -- the template first, the data under it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{</span><span class="nt">&quot;fader&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$n&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;midi_cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$cc&quot;</span><span class="p">}],</span><span class="w"> </span><span class="nt">&quot;each&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">...</span><span class="p">]}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>each</code></td>
+<td>The rows. Required unless <code>repeat</code> is, and the two cannot both appear.</td>
+</tr>
+<tr>
+<td><code>of</code></td>
+<td>The node to build once per row. Optional, exactly as it is for <code>repeat</code>.</td>
+</tr>
+<tr>
+<td><code>from</code>, <code>as</code></td>
+<td>As for <code>repeat</code>: <code>$i</code> and <code>$i0</code> are bound alongside the row's fields.</td>
+</tr>
+</tbody>
+</table>
+<p>A field is read as <code>$name</code>, so a key that cannot be written that way is refused rather than left unreachable, and a field named after the counter is refused rather than one of them silently winning. A row holds strings, numbers and booleans; a lone <code>"$cc"</code> keeps its type exactly as <code>"$i0"</code> does, and a boolean written into a longer string comes out as <code>true</code> rather than Python's <code>True</code>.</p>
+<p><strong>An <code>each</code> of nothing builds nothing.</strong> A generator with nothing to emit writes <code>[]</code>, which is data running out rather than a mistake -- where <code>repeat: 0</code> is refused, because nobody writes one on purpose.</p>
+<p>This is also what closes the gap with <a href="../../cli/#build"><code>py2tosc build</code></a>, which takes a list of parameters and lays out a surface from it. A description can now say the same thing, and say the rest of the layout around it.</p>
+<h3 id="arithmetic-and-what-to-do-instead">Arithmetic, and what to do instead<a class="headerlink" href="#arithmetic-and-what-to-do-instead" title="Permanent link">&para;</a></h3>
+<p>What a repeat still cannot do is arithmetic. There is no <code>$i * 2</code>, and adding one would mean an expression language inside a JSON string, which is a bigger thing than this format is. Two ways round it: <code>from</code> moves where a counter starts, and <code>each</code> puts the number in the data, where a generator or a person can compute whatever they like before writing the file.</p>
+<h2 id="comments">Comments<a class="headerlink" href="#comments" title="Permanent link">&para;</a></h2>
+<p>JSON has no comment, and a description written to be reviewed needs somewhere to say why a number is what it is. <strong>A key beginning with <code>//</code> is ignored</strong>, wherever a key may appear -- the envelope, a node, a binding, a value, and inside <code>props</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">&quot;//&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;front-of-house send, 8 channels to match the desk&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span><span class="nt">&quot;column&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;fader&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ch$i&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;// cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20 up, leaving 0-19 to the transport&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;from&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">}</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">  </span><span class="p">]</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="p">}</span>
+</code></pre></div>
+<p>More than one to an object, since JSON keys have to be unique: <code>"//"</code>, <code>"// why"</code>, <code>"//left-at-8"</code>. A comment is dropped before anything reads the node, so it never reaches the file, is never mistaken for a custom property, and is not substituted into -- a note about a layout can mention <code>$5</code> inside a repeat without meaning a counter.</p>
+<h2 id="bindings">Bindings<a class="headerlink" href="#bindings" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;osc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/mixer/{name}&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;on&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RISE&quot;</span><span class="p">},</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;midi_cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;channel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">},</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;midi_note&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">},</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;connect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readout&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">}</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="p">]</span>
+</code></pre></div>
+<p><strong>This is the same rule as a node, one level down.</strong> One key names the thing -- <code>osc</code>, <code>midi_cc</code>, <code>midi_note</code> or <code>connect</code>, each the <a href="../../api/ui/">combinator</a> of that name -- its value is that combinator's one positional argument, and the siblings are its keyword arguments. A <a href="#partials">partial</a> is the same shape again, one level below that. Three levels, one rule: if you can read a node you can read a binding, and there is nothing else to learn.</p>
+<p><code>{name}</code> in an OSC address is TouchOSC's own templating, resolved on the device when the message is sent, and it is a different thing from <code>$i</code>, which is resolved here while the file is being read. The two use different syntax precisely so that neither can consume the other.</p>
+<p><code>connect</code> names the control it writes to, rather than carrying a node id nothing in a hand-written file could know. Names are looked up once the whole tree exists, so a binding can point forwards, backwards or out of its own branch. A name matching no control, or more than one, is an error saying which.</p>
+<h3 id="partials">Partials<a class="headerlink" href="#partials" title="Permanent link">&para;</a></h3>
+<p>What a binding <em>sends</em> is assembled from <a href="../messages/">partials</a>, and each one is an object naming what it reads -- one key names the thing, as everywhere else:</p>
+<table>
+<thead>
+<tr>
+<th>Partial</th>
+<th>Reads</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>{"value": "x"}</code></td>
+<td>one of the control's own values</td>
+</tr>
+<tr>
+<td><code>{"prop": "name"}</code></td>
+<td>one of its properties; dotted lookups reach upwards, as in <code>parent.name</code></td>
+</tr>
+<tr>
+<td><code>{"const": "#7"}</code></td>
+<td>the text itself, sent unchanged</td>
+</tr>
+<tr>
+<td><code>{"index": null}</code></td>
+<td>where the control sits within its parent. It reads nothing else, so its value is <code>null</code></td>
+</tr>
+</tbody>
+</table>
+<p>Each takes <code>conversion</code> and <code>scale</code> alongside, exactly as <a href="../../api/ui/"><code>ui.value</code></a> and the other three do. A partial goes wherever <code>ui</code> takes one:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;osc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/mix&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;conversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;index&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">}]},</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;midi_note&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;prop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name&quot;</span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;channel&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;index&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">}},</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;connect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readout&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;const&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#7&quot;</span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;on&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RISE&quot;</span><span class="p">}</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="p">]</span>
+</code></pre></div>
+<p>The second is a keyboard whose buttons name their own notes. The third is a key sending a marked constant into a readout, which is what a numpad does.</p>
+<p><strong>A bare string keeps the meaning <code>ui</code> gives it</strong>: in <code>source</code> and <code>to</code> it names one of the control's <em>values</em>, so <code>"source": "x"</code> is <code>{"value": "x"}</code> written short. That is why a constant has to say so -- <code>"source": "#7"</code> is a binding that reads a value called <code>#7</code>, which nothing has. In <code>args</code>, where the two readings are equally plausible and neither is safe to guess, a bare string is refused and the message names both spellings.</p>
+<p><strong><code>triggers</code> replaces <code>on</code> and <code>var</code> entirely</strong>, for a binding that watches more than one value -- an XY sending on both axes, which is what all 39 multi-trigger messages in the corpus are:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="p">{</span><span class="nt">&quot;osc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/pad&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;triggers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;x&quot;</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;y&quot;</span><span class="p">}]}</span>
+</code></pre></div>
+<p>Each is <code>{"var": ..., "on": ...}</code>, defaulting to <code>x</code> and <code>ANY</code>. Nothing in <code>py2tosc.ui</code> is now beyond this dialect.</p>
+<h2 id="sizes-and-the-canvas">Sizes and the canvas<a class="headerlink" href="#sizes-and-the-canvas" title="Permanent link">&para;</a></h2>
+<p>Nothing here has coordinates. The combinators record an arrangement, and <code>resolve</code> divides the root's frame among everything below it -- which is why <code>frame</code> on the root is the one measurement most descriptions state, and why a control inside a <code>row</code> states none. A root with no frame of its own gets <code>1024x768</code>, matching <code>Document.new</code>.</p>
+<p>A <code>frame</code> on a control that a layout is placing is overwritten by that layout, exactly as it is in Python. Inside a <code>group</code>, which arranges nothing, it is kept -- which is what <code>group</code> is for.</p>
+<p>See <a href="../sizes/">Layout sizes</a> for what a canvas is and how to choose one, and <a href="../layouts/">Layouts</a> for what each combinator does with the space it is given.</p>
+<h2 id="shapes-worth-copying">Shapes worth copying<a class="headerlink" href="#shapes-worth-copying" title="Permanent link">&para;</a></h2>
+<p>A pager, one page per section:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="p">{</span><span class="nt">&quot;pager&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;tiles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;button&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pad$i&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="p">}],</span><span class="w"> </span><span class="nt">&quot;columns&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pads&quot;</span><span class="p">},</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;row&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;fader&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ch$i&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">}],</span><span class="w"> </span><span class="nt">&quot;gap&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;faders&quot;</span><span class="p">}</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="p">],</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pages&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;frame&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">568</span><span class="p">,</span><span class="w"> </span><span class="mi">320</span><span class="p">]}</span>
+</code></pre></div>
+<p>A button with a caption over it, which is what <code>labelled</code> and <code>stack</code> are for:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="p">{</span><span class="nt">&quot;labelled&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;button&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;play&quot;</span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;caption&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Play&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">}</span>
+</code></pre></div>
+<p>A bank of encoders, each on its own controller, numbered from 20:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="p">{</span><span class="nt">&quot;tiles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;encoder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enc$i&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;midi_cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$i&quot;</span><span class="p">}],</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;from&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">}</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="p">],</span><span class="w"> </span><span class="nt">&quot;columns&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;gap&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;pad&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">}</span>
+</code></pre></div>
+<p>A button that writes into a readout elsewhere in the layout:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="p">{</span><span class="nt">&quot;column&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;button&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;go&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;connect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readout&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">}]},</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readout&quot;</span><span class="p">}</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="p">]}</span>
+</code></pre></div>
+<h2 id="when-it-will-not-build">When it will not build<a class="headerlink" href="#when-it-will-not-build" title="Permanent link">&para;</a></h2>
+<p>Every message names the node it gave up on, by the path from the root:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>root.column[0]: unknown key &#39;gpa&#39;; did you mean &#39;pad&#39; or &#39;gap&#39;?
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>root.row[0]#1: unknown key &#39;colour&#39;; did you mean &#39;color&#39;?
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>root.column[1]: color: &#39;nope&#39; is not a 6 or 8 digit hex colour
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>root.messages[0]: no control is named &#39;readout&#39;
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>root: nothing here names a control or a layout; expected one of box, button, ...
+</code></pre></div>
+<p>The <code>#1</code> is which pass of a <code>repeat</code> failed. Every copy is built from one template, so ordinarily they all fail together -- but a counter that lands somewhere only some values are legal will not, and the pass number is what says which. A value the control cannot take names its key as well as its node, because a node can carry twenty properties and only one of them is wrong.</p>
+<p>A description that builds but cannot be divided says that too -- a row whose gaps are wider than its frame, a <code>tiles</code> with no columns. Those are reported once the frames are handed down rather than while the file is read, since a layout only fails against a size, so they name the <em>control</em> rather than the node in the file:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>the layout will not resolve: mixer/faders: a width of 100 cannot hold 2 slots with 50/50 padding and 100 between them
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>the layout will not resolve: mixer: column was given 1 sizes for 2 children
+</code></pre></div>
+<p>The path is the names on the way down, as <a href="../validation/">validation</a> reports them, and a control with no name of its own appears as <code>&lt;GROUP&gt;</code>.</p>
+<p>Reading a file only says it could be built. Whether TouchOSC will accept the result is a separate question, and the answer is <a href="../validation/">validation</a>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>validate<span class="w"> </span>mixer.ui.json
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="go">mixer.ui.json: clean</span>
+</code></pre></div>
+<h2 id="stability">Stability<a class="headerlink" href="#stability" title="Permanent link">&para;</a></h2>
+<p>This dialect is a description of what <code>py2tosc.ui</code> does, so it inherits <code>ui</code>'s carve-out from the <a href="../../stability/">stability policy</a>: it may change in a minor release, where the faithful encoding may not. It carries a <code>schema</code> number for the case where a change would stop an already written description from building.</p>
+<p>Nothing it produces is unusual. What comes out is an ordinary <code>Control</code> tree, indistinguishable from one built in Python, so if the dialect ever becomes inconvenient the layouts it built remain valid.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/shakfu/py2tosc" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://pypi.org/project/py2tosc/" target="_blank" rel="noopener" title="pypi.org" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6M286.2 444.7a20.4 20.4 0 1 1 0-40.7 20.4 20.4 0 1 1 0 40.7M167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4m-6.6-183.4a20.4 20.4 0 1 1 0 40.8 20.4 20.4 0 1 1 0-40.8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "content.code.annotate", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

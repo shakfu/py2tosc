@@ -537,6 +537,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../guide/json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The .json format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/ui-json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Describing a layout in JSON
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../guide/custom-properties/" class="md-nav__link">
         
   
@@ -1314,6 +1370,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The JSON encoding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/ui-json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layout descriptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/codegen/" class="md-nav__link">
         
   
@@ -1897,50 +2009,59 @@
 <a id="__codelineno-0-374" name="__codelineno-0-374" href="#__codelineno-0-374"></a>    <span class="n">pager</span> <span class="o">=</span> <span class="n">ui</span><span class="o">.</span><span class="n">pager</span><span class="p">(</span>
 <a id="__codelineno-0-375" name="__codelineno-0-375" href="#__codelineno-0-375"></a>        <span class="n">faders_page</span><span class="p">(),</span> <span class="n">pads_page</span><span class="p">(),</span> <span class="n">xy_page</span><span class="p">(),</span> <span class="n">matrix_page</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;pager1&quot;</span>
 <a id="__codelineno-0-376" name="__codelineno-0-376" href="#__codelineno-0-376"></a>    <span class="p">)</span>
-<a id="__codelineno-0-377" name="__codelineno-0-377" href="#__codelineno-0-377"></a>    <span class="c1"># The pager reports which page it switched to.</span>
-<a id="__codelineno-0-378" name="__codelineno-0-378" href="#__codelineno-0-378"></a>    <span class="n">pager</span><span class="o">.</span><span class="n">messages</span> <span class="o">+=</span> <span class="p">[</span>
-<a id="__codelineno-0-379" name="__codelineno-0-379" href="#__codelineno-0-379"></a>        <span class="n">py2tosc</span><span class="o">.</span><span class="n">MidiMessage</span><span class="p">(</span>
-<a id="__codelineno-0-380" name="__codelineno-0-380" href="#__codelineno-0-380"></a>            <span class="n">triggers</span><span class="o">=</span><span class="p">[</span><span class="n">py2tosc</span><span class="o">.</span><span class="n">Trigger</span><span class="p">(</span><span class="s2">&quot;page&quot;</span><span class="p">,</span> <span class="s2">&quot;ANY&quot;</span><span class="p">)],</span>
-<a id="__codelineno-0-381" name="__codelineno-0-381" href="#__codelineno-0-381"></a>            <span class="n">message</span><span class="o">=</span><span class="n">py2tosc</span><span class="o">.</span><span class="n">MidiCommand</span><span class="p">(</span><span class="s2">&quot;PROGRAMCHANGE&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-382" name="__codelineno-0-382" href="#__codelineno-0-382"></a>        <span class="p">),</span>
-<a id="__codelineno-0-383" name="__codelineno-0-383" href="#__codelineno-0-383"></a>        <span class="n">ui</span><span class="o">.</span><span class="n">osc</span><span class="p">(</span><span class="s2">&quot;/page&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">ui</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="s2">&quot;page&quot;</span><span class="p">)],</span> <span class="n">var</span><span class="o">=</span><span class="s2">&quot;page&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-384" name="__codelineno-0-384" href="#__codelineno-0-384"></a>    <span class="p">]</span>
-<a id="__codelineno-0-385" name="__codelineno-0-385" href="#__codelineno-0-385"></a>    <span class="c1"># The pager cannot be the root: TouchOSC treats the root as the canvas and</span>
-<a id="__codelineno-0-386" name="__codelineno-0-386" href="#__codelineno-0-386"></a>    <span class="c1"># gives it none of its type&#39;s behaviour. The original is built the same way.</span>
-<a id="__codelineno-0-387" name="__codelineno-0-387" href="#__codelineno-0-387"></a>    <span class="k">return</span> <span class="n">py2tosc</span><span class="o">.</span><span class="n">Document</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">ui</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">pager</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;group&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="n">SIZE</span><span class="p">))</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-<a id="__codelineno-0-388" name="__codelineno-0-388" href="#__codelineno-0-388"></a>
-<a id="__codelineno-0-389" name="__codelineno-0-389" href="#__codelineno-0-389"></a>
-<a id="__codelineno-0-390" name="__codelineno-0-390" href="#__codelineno-0-390"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-391" name="__codelineno-0-391" href="#__codelineno-0-391"></a>    <span class="n">doc</span> <span class="o">=</span> <span class="n">build</span><span class="p">()</span>
-<a id="__codelineno-0-392" name="__codelineno-0-392" href="#__codelineno-0-392"></a>
-<a id="__codelineno-0-393" name="__codelineno-0-393" href="#__codelineno-0-393"></a>    <span class="k">for</span> <span class="n">issue</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">validate</span><span class="p">():</span>
-<a id="__codelineno-0-394" name="__codelineno-0-394" href="#__codelineno-0-394"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">issue</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-395" name="__codelineno-0-395" href="#__codelineno-0-395"></a>
-<a id="__codelineno-0-396" name="__codelineno-0-396" href="#__codelineno-0-396"></a>    <span class="n">output_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-0-397" name="__codelineno-0-397" href="#__codelineno-0-397"></a>    <span class="n">doc</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
-<a id="__codelineno-0-398" name="__codelineno-0-398" href="#__codelineno-0-398"></a>    <span class="n">pages</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;PAGER&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">children</span><span class="p">)</span>
-<a id="__codelineno-0-399" name="__codelineno-0-399" href="#__codelineno-0-399"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pages</span><span class="si">}</span><span class="s2"> pages, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">find_all</span><span class="p">())</span><span class="si">}</span><span class="s2"> controls -&gt; </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-400" name="__codelineno-0-400" href="#__codelineno-0-400"></a>
+<a id="__codelineno-0-377" name="__codelineno-0-377" href="#__codelineno-0-377"></a>    <span class="c1"># The pager reports which page it switched to. Both halves of the MIDI</span>
+<a id="__codelineno-0-378" name="__codelineno-0-378" href="#__codelineno-0-378"></a>    <span class="c1"># binding have to say `page`: the trigger that fires it, and the slots it</span>
+<a id="__codelineno-0-379" name="__codelineno-0-379" href="#__codelineno-0-379"></a>    <span class="c1"># sends. A default `MidiMessage` reads `x`, which a PAGER does not have --</span>
+<a id="__codelineno-0-380" name="__codelineno-0-380" href="#__codelineno-0-380"></a>    <span class="c1"># it would have fired on every page change and sent 0 each time, which is</span>
+<a id="__codelineno-0-381" name="__codelineno-0-381" href="#__codelineno-0-381"></a>    <span class="c1"># what the original&#39;s slots say and what this demo previously did not.</span>
+<a id="__codelineno-0-382" name="__codelineno-0-382" href="#__codelineno-0-382"></a>    <span class="n">pager</span><span class="o">.</span><span class="n">messages</span> <span class="o">+=</span> <span class="p">[</span>
+<a id="__codelineno-0-383" name="__codelineno-0-383" href="#__codelineno-0-383"></a>        <span class="n">py2tosc</span><span class="o">.</span><span class="n">MidiMessage</span><span class="p">(</span>
+<a id="__codelineno-0-384" name="__codelineno-0-384" href="#__codelineno-0-384"></a>            <span class="n">triggers</span><span class="o">=</span><span class="p">[</span><span class="n">py2tosc</span><span class="o">.</span><span class="n">Trigger</span><span class="p">(</span><span class="s2">&quot;page&quot;</span><span class="p">,</span> <span class="s2">&quot;ANY&quot;</span><span class="p">)],</span>
+<a id="__codelineno-0-385" name="__codelineno-0-385" href="#__codelineno-0-385"></a>            <span class="n">message</span><span class="o">=</span><span class="n">py2tosc</span><span class="o">.</span><span class="n">MidiCommand</span><span class="p">(</span><span class="s2">&quot;PROGRAMCHANGE&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-386" name="__codelineno-0-386" href="#__codelineno-0-386"></a>            <span class="n">values</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-0-387" name="__codelineno-0-387" href="#__codelineno-0-387"></a>                <span class="n">py2tosc</span><span class="o">.</span><span class="n">MidiValue</span><span class="p">(</span><span class="s2">&quot;CONSTANT&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
+<a id="__codelineno-0-388" name="__codelineno-0-388" href="#__codelineno-0-388"></a>                <span class="n">py2tosc</span><span class="o">.</span><span class="n">MidiValue</span><span class="p">(</span><span class="s2">&quot;VALUE&quot;</span><span class="p">,</span> <span class="s2">&quot;page&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+<a id="__codelineno-0-389" name="__codelineno-0-389" href="#__codelineno-0-389"></a>                <span class="n">py2tosc</span><span class="o">.</span><span class="n">MidiValue</span><span class="p">(</span><span class="s2">&quot;VALUE&quot;</span><span class="p">,</span> <span class="s2">&quot;page&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">127</span><span class="p">),</span>
+<a id="__codelineno-0-390" name="__codelineno-0-390" href="#__codelineno-0-390"></a>            <span class="p">],</span>
+<a id="__codelineno-0-391" name="__codelineno-0-391" href="#__codelineno-0-391"></a>        <span class="p">),</span>
+<a id="__codelineno-0-392" name="__codelineno-0-392" href="#__codelineno-0-392"></a>        <span class="n">ui</span><span class="o">.</span><span class="n">osc</span><span class="p">(</span><span class="s2">&quot;/page&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">ui</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="s2">&quot;page&quot;</span><span class="p">)],</span> <span class="n">var</span><span class="o">=</span><span class="s2">&quot;page&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-393" name="__codelineno-0-393" href="#__codelineno-0-393"></a>    <span class="p">]</span>
+<a id="__codelineno-0-394" name="__codelineno-0-394" href="#__codelineno-0-394"></a>    <span class="c1"># The pager cannot be the root: TouchOSC treats the root as the canvas and</span>
+<a id="__codelineno-0-395" name="__codelineno-0-395" href="#__codelineno-0-395"></a>    <span class="c1"># gives it none of its type&#39;s behaviour. The original is built the same way.</span>
+<a id="__codelineno-0-396" name="__codelineno-0-396" href="#__codelineno-0-396"></a>    <span class="k">return</span> <span class="n">py2tosc</span><span class="o">.</span><span class="n">Document</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">ui</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">pager</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;group&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="n">SIZE</span><span class="p">))</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<a id="__codelineno-0-397" name="__codelineno-0-397" href="#__codelineno-0-397"></a>
+<a id="__codelineno-0-398" name="__codelineno-0-398" href="#__codelineno-0-398"></a>
+<a id="__codelineno-0-399" name="__codelineno-0-399" href="#__codelineno-0-399"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-400" name="__codelineno-0-400" href="#__codelineno-0-400"></a>    <span class="n">doc</span> <span class="o">=</span> <span class="n">build</span><span class="p">()</span>
 <a id="__codelineno-0-401" name="__codelineno-0-401" href="#__codelineno-0-401"></a>
-<a id="__codelineno-0-402" name="__codelineno-0-402" href="#__codelineno-0-402"></a><span class="k">def</span><span class="w"> </span><span class="nf">parse_args</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">:</span>
-<a id="__codelineno-0-403" name="__codelineno-0-403" href="#__codelineno-0-403"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Read the command line, so a missing path is a message and not a crash.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-404" name="__codelineno-0-404" href="#__codelineno-0-404"></a>    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
-<a id="__codelineno-0-405" name="__codelineno-0-405" href="#__codelineno-0-405"></a>        <span class="n">description</span><span class="o">=</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
-<a id="__codelineno-0-406" name="__codelineno-0-406" href="#__codelineno-0-406"></a>        <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">,</span>
-<a id="__codelineno-0-407" name="__codelineno-0-407" href="#__codelineno-0-407"></a>    <span class="p">)</span>
-<a id="__codelineno-0-408" name="__codelineno-0-408" href="#__codelineno-0-408"></a>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-<a id="__codelineno-0-409" name="__codelineno-0-409" href="#__codelineno-0-409"></a>        <span class="s2">&quot;-o&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-410" name="__codelineno-0-410" href="#__codelineno-0-410"></a>        <span class="s2">&quot;--output&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-411" name="__codelineno-0-411" href="#__codelineno-0-411"></a>        <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span>
-<a id="__codelineno-0-412" name="__codelineno-0-412" href="#__codelineno-0-412"></a>        <span class="n">default</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;build&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">.tosc&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-413" name="__codelineno-0-413" href="#__codelineno-0-413"></a>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;where to write the layout (default: </span><span class="si">%(default)s</span><span class="s2">)&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-414" name="__codelineno-0-414" href="#__codelineno-0-414"></a>    <span class="p">)</span>
-<a id="__codelineno-0-415" name="__codelineno-0-415" href="#__codelineno-0-415"></a>    <span class="k">return</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
-<a id="__codelineno-0-416" name="__codelineno-0-416" href="#__codelineno-0-416"></a>
-<a id="__codelineno-0-417" name="__codelineno-0-417" href="#__codelineno-0-417"></a>
-<a id="__codelineno-0-418" name="__codelineno-0-418" href="#__codelineno-0-418"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-419" name="__codelineno-0-419" href="#__codelineno-0-419"></a>    <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">()</span>
-<a id="__codelineno-0-420" name="__codelineno-0-420" href="#__codelineno-0-420"></a>    <span class="n">main</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+<a id="__codelineno-0-402" name="__codelineno-0-402" href="#__codelineno-0-402"></a>    <span class="k">for</span> <span class="n">issue</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">validate</span><span class="p">():</span>
+<a id="__codelineno-0-403" name="__codelineno-0-403" href="#__codelineno-0-403"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">issue</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-404" name="__codelineno-0-404" href="#__codelineno-0-404"></a>
+<a id="__codelineno-0-405" name="__codelineno-0-405" href="#__codelineno-0-405"></a>    <span class="n">output_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-406" name="__codelineno-0-406" href="#__codelineno-0-406"></a>    <span class="n">doc</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+<a id="__codelineno-0-407" name="__codelineno-0-407" href="#__codelineno-0-407"></a>    <span class="n">pages</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;PAGER&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">children</span><span class="p">)</span>
+<a id="__codelineno-0-408" name="__codelineno-0-408" href="#__codelineno-0-408"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pages</span><span class="si">}</span><span class="s2"> pages, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">find_all</span><span class="p">())</span><span class="si">}</span><span class="s2"> controls -&gt; </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-409" name="__codelineno-0-409" href="#__codelineno-0-409"></a>
+<a id="__codelineno-0-410" name="__codelineno-0-410" href="#__codelineno-0-410"></a>
+<a id="__codelineno-0-411" name="__codelineno-0-411" href="#__codelineno-0-411"></a><span class="k">def</span><span class="w"> </span><span class="nf">parse_args</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">:</span>
+<a id="__codelineno-0-412" name="__codelineno-0-412" href="#__codelineno-0-412"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Read the command line, so a missing path is a message and not a crash.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-413" name="__codelineno-0-413" href="#__codelineno-0-413"></a>    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+<a id="__codelineno-0-414" name="__codelineno-0-414" href="#__codelineno-0-414"></a>        <span class="n">description</span><span class="o">=</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+<a id="__codelineno-0-415" name="__codelineno-0-415" href="#__codelineno-0-415"></a>        <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">,</span>
+<a id="__codelineno-0-416" name="__codelineno-0-416" href="#__codelineno-0-416"></a>    <span class="p">)</span>
+<a id="__codelineno-0-417" name="__codelineno-0-417" href="#__codelineno-0-417"></a>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+<a id="__codelineno-0-418" name="__codelineno-0-418" href="#__codelineno-0-418"></a>        <span class="s2">&quot;-o&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-419" name="__codelineno-0-419" href="#__codelineno-0-419"></a>        <span class="s2">&quot;--output&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-420" name="__codelineno-0-420" href="#__codelineno-0-420"></a>        <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span>
+<a id="__codelineno-0-421" name="__codelineno-0-421" href="#__codelineno-0-421"></a>        <span class="n">default</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;build&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">.tosc&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-422" name="__codelineno-0-422" href="#__codelineno-0-422"></a>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;where to write the layout (default: </span><span class="si">%(default)s</span><span class="s2">)&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-423" name="__codelineno-0-423" href="#__codelineno-0-423"></a>    <span class="p">)</span>
+<a id="__codelineno-0-424" name="__codelineno-0-424" href="#__codelineno-0-424"></a>    <span class="k">return</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+<a id="__codelineno-0-425" name="__codelineno-0-425" href="#__codelineno-0-425"></a>
+<a id="__codelineno-0-426" name="__codelineno-0-426" href="#__codelineno-0-426"></a>
+<a id="__codelineno-0-427" name="__codelineno-0-427" href="#__codelineno-0-427"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-428" name="__codelineno-0-428" href="#__codelineno-0-428"></a>    <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">()</span>
+<a id="__codelineno-0-429" name="__codelineno-0-429" href="#__codelineno-0-429"></a>    <span class="n">main</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="gp">$ </span>python<span class="w"> </span>tests/demos/simple_mk2.py
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="go">4 pages, 176 controls -&gt; build/simple_mk2.tosc</span>

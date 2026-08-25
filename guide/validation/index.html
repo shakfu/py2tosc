@@ -539,6 +539,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The .json format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ui-json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Describing a layout in JSON
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../custom-properties/" class="md-nav__link">
         
   
@@ -656,6 +712,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Where the rules come from">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-exception-and-why-it-is-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The exception, and why it is one
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1336,6 +1409,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The JSON encoding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/ui-json/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Layout descriptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/codegen/" class="md-nav__link">
         
   
@@ -1530,6 +1659,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Where the rules come from">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-exception-and-why-it-is-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The exception, and why it is one
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1602,6 +1748,9 @@ a <code>message</code>. Errors sort first.</p>
 <li>a root node that is not a <code>GROUP</code></li>
 <li>a <code>GRID</code> holding a different number of controls than its <code>grid_x</code> and <code>grid_y</code> claim</li>
 <li>a local binding writing a value or property the destination does not have</li>
+<li>a local binding sending a value its own control does not have</li>
+<li>a binding that fires on a value its control does not carry</li>
+<li>a binding that reads a value its control does not carry</li>
 <li>a layout the combinators described that nobody has resolved</li>
 <li>a custom property named after one of the control's own values</li>
 </ul>
@@ -1632,6 +1781,25 @@ way.</p>
 and then discarded, so the control it targets simply never moves. All 358
 resolvable local bindings in the corpus address something real. A blank
 <code>dst_var</code> is left alone, like a blank <code>dst_id</code>.</p>
+<p>The sending half of a local binding fails the same way and just as quietly. A
+bare string in <a href="../../api/ui/"><code>ui.connect</code></a>'s <code>source</code> names one of the
+control's <em>values</em>, so a caller who meant a constant -- <code>source="#7"</code> rather
+than <code>source=ui.const("#7")</code> -- gets a binding that reads a value the control
+does not have and therefore sends nothing. All 361 local bindings in the corpus
+that send a value send one their control carries. A constant or a property
+source is left alone, since neither says anything about the control's values.</p>
+<p>A binding is addressed to values at both ends, and both can name one the
+control does not have. <strong>A trigger</strong> that does never fires. <strong>An argument, a
+MIDI slot or an address partial</strong> that does is sent anyway, as <code>0</code> -- which is
+the worse of the two, because a binding that looks dead is not silent: it
+transmits a plausible number to whatever is listening. Both halves of one
+message are reported separately, since a binding can have either without the
+other.</p>
+<p>The common way to arrive there is <a href="../../api/ui/"><code>ui.labelled</code></a>, which returns
+the <em>group</em> holding a control and its caption -- so a message put on that group
+is addressed to <code>x</code>, which a group does not have, and the binding is inert
+while everything about the layout looks right. <code>ui.osc()</code> defaults to <code>x</code> at
+both ends, which is right for a fader and wrong for a label.</p>
 <p>A <code>GRID</code> is never empty in TouchOSC -- creating one populates it, and <code>grid_x</code>
 and <code>grid_y</code> say how many controls it holds rather than describing space to be
 filled later. A bare <a class="autorefs autorefs-internal" title="grid
@@ -1655,9 +1823,35 @@ error, or an OSC address collides with another.</p>
 test suite requires all 45 layouts in the corpus to validate without errors, and
 the editor-written ones to produce no warnings at all -- a validator that fires
 on real files trains you to ignore it.</p>
-<p>Two candidate rules were dropped for failing that bar. One flagged OSC bindings
-with no triggers as dead; the editor writes 40 of those, send-enabled, so
-whatever it means it is not a mistake.</p>
+<p>Two candidate rules were dropped for failing that bar. One flagged OSC
+bindings with no triggers as dead; the editor writes 40 of those, send-enabled,
+so whatever it means it is not a mistake.</p>
+<h3 id="the-exception-and-why-it-is-one">The exception, and why it is one<a class="headerlink" href="#the-exception-and-why-it-is-one" title="Permanent link">&para;</a></h3>
+<p>The dead-binding rules above are the one place this standard is knowingly
+broken, and they are also the only rules here settled by experiment rather than
+by the corpus -- because the corpus says the opposite of what it appears to.</p>
+<p>The editor writes 152 bindings addressed to a value their control does not
+have: 104 on labels and 48 on grids, <code>x</code> in every case, across ten files
+including five TouchOSC ships. By the usual standard that retires a rule. Two
+readings were available from the documents and neither could be ruled out: a
+control might carry values the format never writes down, or those bindings
+might simply be dead in TouchOSC's own examples.</p>
+<p>A layout was built to ask TouchOSC directly. Two labels, identical but for
+their trigger, both written to by the same button; one fired on <code>text</code>, the
+other on <code>x</code>. Pressing the button changed both labels' text. Only the <code>text</code>
+one sent anything -- and what it sent was <code>FLOAT(0)</code>, for the <code>x</code> it had been
+told to read. So a trigger on a missing value never fires, an argument on one
+sends zero, and all 152 are vestigial: bindings left behind when a control was
+copied or its type changed, which the editor does not garbage collect. That is
+the same thing the dead LOCAL binding in <code>msgs.tosc</code> is.</p>
+<p>So the files are named individually in <code>tests/test_validate.py</code>, with the count
+each is allowed to produce. A rule that starts firing anywhere else, or once
+more in a named file, still fails. <code>py2tosc validate</code> on one of those layouts
+reports what it finds and still exits zero, because a warning is advisory.</p>
+<p>The rule earned its place immediately: it found a half-configured MIDI binding
+in this project's own <code>simple_mk2</code> demo, where the trigger had been moved to
+<code>page</code> and the slots left reading <code>x</code>, and three dead bindings in the
+<code>controls</code> demo.</p>
 <h2 id="refusing-to-write-a-broken-layout">Refusing to write a broken layout<a class="headerlink" href="#refusing-to-write-a-broken-layout" title="Permanent link">&para;</a></h2>
 <p><code>save</code> can check first and write nothing if there are errors, which is the
 checkpoint worth using: the mistake is caught before the file exists, rather
@@ -1670,7 +1864,8 @@ than when TouchOSC refuses to open it.</p>
 <a class="autorefs autorefs-internal" title="ValidationError" href="../../api/errors/#py2tosc.ValidationError"><code>ValidationError</code></a> carries every finding on <code>.issues</code>,
 warnings included, so a caller can report them all.</p>
 <p>Warnings alone never block a save. <code>dumps(validate=True)</code> does the same for the
-string form.</p>
+string form, and <a class="autorefs autorefs-internal" title="edit" href="../../api/document/#py2tosc.edit"><code>edit</code></a> takes the same argument, applying the
+check when its block ends and leaving the file it read untouched if it fails.</p>
 <p>It is off by default, deliberately. A rule in the checker being wrong should not
 stop you writing a file -- and these rules have been wrong before, 108 times on
 their first run.</p>

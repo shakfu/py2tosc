@@ -1,0 +1,209 @@
+{
+  "format": "py2tosc.ui",
+  "//": "the numpad demo of tests/demos/numpad.py, written as a description",
+  "root": {
+    "column": [
+      {
+        "row": [
+          {
+            "stack": [
+              {
+                "button": "valueButton",
+                "color": "404040ff"
+              },
+              {
+                "label": "valueLabel",
+                "color": "404040ff",
+                "background": false,
+                "text_size": 60,
+                "values": [
+                  {
+                    "key": "text",
+                    "default": "0"
+                  },
+                  {
+                    "key": "touch",
+                    "default": false
+                  }
+                ],
+                "props": {
+                  "sum": "",
+                  "max": "127"
+                },
+                "script": "\n-- The running total, held as text so digits can be appended to it. Empty\n-- means nothing has been typed yet, which shows as 0.\nself.sum = \"\"\nself.values.text = \"0\"\n\n-- A keypress arrives on the same value the readout displays, so it is marked\n-- with a prefix a total can never start with. Without it, pressing 7 while the\n-- readout already shows 7 would write the value that is there, and TouchOSC\n-- reports a value only when it changes -- so the key would do nothing.\nlocal PRESS = \"#\"\n\nfunction onValueChanged(key, value)\n    if key ~= \"text\" then\n        return\n    end\n\n    local incoming = self.values.text\n    if string.sub(incoming, 1, 1) ~= PRESS then\n        return\n    end\n\n    -- Each key names itself, so the key decides what it means.\n    local pressed = string.sub(incoming, 2)\n\n    if pressed == \"CLR\" then\n        self.sum = \"\"\n    elseif pressed == \"DEL\" then\n        self.sum = string.sub(self.sum, 1, -2)\n    elseif not (self.sum == \"\" and pressed == \"0\") then\n        self.sum = self.sum..pressed\n    end\n\n    if self.sum ~= \"\" and tonumber(self.sum) > tonumber(self.max) then\n        self.sum = self.max\n    end\n\n    self.values.text = self.sum ~= \"\" and self.sum or \"0\"\nend\n",
+                "// send": "an OSC argument reads the control it sits on, and only the readout holds the total",
+                "messages": [
+                  {
+                    "osc": "/numpad/value",
+                    "args": [
+                      {
+                        "value": "text",
+                        "conversion": "STRING"
+                      }
+                    ],
+                    "var": "touch",
+                    "on": "RISE",
+                    "receive": false
+                  }
+                ]
+              }
+            ],
+            "name": "value",
+            "color": "404040ff"
+          },
+          {
+            "labelled": {
+              "button": "SEND",
+              "color": "804040ff",
+              "outline": false,
+              "messages": [
+                {
+                  "connect": "valueLabel",
+                  "to": "touch",
+                  "on": "ANY"
+                }
+              ]
+            },
+            "caption": "SEND",
+            "name": "send",
+            "color": "804040ff"
+          }
+        ],
+        "name": "values",
+        "color": "404040ff"
+      },
+      {
+        "//": "the digits, in a keypad's order rather than a counter's",
+        "tiles": [
+          {
+            "labelled": {
+              "button": "$cap",
+              "color": "$shade",
+              "outline": false,
+              "messages": [
+                {
+                  "connect": "valueLabel",
+                  "source": {
+                    "const": "#$cap"
+                  },
+                  "to": "text",
+                  "on": "RISE"
+                }
+              ]
+            },
+            "caption": "$cap",
+            "name": "$name",
+            "color": "$shade",
+            "inset": 0.1,
+            "each": [
+              {
+                "cap": "7",
+                "name": "key7",
+                "shade": "404040ff"
+              },
+              {
+                "cap": "4",
+                "name": "key4",
+                "shade": "484040ff"
+              },
+              {
+                "cap": "1",
+                "name": "key1",
+                "shade": "504040ff"
+              },
+              {
+                "cap": "8",
+                "name": "key8",
+                "shade": "584040ff"
+              },
+              {
+                "cap": "5",
+                "name": "key5",
+                "shade": "604040ff"
+              },
+              {
+                "cap": "2",
+                "name": "key2",
+                "shade": "684040ff"
+              },
+              {
+                "cap": "9",
+                "name": "key9",
+                "shade": "704040ff"
+              },
+              {
+                "cap": "6",
+                "name": "key6",
+                "shade": "784040ff"
+              },
+              {
+                "cap": "3",
+                "name": "key3",
+                "shade": "804040ff"
+              }
+            ]
+          }
+        ],
+        "columns": 3,
+        "name": "numbers",
+        "color": "604040ff"
+      },
+      {
+        "// meaning": "CLR and DEL send their names like any other key; the readout's script is what gives them meaning",
+        "row": [
+          {
+            "labelled": {
+              "button": "$cap",
+              "color": "$shade",
+              "outline": false,
+              "messages": [
+                {
+                  "connect": "valueLabel",
+                  "source": {
+                    "const": "#$cap"
+                  },
+                  "to": "text",
+                  "on": "RISE"
+                }
+              ]
+            },
+            "caption": "$cap",
+            "name": "$name",
+            "color": "$shade",
+            "each": [
+              {
+                "cap": "CLR",
+                "name": "clear",
+                "shade": "404040ff"
+              },
+              {
+                "cap": "0",
+                "name": "zero",
+                "shade": "604040ff"
+              },
+              {
+                "cap": "DEL",
+                "name": "del",
+                "shade": "804040ff"
+              }
+            ]
+          }
+        ],
+        "name": "clear",
+        "color": "804040ff"
+      }
+    ],
+    "sizes": [
+      1,
+      3,
+      1
+    ],
+    "frame": [
+      0,
+      0,
+      500,
+      800
+    ],
+    "name": "Numpad"
+  }
+}

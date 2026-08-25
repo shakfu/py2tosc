@@ -4,6 +4,8 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.5.0]
+
 ### Added
 
 - A JSON encoding of a layout, alongside the `.tosc` and the `.xml`. It is documented in [The .json format](https://shakfu.github.io/py2tosc/guide/json/), and three names are new in the public API: `py2tosc.to_json`, `py2tosc.from_json` and the `py2tosc.json_codec` module behind them.
@@ -18,20 +20,48 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
 
   A key nothing reads is refused rather than ignored, with a suggested spelling where there is a near match. This is the failure a hand-authored format has to close: a `childs` that is quietly skipped drops a whole subtree, and the layout that comes back looks exactly like one that read correctly. Every message names the node it gave up on -- `root.children[1].properties.frame: a frame needs 4 values (x, y, w, h), got 2` -- because a layout is a deep tree and 4715 controls is a real size for one.
 
+- `validate` warns when a local binding sends a value its own control does not have -- the mirror of the rule that checks what one writes to its destination, and the same silent failure at the other end: a binding that reads nothing sends nothing while the layout stays well formed. `ui.connect` reads a bare `source` string as a value key, so a caller who meant a constant -- `source="#7"` rather than `source=ui.const("#7")` -- lands here. All 361 local bindings in the corpus that send a value send one their control carries; a constant or a property source is left alone, since neither says anything about the control's values.
+
+  Found by porting the numpad demo to the JSON layout dialect, where it is not a slip but the only spelling available: the dialect has no notation for partials, so `"source": "#7"` is what a description has to say, and it built a binding that reads a value the button does not have without complaint.
+
+- `validate` warns when a binding is addressed to a value its control does not have, at either end: the trigger that would fire it, and the argument, MIDI slot or address partial it would send. A trigger naming a value the control lacks never fires; a partial reading one is sent anyway, as `0`. The layout loads, round-trips and validates as well formed either way, so nothing else catches it. The usual way to get there is `ui.labelled`, which returns the group holding a control and its caption -- a message put on that node is addressed to `x`, where a group carries only `touch`.
+
+  These are the only rules here settled by experiment rather than by the corpus, because the corpus says the opposite of what it appears to. The editor writes 152 such bindings -- 104 on labels, 48 on grids, `x` in every case, across ten files including five TouchOSC ships -- which by the usual standard retires a rule. Two readings could not be told apart from the documents: a control might carry values the format never writes down, or those bindings might be dead in TouchOSC's own examples.
+
+  A layout was built to ask. Two labels differing only in their trigger, both written to by the same button; only the one firing on `text` sent anything, and what it sent was `FLOAT(0)` for the `x` it had been told to read. So all 152 are vestigial, left behind when a control was copied or its type changed, exactly like the dead LOCAL binding in `msgs.tosc`. The files are named individually in the test suite with the count each may produce, so a rule that starts firing anywhere else still fails.
+
+  It earned its place immediately, on this project's own demos: a half-configured MIDI binding in `simple_mk2`, where the trigger had been moved to `page` and the slots left reading `x`, and three dead bindings in `controls`, where a BOX, a LABEL and a TEXT were each given the `x` binding that suits a fader. Both are fixed.
+
 - A JSON dialect that *describes* a layout for the combinators to build, where the encoding above holds one the file already has. It is documented in [Describing a layout in JSON](https://shakfu.github.io/py2tosc/guide/ui-json/), read by `py2tosc.load` like any other layout, and reached directly as `py2tosc.ui_json`.
 
   ```json
   {"format": "py2tosc.ui", "root": {"column": [
-    {"row": [{"repeat": 8, "of": {"fader": "ch$i", "messages": [{"midi_cc": "$i0"}]}}], "gap": 4},
+    {"row": [{"fader": "ch$i", "messages": [{"midi_cc": "$i0"}], "repeat": 8}], "gap": 4},
     {"grid": "BUTTON", "columns": 8, "rows": 2, "name": "mutes"}
   ], "sizes": [3, 1], "gap": 8, "pad": 8, "frame": [0, 0, 1024, 768]}}
   ```
 
   Four rules are the whole of it. One key names the thing, and everything else is an argument to it: `{"row": [...], "gap": 4}` is `ui.row(*children, gap=4)`. The value is that tag's one positional argument -- children, a control type, the control being wrapped, or a control's name. `repeat` expands in place, as a child rather than a setting on its parent, so a list can mix repeated and hand-written children. And a sibling key that is not an argument is a property, checked against what the type accepts, so a mistyped `gpa` is a message rather than a custom property nobody asked for.
 
+  A repeat is written either way round: a node repeats itself, `{"fader": "ch$i", "repeat": 8}`, or holds the node it repeats under `of`. The short form puts the thing being built first, which is the same instinct as one key naming the thing, and costs a nesting level less; the long form keeps a large template separate from the count. Carrying both, or a `repeat` anywhere but in a list of children, is refused rather than guessed at.
+
+  `each` walks a list of rows where `repeat` counts, binding every field of the current row the way `repeat` binds its counter: `{"each": [{"n": "kick", "cc": 20}, ...], "of": {"fader": "$n", "messages": [{"midi_cc": "$cc"}]}}`. Counting only reaches layouts that are a sequence, and most are not -- a numpad's keys read 7, 4, 1, 8, 5, 2, 9, 6, 3, and a mixer's channels have names. It takes the same two forms `repeat` does, binds `$i` and `$i0` alongside the row, and an `each` of nothing builds nothing, since a generator with nothing to emit writes an empty list where a `repeat` of 0 would be a typo. A field is read as `$name`, so a key that cannot be written that way is refused rather than left unreachable, and a field named after the counter is refused rather than one of the two silently winning.
+
+  It is also what closes the gap with `py2tosc build`, which takes a list of parameters and lays out a surface from it: a description can now say the same thing, and say the rest of the layout around it. Written with `each`, `tests/data/numpad.ui.json` is 209 lines against the 353 it took to name every key by hand.
+
   Repetition binds two counters, `$i` from wherever `from` says and `$i0` from zero, and a string that is nothing but a counter keeps its type -- which is the only reason a controller number can be repeated at all. Repeats nest, each naming its own counter with `as`, and the outer pass leaves the inner pass's counters alone so both are readable in the innermost node. A `$` is only special inside a repeat, so an OSC address written `/mixer/{name}` is untouched: that is TouchOSC's templating, resolved on the device, and the two syntaxes are different so neither can consume the other.
 
   A `connect` binding names the control it writes to rather than carrying a node id, and every name is looked up once the whole tree exists, so a binding can point forwards, backwards or out of its own branch. A name matching no control, or more than one, is an error that says which.
+
+  What a binding sends is assembled from partials, and each is an object of the same shape as everything else: `{"value": "x"}`, `{"prop": "name"}`, `{"const": "#7"}` or `{"index": null}`, with `conversion` and `scale` alongside. A bare string keeps the meaning `py2tosc.ui` gives it -- the key of a value -- so a constant has to say so, and in `args`, where neither reading is safe to guess, a bare string is refused rather than assumed. `triggers` is a list of `{"var": ..., "on": ...}`, for the binding that watches two values at once: all 39 multi-trigger messages in the corpus are an XY sending on both axes. Nothing in `py2tosc.ui` is beyond the dialect.
+
+  The evidence that it is enough is `tests/data/numpad.ui.json`, the `numpad` demo written as a description: 45 controls, nested layouts, a Lua script carried as a property, a caption over every key, twelve local bindings sending a marked constant into one readout, and the OSC binding that sends the total. It is compared against the demo's own `build()` as bytes with node ids normalised, so the description and the Python cannot drift -- not a colour, not a frame, not a trigger, not the script.
+
+  `text` on a node sets what a `LABEL` says. That is a *value* rather than a property, so the long way round is `{"values": [{"key": "text", "default": "Hello"}]}` for the second most common thing anyone does to a label, and the obvious spelling was refused because `text` is also the tag for a TEXT control. It now loses that tie the way `grid` and `inset` do -- a bare `{"text": "notes"}` is still a TEXT control -- and is accepted only on the types that carry a `text` value, and not alongside `values`, which sets the same thing.
+
+  A key beginning with `//` is a comment, ignored wherever a key may appear -- the envelope, a node, a binding, a value, and inside `props`, with more than one to an object since JSON keys are unique. JSON has no notation for one, and the reason this dialect exists is that a layout is decided somewhere a Python script cannot be reviewed, which leaves nowhere to write down why a number is what it is. A comment is dropped before anything reads the node, so it never reaches the file, is never mistaken for a custom property, and is never substituted into -- a note mentioning `$5` inside a repeat is not a counter nobody bound.
+
+  What a node cannot do is be quietly half-read, which is the same bar the encoding above is held to one level down. A leaf's value is its name and nothing else. A name given twice, once by position and once by key, is refused rather than one of the two silently winning. `props` on an `inset` -- which hands back the control it was given and has nowhere to put them -- says so instead of dropping them. And a binding's positional argument is checked before the combinator sees it, so a quoted controller number reads `midi_cc takes a controller number, found a string` rather than an `AttributeError` raised from inside the partial machinery, with no node named and no relation to what the file wrote.
 
   It is read and never written. A resolved layout has frames and no memory of the `row` that placed them, so `save` always writes the faithful encoding whatever the document was built from. Being a description of what `py2tosc.ui` does, it inherits that module's carve-out from the stability policy: it may change in a minor release, where the encoding above may not.
 
@@ -44,6 +74,20 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
 - The [stability policy](https://shakfu.github.io/py2tosc/stability/) now covers the JSON encoding under the same byte-exact guarantee, with the same two exceptions. That encoding carries a `schema` number of its own: a change that would stop an already written file from reading gets a new one, and a file declaring an older schema keeps reading.
 
 ### Fixed
+
+- A layout that will not divide now says which branch it was. The arithmetic is not local -- a row fails because of the frame its grandparent handed down -- so `a width of 100 cannot hold 2 slots with 50/50 padding and 100 between them` was true and unactionable on anything bigger than a demo. The message now carries the names on the way down, as `validate` reports them: `mixer/faders: a width of 100 cannot hold ...`, with an unnamed control appearing as `<GROUP>`. This is `ui.resolve`, so it reaches every caller rather than only the JSON dialect.
+
+- `sizes` given a string read it as one weight per character. `"3 1"` failed on `float(' ')` from inside the geometry, and `"31"` did not fail at all -- it silently meant two slots of 3 and 1. Both now say `sizes takes a number of slots or a list of weights`.
+
+- A property value the control cannot take names its key in the JSON layout dialect. A combinator is handed a whole dictionary and reports the value it could not coerce, so `'nope' is not a 6 or 8 digit hex colour` named the node and left twenty properties to choose between; it now reads `root.column[1]: color: 'nope' is not ...`. The faithful encoding already read properties one at a time for the same reason.
+
+- Two spellings `py2tosc.ui` passed straight through to the file without checking them, which is the one thing this layer is not allowed to do: everything else it builds is vocabulary the format defines. `on` on all four message helpers reached the file as a `<condition>` -- `on="NOPE"` wrote a condition TouchOSC has no concept of -- and `conversion` on `ui.value`, `ui.const`, `ui.prop` and `ui.index` did the same for a partial's `<conversion>`. Nothing downstream would have caught either: the codec writes what it is given, and `validate` has no rule for a condition or a conversion, so what came back was a layout that loads, round-trips and does nothing.
+
+  Both are now coerced through their enum, so a name that is not one the format defines is a `ValueError` at the call. A member and its text are both still accepted, since a loaded message holds the text where a built one holds the member. `ui.grid` already checked its control type this way; nothing else in the module takes an enum by name.
+
+  This reaches the JSON layout dialect too, where a condition is the likeliest of the two to be mistyped: `{"osc": "/a", "on": "RISE"}` is a binding anyone can write, and `"on": "NOPE"` is now a `FormatError` naming the binding rather than a file that quietly does nothing.
+
+- Two demos carried bindings that could never fire, both found by the rules above the day they existed. `simple_mk2` built the pager's MIDI binding with its trigger moved to `page` and its slots left at the default, reading the `x` a PAGER does not have -- so it fired on every page change and sent 0, where the layout it rebuilds reads `page` in all three slots. `controls` gave every control type the `x` binding that suits a fader, which left the BOX, the LABEL and the TEXT addressed to a value none of them carries; each is now addressed to one it does, preferring `x`, then `text`, then `touch`. The `simple_mk2` test now asserts that the rebuild warns exactly where the original warns and nowhere else, which is a sharper statement of faithfulness than the "is clean" it replaced.
 
 - `ui.tiles` refused nothing, so `columns=0` divided by zero inside the geometry at `resolve` -- a `ZeroDivisionError` from a long way away from the call that caused it. It now raises a `ValueError` naming the argument, as `ui.grid` already did for the same mistake.
 
@@ -192,6 +236,7 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
 - **`grid` now names the `GRID` control everywhere and nothing else.** It previously meant three different things across three modules, which is why it took a round of questions to establish how to build one. Two renames follow:
 
   - `ui.grid` -- the arrangement that tiles controls you already have into a `GROUP` -- is now `ui.tiles`. It sits alongside `row`, `column` and `stack`, and is the only one of them that took the format's name for a control it does not build.
+
   - `layout.grid` is now `layout.matrix`. It creates one control type across M by N cells inside a parent, which `matrix` describes and `grid` did not; the eager family now reads `row`, `column`, `matrix`. Behaviour is unchanged.
 
   So `py2tosc.grid` and `ui.grid` both give a `GRID`, the first bare and the second with its cells, while `ui.tiles` and `layout.matrix` arrange controls in a `GROUP`. `layout.matrix` is the first break in `layout` since 0.1.0; no demo used it, and it is a rename with no behavioural change.
@@ -204,10 +249,7 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
 
 ## [0.2.0]
 
-Adds `py2tosc.ui`, a layer of combinators for building messages and layouts, and
-fixes a defect that made `Control.copy` silently misdirect a duplicated
-subtree's wiring. `py2tosc.layout` and everything else in the core namespace are
-unchanged, so existing scripts keep working.
+Adds `py2tosc.ui`, a layer of combinators for building messages and layouts, and fixes a defect that made `Control.copy` silently misdirect a duplicated subtree's wiring. `py2tosc.layout` and everything else in the core namespace are unchanged, so existing scripts keep working.
 
 ### Added
 
@@ -341,6 +383,10 @@ First release: py2tosc is a rewrite of [tosclib](https://github.com/AlbertoV5/to
 
 py2tosc began as a fork of [tosclib](https://github.com/AlbertoV5/tosclib), which had twelve releases between 2022-05-20 and 2022-06-09, ending at 0.3.5. That history belongs to a different distribution and is not restated here; see [the tosclib releases](https://pypi.org/project/tosclib/#history).
 
+[0.5.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.5.0
+[0.4.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.4.0
+[0.3.3]: https://github.com/shakfu/py2tosc/releases/tag/v0.3.3
+[0.3.2]: https://github.com/shakfu/py2tosc/releases/tag/v0.3.2
 [0.3.1]: https://github.com/shakfu/py2tosc/releases/tag/v0.3.1
 [0.3.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.3.0
 [0.2.1]: https://github.com/shakfu/py2tosc/releases/tag/v0.2.1

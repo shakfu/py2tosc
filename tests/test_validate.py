@@ -7,10 +7,13 @@ whether a rule is allowed to exist. Two rules were dropped while writing this
 for failing it.
 """
 
+from collections import Counter
+
 import pytest
 
 import py2tosc
 from _corpus import CORPUS, EDITOR_WRITTEN
+from py2tosc import ui
 from py2tosc.validate import ERROR, WARNING
 
 
@@ -36,13 +39,39 @@ def test_no_real_layout_produces_an_error(path):
     assert not found, f"{path.name}: {[str(i) for i in found]}"
 
 
-#: The one editor-written file that warns, and what it is allowed to say. The
-#: layout genuinely holds a dead LOCAL binding: the destination id appears
-#: exactly once in the file, inside `dstID`, and its v1 timestamp is later than
-#: either control in the layout -- so the destination was deleted, or the
-#: message was pasted in from somewhere else. The editor does not garbage
-#: collect the binding, which is why the rule fires here without being wrong.
-KNOWN_WARNINGS = {"msgs.tosc": "a75407ae-da3a-11ec-b68f-2cf05d85548b"}
+#: The editor-written files that warn, and exactly what each is allowed to
+#: say. Named rather than tolerated: a rule that starts firing on anything
+#: else, or a count that moves, still fails here.
+#:
+#: `msgs.tosc` holds a dead LOCAL binding. The destination id appears exactly
+#: once in the file, inside `dstID`, and its v1 timestamp is later than either
+#: control in the layout -- so the destination was deleted, or the message was
+#: pasted in from somewhere else. The editor does not garbage collect the
+#: binding, which is why the rule fires here without being wrong.
+#:
+#: The rest hold bindings addressed to a value their control does not have:
+#: 104 on labels and 48 on grids, `x` in every case. Each is counted twice
+#: because both halves of one message are wrong -- the trigger that would fire
+#: it, and the argument it would send -- and they are separate findings, since
+#: a binding can have one without the other.
+#:
+#: These were the reason this rule nearly did not exist. The corpus says the
+#: editor writes them deliberately, which by the usual standard here retires a
+#: rule; only an experiment could say otherwise, and it did. See
+#: `docs/guide/validation.md`.
+KNOWN_WARNINGS = {
+    "msgs.tosc": {"LocalMessage is addressed to node id": 1},
+    "mix_2_mk2.tosc": {"fires on value": 72, "reads value": 72},
+    "beatmachine_mk2.tosc": {"fires on value": 36, "reads value": 36},
+    "automat5_mk2.tosc": {"fires on value": 22, "reads value": 22},
+    "logicpad.tosc": {"fires on value": 10, "reads value": 10},
+    "logictouch.tosc": {"fires on value": 4, "reads value": 4},
+    "grid-encoders.tosc": {"fires on value": 2, "reads value": 2},
+    "grid-faders.tosc": {"fires on value": 2, "reads value": 2},
+    "simple_mk2.tosc": {"fires on value": 2, "reads value": 2},
+    "controls.tosc": {"fires on value": 1, "reads value": 1},
+    "controls.xml": {"fires on value": 1, "reads value": 1},
+}
 
 
 @pytest.mark.parametrize("path", EDITOR_WRITTEN, ids=lambda p: p.name)
@@ -55,16 +84,19 @@ def test_editor_written_layouts_are_almost_warning_free(path):
     `gridColor`/`textWrap` when a 1.5.2 sample covering every control type
     joined the corpus.
 
-    The single exception is named rather than tolerated, so a rule that starts
-    firing on anything else still fails here.
+    Every exception is named rather than tolerated, so a rule that starts
+    firing on anything else -- or on one more control than it did -- still
+    fails here.
     """
     found = warnings(py2tosc.load(path).validate())
-    expected = KNOWN_WARNINGS.get(path.name)
-    if expected is None:
-        assert found == []
-    else:
-        assert len(found) == 1
-        assert expected in found[0].message
+    expected = KNOWN_WARNINGS.get(path.name, {})
+
+    counted: Counter = Counter()
+    for issue in found:
+        matched = [phrase for phrase in expected if phrase in issue.message]
+        assert matched, f"{path.name}: unexpected warning {issue}"
+        counted[matched[0]] += 1
+    assert counted == Counter(expected), f"{path.name}: {counted} != {expected}"
 
 
 def test_gamepad_connections_use_the_narrower_field():
@@ -77,14 +109,22 @@ def test_gamepad_connections_use_the_narrower_field():
     assert any("connections is 10 characters" in i.message for i in found)
 
 
-def test_the_whole_corpus_produces_two_known_warnings():
-    """Both findings are real defects in the files, not gaps in the rules."""
+def test_the_whole_corpus_produces_only_known_warnings():
+    """Every finding is a real defect in a file, not a gap in the rules."""
     total = [i for p in CORPUS for i in py2tosc.load(p).validate()]
     assert errors(total) == []
 
     found = warnings(total)
-    assert len(found) == 2
-    messages = sorted(i.message for i in found)
+    dead = [i for i in found if "fires on value" in i.message or "reads value" in i.message]
+
+    # 152 bindings addressed to a value their control does not have, each
+    # counted twice: the trigger that would fire it, and the argument it
+    # would send. Confirmed dead in TouchOSC rather than inferred.
+    assert len(dead) == 304
+    assert len([i for i in dead if "fires on value" in i.message]) == 152
+
+    messages = sorted(i.message for i in found if i not in dead)
+    assert len(messages) == 2
 
     # A dead LOCAL binding in msgs.tosc, addressed to a control the file does
     # not contain. See KNOWN_WARNINGS above.
@@ -494,6 +534,143 @@ def test_a_half_configured_local_binding_is_left_alone():
     )
     panel = py2tosc.group(name="panel", children=[target, button])
     assert panel.validate() == []
+
+
+def test_a_container_binding_that_fires_on_a_value_it_lacks_warns():
+    """The `labelled` trap: the binding lands on the group, not the button.
+
+    `ui.labelled` returns the group holding the control and its caption, so a
+    message put there fires on `x` -- which a group does not have. Nothing
+    about the layout is malformed and the binding never fires.
+    """
+    panel = ui.labelled(py2tosc.button(name="play"), "Play")
+    panel.messages.append(ui.osc("/play"))
+    ui.resolve(panel, (0, 0, 100, 100))
+
+    found = [i.message for i in warnings(panel.validate())]
+    # Both halves of the one binding: what would fire it, and what it sends.
+    assert any("fires on value 'x' on a GROUP, which carries touch" in m for m in found)
+    assert any("reads value 'x' on a GROUP, which carries touch" in m for m in found)
+
+
+def test_a_binding_that_addresses_a_value_the_control_has_is_clean():
+    """Both halves have to be right, which is the point of reporting them apart.
+
+    Moving the trigger to `touch` and leaving the argument on `x` is the
+    half-fix that looks done: nothing fires it now, and if anything did it
+    would send a zero.
+    """
+    panel = py2tosc.group(name="panel", frame=(0, 0, 100, 100))
+    panel.messages.append(
+        ui.osc("/panel", var="touch", args=[ui.value("touch")])
+    )
+    assert panel.validate() == []
+
+    half_fixed = py2tosc.group(name="half", frame=(0, 0, 100, 100))
+    half_fixed.messages.append(ui.osc("/half", var="touch"))
+    assert [i.message for i in warnings(half_fixed.validate())] == [
+        "OscMessage reads value 'x' on a GROUP, which carries touch"
+    ]
+
+
+@pytest.mark.parametrize("kind", [py2tosc.label, py2tosc.text])
+def test_a_label_firing_on_x_is_the_case_the_experiment_settled(kind):
+    """No carve-out, and this is the shape that nearly earned one.
+
+    A label carries `text` and `touch`. The editor writes 104 bindings that
+    fire on `x` anyway, which looked like evidence that a control holds values
+    the format never writes down -- so the rule was held to containers until a
+    layout was built to ask TouchOSC directly. Two labels differing only in
+    their trigger, both written to by the same button: only the one firing on
+    `text` sent anything, and it sent `FLOAT(0)` for the `x` it was told to
+    read. Both halves dead, and now both reported.
+    """
+    control = kind(name="readout", frame=(0, 0, 10, 10))
+    control.messages.append(ui.osc("/thing"))
+
+    found = [i.message for i in warnings(control.validate())]
+    assert any("fires on value 'x'" in m for m in found)
+    assert any("reads value 'x'" in m for m in found)
+
+
+def test_a_binding_reading_a_constant_or_a_property_is_left_alone():
+    """Neither says anything about the control's values."""
+    label = py2tosc.label(name="readout", frame=(0, 0, 10, 10))
+    label.messages.append(
+        ui.osc("/{name}", var="text", args=[ui.const("hello"), ui.prop("name"), ui.index()])
+    )
+    assert label.validate() == []
+
+
+def test_a_local_binding_sending_a_value_its_control_lacks_warns():
+    """The mirror of the destination rule, and what a port to JSON found.
+
+    `ui.connect(source="#7")` reads a bare string as a value key, so a caller
+    meaning a constant gets a binding that reads a value the button does not
+    have. It sends nothing, and nothing else about the layout is wrong.
+    """
+    readout = py2tosc.label(name="readout")
+    button = py2tosc.button(name="key", messages=[ui.connect(readout, source="#7", to="text")])
+    panel = py2tosc.group(name="panel", children=[readout, button], frame=(0, 0, 100, 100))
+
+    found = [i for i in warnings(panel.validate()) if "sends value" in i.message]
+    assert len(found) == 1
+    assert "sends value '#7' from a BUTTON, which carries touch, x" in found[0].message
+
+
+def test_a_local_binding_sending_a_constant_or_a_property_is_left_alone():
+    """Neither says anything about the control's values."""
+    readout = py2tosc.label(name="readout")
+    button = py2tosc.button(
+        name="key",
+        messages=[
+            ui.connect(readout, source=ui.const("#7"), to="text"),
+            ui.connect(readout, source=ui.prop("name"), to="text"),
+        ],
+    )
+    panel = py2tosc.group(name="panel", children=[readout, button], frame=(0, 0, 100, 100))
+    assert not [i for i in warnings(panel.validate()) if "sends value" in i.message]
+
+
+def test_every_local_binding_in_the_corpus_sends_a_value_its_control_has():
+    """The standard this rule had to clear before it was allowed to exist."""
+    checked = 0
+    for path in CORPUS:
+        for control in py2tosc.load(path).walk():
+            for message in control.messages:
+                if isinstance(message, py2tosc.LocalMessage) and message.value:
+                    checked += 1
+    assert checked > 350, f"only {checked} bindings checked"
+
+    total = [i for p in CORPUS for i in py2tosc.load(p).validate()]
+    assert not [i for i in warnings(total) if "sends value" in i.message]
+
+
+def test_the_dead_binding_rules_fire_only_where_they_are_named():
+    """The standard, restated for the one rule the corpus could not settle.
+
+    It is not "fires on nothing the editor wrote" here, because the editor
+    wrote 152 of these. It is that every one of them is in a file this suite
+    names, with the count it names -- so the rule stays as narrow as the
+    evidence, and a new firing anywhere else fails
+    `test_editor_written_layouts_are_almost_warning_free`.
+    """
+    checked = 0
+    for path in CORPUS:
+        for control in py2tosc.load(path).walk():
+            checked += sum(
+                len(getattr(m, "triggers", None) or []) for m in control.messages
+            )
+    assert checked > 4000, f"only {checked} triggers checked"
+
+    loose = [
+        (path.name, issue)
+        for path in CORPUS
+        for issue in warnings(py2tosc.load(path).validate())
+        if ("fires on value" in issue.message or "reads value" in issue.message)
+        and path.name not in KNOWN_WARNINGS
+    ]
+    assert not loose, f"unnamed dead bindings: {loose}"
 
 
 def test_every_resolvable_local_binding_in_the_corpus_addresses_something_real():

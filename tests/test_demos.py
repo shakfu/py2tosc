@@ -476,10 +476,24 @@ def test_simple_mk2_lands_where_the_original_does(tmp_path):
     assert {k[2] for k in apart} == {"LABEL"}, "only the readouts may differ"
 
 
-def test_simple_mk2_output_is_a_clean_layout(tmp_path):
+def test_simple_mk2_output_warns_exactly_as_the_original_does(tmp_path):
+    """Faithful means faithful, including what the original gets wrong.
+
+    Hexler's own `multitoggle` carries four bindings addressed to `x`, which a
+    GRID does not have -- dead in TouchOSC, as an experiment with two labels
+    confirmed. Rebuilding the layout reproduces them, so the rebuild warns
+    where the original warns and nowhere else. Anything beyond that list is
+    this demo's own defect: it is how the pager's half-configured MIDI binding
+    was found.
+    """
     out = tmp_path / "mk2.tosc"
     run("simple_mk2.py", "-o", out)
-    assert py2tosc.load(out).validate() == []
+
+    rebuilt = py2tosc.load(out).validate()
+    original = py2tosc.load(EXAMPLES / "simple_mk2.tosc").validate()
+
+    assert [i for i in rebuilt if i.level == "error"] == []
+    assert sorted(i.message for i in rebuilt) == sorted(i.message for i in original)
 
 
 def test_simple_mk2_behaves_like_the_original(tmp_path):

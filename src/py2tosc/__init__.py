@@ -71,7 +71,7 @@ from .messages import (
 from .properties import Color, Frame, Property, to_color, to_frame
 from .validate import Issue, ValidationError, validate
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 # Sorted rather than grouped by topic, because RUF022 asks for it and the
 # grouping lives in the API reference instead. See docs/api/.

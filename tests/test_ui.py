@@ -18,6 +18,7 @@ from py2tosc import (
     Partial,
     PartialType,
     Trigger,
+    TriggerCondition,
     ui,
 )
 
@@ -46,6 +47,31 @@ def test_index_defaults_to_the_only_shape_the_corpus_contains():
 
 def test_value_matches_the_default_osc_argument():
     assert [ui.value("x")] == OscMessage().arguments
+
+
+PARTIALS = [
+    lambda **kw: ui.value("x", **kw),
+    lambda **kw: ui.const("hello", **kw),
+    lambda **kw: ui.prop("name", **kw),
+    lambda **kw: ui.index(**kw),
+]
+
+
+@pytest.mark.parametrize("make", PARTIALS)
+def test_a_conversion_the_format_has_no_concept_of_is_refused(make):
+    """The same constraint as a trigger condition, one layer down.
+
+    A conversion is stored as text, so an unchecked one reaches the file as a
+    `<conversion>` TouchOSC has never heard of -- and like a condition, nothing
+    after this point looks at it again.
+    """
+    with pytest.raises(ValueError):
+        make(conversion="NOPE")
+
+
+@pytest.mark.parametrize("make", PARTIALS)
+def test_a_conversion_may_be_the_enum_or_its_text(make):
+    assert make(conversion=Conversion.BOOLEAN) == make(conversion="BOOLEAN")
 
 
 # -- addresses
@@ -326,6 +352,24 @@ def test_on_and_var_build_one_trigger(make):
 @pytest.mark.parametrize("make", MAKERS)
 def test_triggers_override_on_and_var(make):
     assert make(on="RISE", triggers=[]).triggers == []
+
+
+@pytest.mark.parametrize("make", MAKERS)
+def test_a_condition_the_format_has_no_concept_of_is_refused(make):
+    """The one place a helper could write vocabulary the format lacks.
+
+    A condition is passed through as text, so an unchecked one reaches the
+    file as a `<condition>` TouchOSC has never heard of -- and nothing after
+    this point looks at it: the codec writes what it is given, and `validate`
+    has no rule for it. Refusing here is the only chance.
+    """
+    with pytest.raises(ValueError):
+        make(on="NOPE")
+
+
+@pytest.mark.parametrize("make", MAKERS)
+def test_a_condition_may_be_the_enum_or_its_text(make):
+    assert make(on=TriggerCondition.FALL).triggers == make(on="FALL").triggers
 
 
 def test_a_message_with_no_triggers_omits_the_element():

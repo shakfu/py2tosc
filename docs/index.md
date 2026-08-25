@@ -84,6 +84,10 @@ print(py2tosc.to_python(py2tosc.load("mixer.tosc")))
 
 - [Message combinators](api/ui.md) shortens the bindings: an f-string-like OSC address, the two common MIDI ones, and local wiring in a line.
 
+- [The .json format](guide/json.md) is the same tree as JSON, for emitting a layout from something that is not Python, or reading a diff of one.
+
+- [Describing a layout in JSON](guide/ui-json.md) is the other dialect: what nests in what, repeated over counters or rows of data, built by the combinators.
+
 - [The .tosc format](guide/format.md) documents the file format itself, which is useful whether or not you use this library.
 
 - [Validation](guide/validation.md) checks a layout for what TouchOSC will reject.

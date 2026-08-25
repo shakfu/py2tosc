@@ -90,7 +90,16 @@ def sample(kind: str, name: str) -> Control:
         control.value("text").default = "label"
     elif kind == "TEXT":
         control.value("text").default = "A TEXT holds several lines, and wraps."
-    control.messages.append(ui.osc("/{name}"))
+
+    # A binding is addressed to a value, and not every type has the same ones.
+    # `ui.osc()` defaults to `x`, which a BOX, a LABEL and a TEXT do not carry
+    # -- so on those three the binding would never fire, and would send 0 if
+    # anything made it. What a label has to report is what it says.
+    carried = {value.key for value in control.values}
+    watched = next(key for key in ("x", "text", "touch") if key in carried)
+    control.messages.append(
+        ui.osc("/{name}", var=watched, args=[ui.value(watched)])
+    )
     return control
 
 

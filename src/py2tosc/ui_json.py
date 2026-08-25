@@ -34,10 +34,28 @@ Four rules are the whole of it.
   wrapped for `labelled` and `inset`, and the name for a plain control, since a
   name is what a control almost always has.
 - **`repeat` expands in place.** It is a child rather than a property of its
-  parent, so it works anywhere children are accepted.
+  parent, so it works anywhere children are accepted. A node repeats itself --
+  `{"fader": "ch$i", "repeat": 8}` -- or holds the node it repeats under `of`,
+  which keeps a long template separate from the count. `each` walks a list of
+  rows where `repeat` counts, binding every field of a row the way `repeat`
+  binds `$i`, which is how a layout whose names and numbers follow no sequence
+  is described.
 - **A sibling key that is not an argument is a property.** Checked against what
   the type accepts, so `gpa` is a message rather than a custom property nobody
-  asked for. Genuinely custom keys go under `props`.
+  asked for. Genuinely custom keys go under `props`. `text` is the exception
+  that proves it: what a label says is a value rather than a property, and
+  `{"label": "readout", "text": "Hello"}` is what anyone would write.
+
+What a binding sends is assembled from partials, and each is an object of the
+same shape as everything else: `{"value": "x"}`, `{"prop": "name"}`,
+`{"const": "#7"}` or `{"index": null}`, with `conversion` and `scale` alongside.
+A bare string keeps the meaning `ui` gives it -- the key of a value -- so a
+constant says so, and in `args`, where neither reading is safe to guess, a bare
+string is refused rather than assumed.
+
+A key beginning with `//` is a comment, ignored wherever a key may appear.
+JSON has no notation for one, and a description that exists to be reviewed
+needs somewhere to say why a number is what it is.
 
 Being a dialect over `py2tosc.ui`, it inherits that module's carve-out from the
 [stability policy](https://shakfu.github.io/py2tosc/stability/): it may change
@@ -50,7 +68,7 @@ from __future__ import annotations
 
 import json
 import re
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, fields, replace
 from typing import Any
 
 from . import ui
@@ -69,12 +87,12 @@ from .control import (
     text,
     xy,
 )
-from .defaults import allowed_properties
+from .defaults import allowed_properties, default_values_for
 from .document import Document
-from .enums import ControlType
+from .enums import ControlType, TriggerCondition
 from .errors import FormatError
-from .messages import LocalMessage, Message, Value
-from .properties import to_camel
+from .messages import LocalMessage, Message, Partial, Trigger, Value
+from .properties import Property, to_camel
 
 __all__ = ["DIALECT", "SCHEMA", "build", "from_json"]
 
@@ -148,13 +166,21 @@ _PRODUCES: dict[str, ControlType] = {
 
 _TAGS = frozenset(_PRODUCES) | {"inset"}
 
+#: Sibling keys that set one of the control's *values* rather than a
+#: property. Only `text` so far, because a label saying something is the
+#: second most common thing anyone does to one and `values` is a long way to
+#: say it. A control whose type does not carry the value refuses the key, as
+#: it would any other it does not know.
+_VALUE_SUGAR = frozenset({"text"})
+
 #: Tags that are also the name of a property or of another tag's argument:
 #: `grid` is a GRID control and the switch that draws grid lines on a fader,
 #: and `inset` is a combinator and an argument of `labelled`. A node holding
 #: one of these plus a real tag is not ambiguous, it just has a property with
 #: an awkward name, so these lose the tie in `_tag`.
 _AMBIGUOUS = _TAGS & (
-    frozenset().union(*_OPTIONS.values())
+    _VALUE_SUGAR
+    | frozenset().union(*_OPTIONS.values())
     | frozenset().union(*(allowed_properties(t) for t in ControlType))
 )
 
@@ -166,12 +192,63 @@ _MESSAGES: dict[str, Any] = {
     "connect": ui.connect,
 }
 
-#: Arguments a binding takes that are partials rather than plain values. They
-#: have no notation here and are not worth inventing one for: a layout that
-#: needs them is one to build in Python, or to write in the faithful encoding.
-_PARTIAL_ONLY = frozenset({"args", "triggers"})
+#: What each binding's one positional argument is: the type it has to be,
+#: and what to call it in the message when it is not. Checked here rather than
+#: left to the combinator, whose own complaint is about its internals -- a
+#: quoted controller number reaches for `Partial.type` and a numeric address
+#: reaches for `len`, neither of which names anything the file wrote.
+_TAKES: dict[str, tuple[tuple[type, ...], str]] = {
+    "osc": ((str,), "an address"),
+    "midi_cc": ((int, dict), "a controller number or a partial that reads one"),
+    "midi_note": ((int, dict), "a note number or a partial that reads one"),
+    "connect": ((str,), "the name of the control it writes to"),
+}
+
+#: The partials a binding is assembled from, and what each reads by position.
+#: One key names the thing here as it does everywhere else, so a partial is an
+#: object carrying one of these.
+_PARTIALS: dict[str, tuple[Any, str]] = {
+    "value": (ui.value, "the key of a value to read"),
+    "const": (ui.const, "the text to send"),
+    "prop": (ui.prop, "the name of a property to read"),
+    "index": (ui.index, ""),
+}
+
+#: The arguments of each binding a partial can be written into. A bare string
+#: in one of these keeps the meaning `ui` gives it -- the key of a value -- so
+#: a constant has to say so: `{"const": "#7"}`.
+_PARTIAL_ARGS: dict[str, frozenset[str]] = {
+    "osc": frozenset({"args"}),
+    "midi_cc": frozenset({"source", "channel"}),
+    "midi_note": frozenset({"source", "channel"}),
+    "connect": frozenset({"source", "to"}),
+}
 
 _PLACEHOLDER = re.compile(r"\$(?:\$|\{(\w+)\}|(\w+))")
+
+#: How a comment is written. JSON has none, and a description is meant to be
+#: read by the people who have to review it, so a key beginning with this is
+#: ignored wherever a key may appear -- in a node, a binding, a value, the
+#: envelope, and inside `props`. More than one to an object, since JSON keys
+#: are unique: `"//"`, `"//why"`, `"// left at 8 because"`.
+_COMMENT = "//"
+
+#: The keys a repeat spends on itself. Everything else it carries is the node
+#: being repeated, in the short form.
+_REPEAT_KEYS = frozenset({"repeat", "each", "of", "from", "as"})
+
+
+def _object(data: Any, where: str) -> dict[str, Any]:
+    """Insist on an object, and drop the comments from it.
+
+    Every object this dialect reads goes through here rather than through
+    `as_object` directly, so a comment is ignored in one place rather than
+    being admitted key by key to every check in the file.
+    """
+    entry = as_object(data, where)
+    if not any(key.startswith(_COMMENT) for key in entry):
+        return entry
+    return {key: item for key, item in entry.items() if not key.startswith(_COMMENT)}
 
 
 @dataclass
@@ -186,34 +263,67 @@ class _Deferred:
 # -- repetition --------------------------------------------------------------
 
 
+def _repeats(entry: dict[str, Any]) -> bool:
+    """Whether one node stands for several: by counting, or by walking a list."""
+    return "repeat" in entry or "each" in entry
+
+
 def _counters(entry: dict[str, Any]) -> frozenset[str]:
-    """The two names one repeat binds: `i` and `i0`, or whatever `as` calls them."""
+    """Every name one repeat binds: its two counters, and a record's fields.
+
+    `i` and `i0`, or whatever `as` calls them, plus each field of every record
+    an `each` walks -- the union across all of them, since what the inner pass
+    will bind is what the outer pass has to leave alone.
+    """
     named = entry.get("as", "i")
     name = named if isinstance(named, str) else "i"
-    return frozenset({name, f"{name}0"})
+    bound = {name, f"{name}0"}
+
+    records = entry.get("each")
+    if isinstance(records, list):
+        for record in records:
+            if isinstance(record, dict):
+                bound |= {key for key in record if isinstance(key, str)}
+    return frozenset(bound)
+
+
+def _template(entry: dict[str, Any]) -> frozenset[str]:
+    """Which of a repeat's keys hold the node being repeated.
+
+    The long form keeps it under `of` and the short form *is* it, so which
+    keys a nested repeat's counters have to be held back from depends on
+    which form it was written in.
+    """
+    if "of" in entry:
+        return frozenset({"of"})
+    return frozenset(entry) - _REPEAT_KEYS
 
 
 def _lookup(
-    name: str, bindings: dict[str, int], inner: frozenset[str], where: str
-) -> int | None:
-    """What a counter stands for, or `None` if a nested repeat will bind it."""
+    name: str, bindings: dict[str, Any], inner: frozenset[str], where: str
+) -> Any:
+    """What a name stands for, or `None` if a nested repeat will bind it.
+
+    `None` is the sentinel for "not this pass's to fill", which is why a record
+    field may not hold null: the two would be indistinguishable here.
+    """
     if name in bindings:
         return bindings[name]
     if name in inner:
         return None
     known = ", ".join(f"${key}" for key in sorted(bindings))
     raise FormatError(
-        f"{where}: ${name} is not one of this repeat's counters ({known}); "
+        f"{where}: ${name} is not one of the names this repeat binds ({known}); "
         f"write $$ for a literal dollar sign"
     )
 
 
 def _interpolate(
-    source: str, bindings: dict[str, int], inner: frozenset[str], where: str
+    source: str, bindings: dict[str, Any], inner: frozenset[str], where: str
 ) -> Any:
-    """Substitute a repeat's counters into one string.
+    """Substitute a repeat's names into one string.
 
-    A string that is nothing but a counter keeps its type, so `"$i0"` is the
+    A string that is nothing but a name keeps its type, so `"$i0"` is the
     number a controller number wants while `"ch$i"` is the name a control
     wants. A counter a nested repeat will bind is left as it was written, so
     the inner pass can fill it in.
@@ -228,14 +338,18 @@ def _interpolate(
         if name is None:
             return "$"
         found = _lookup(name, bindings, inner, where)
-        return match.group(0) if found is None else str(found)
+        if found is None:
+            return match.group(0)
+        # Written into a larger string, a boolean is spelled the way the file
+        # spells one rather than the way Python does.
+        return str(found).lower() if isinstance(found, bool) else str(found)
 
     return _PLACEHOLDER.sub(replace, source)
 
 
 def _substitute(
     value: Any,
-    bindings: dict[str, int],
+    bindings: dict[str, Any],
     where: str,
     inner: frozenset[str] = frozenset(),
 ) -> Any:
@@ -247,19 +361,27 @@ def _substitute(
     A nested repeat is descended into with its own counter names held back,
     since those are the inner pass's to fill: `{"repeat": 2, "as": "bank",
     "of": {"row": [{"repeat": 3, "of": {"button": "b$bank-$i"}}]}}` has to
-    leave `$i` alone while replacing `$bank`.
+    leave `$i` alone while replacing `$bank`. What is held back and where
+    depends on which form the inner repeat was written in, which is what
+    `_template` answers.
+
+    Comments are dropped rather than copied. They are ignored either way, and
+    substituting into one would make a `$` in a note about a layout an error
+    about a counter nobody bound.
     """
     if isinstance(value, str):
         return _interpolate(value, bindings, inner, where)
     if isinstance(value, list):
         return [_substitute(item, bindings, where, inner) for item in value]
     if isinstance(value, dict):
-        nested = _counters(value) if "repeat" in value else frozenset()
+        held = _template(value) if _repeats(value) else frozenset()
+        nested = _counters(value) if held else frozenset()
         return {
             key: _substitute(
-                item, bindings, where, inner | nested if key == "of" else inner
+                item, bindings, where, inner | nested if key in held else inner
             )
             for key, item in value.items()
+            if not key.startswith(_COMMENT)
         }
     return value
 
@@ -275,25 +397,97 @@ def _count(entry: dict[str, Any], key: str, where: str, low: int) -> int:
     return number
 
 
+def _record(data: Any, counter: str, where: str) -> dict[str, Any]:
+    """One row of an `each`, checked against what a name can stand for."""
+    fields = _object(data, where)
+    for key, value in fields.items():
+        if not key.isidentifier():
+            raise FormatError(
+                f"{where}: a field is read as ${key}, and {key!r} cannot be "
+                f"written that way, so nothing could reach it"
+            )
+        if key in (counter, f"{counter}0"):
+            raise FormatError(
+                f"{where}: {key!r} is this repeat's own counter; rename one of "
+                f"the two with `as`"
+            )
+        if value is None or isinstance(value, (dict, list)):
+            # Null is the sentinel `_lookup` uses for a name a nested repeat
+            # will bind, and a list or an object has no reading inside a
+            # string. A row holds the values a control is described with.
+            raise FormatError(
+                f"{where}: {key} should be a string, a number or a boolean, "
+                f"found {describe(value)}"
+            )
+    return fields
+
+
+def _rows(entry: dict[str, Any], counter: str, where: str) -> list[dict[str, Any]]:
+    """What each pass of one repeat binds beyond its counters.
+
+    A `repeat` binds nothing beyond them and says only how many passes to make;
+    an `each` binds a row of fields per pass and says how many by how many rows
+    it holds -- including none, since a list of nothing is what a generator
+    with nothing to emit produces, where a `repeat` of 0 is a typo.
+    """
+    if "each" not in entry:
+        return [{} for _ in range(_count(entry, "repeat", where, 1))]
+    return [
+        _record(record, counter, f"{where}.each[{index}]")
+        for index, record in enumerate(as_list(entry["each"], f"{where}.each"))
+    ]
+
+
 def _repeat(
     entry: dict[str, Any], where: str, deferred: list[_Deferred]
 ) -> list[Control]:
-    """Expand one `repeat` into the controls it stands for."""
-    check_keys(entry, {"repeat", "of", "from", "as"}, where)
-    if "of" not in entry:
-        raise FormatError(f"{where}: a repeat needs an `of` to repeat")
+    """Expand one `repeat` or `each` into the controls it stands for.
 
-    count = _count(entry, "repeat", where, 1)
+    Two axes, and they are independent. A repeat counts with `repeat` or walks
+    a list of rows with `each`; and it holds the node it repeats under `of`, or
+    is that node itself.
+    """
+    if "repeat" in entry and "each" in entry:
+        raise FormatError(
+            f"{where}: a repeat counts with `repeat` or walks a list with "
+            f"`each`, not both; an `each` is as long as the list it holds"
+        )
+
+    if "of" in entry:
+        also = [key for key in entry if key in _TAGS]
+        if also:
+            named = " and ".join(repr(key) for key in also)
+            raise FormatError(
+                f"{where}: a repeat holds the node it repeats under `of` or is "
+                f"that node itself, not both; {named} names one and `of` holds "
+                f"another"
+            )
+        check_keys(entry, _REPEAT_KEYS, where)
+        described: Any = entry["of"]
+    elif any(key in _TAGS for key in entry):
+        described = {
+            key: item for key, item in entry.items() if key not in _REPEAT_KEYS
+        }
+    else:
+        # Nothing here names a node, so this is the long form with something
+        # wrong with it. A misspelled `of` is the likeliest and worth saying.
+        check_keys(entry, _REPEAT_KEYS, where)
+        raise FormatError(
+            f"{where}: a repeat needs an `of` to repeat, or a tag of its own "
+            f"to repeat itself"
+        )
+
     start = _count(entry, "from", where, 0) if "from" in entry else 1
     counter = entry.get("as", "i")
     if not isinstance(counter, str) or not counter.isidentifier():
         raise FormatError(f"{where}: as should name a counter, found {counter!r}")
 
     built = []
-    for step in range(count):
-        bindings = {counter: start + step, f"{counter}0": step}
+    for step, row in enumerate(_rows(entry, counter, where)):
+        bindings: dict[str, Any] = {counter: start + step, f"{counter}0": step}
+        bindings.update(row)
         spot = f"{where}#{step + 1}"
-        built.append(_node(_substitute(entry["of"], bindings, spot), spot, deferred))
+        built.append(_node(_substitute(described, bindings, spot), spot, deferred))
     return built
 
 
@@ -322,26 +516,58 @@ def _tag(entry: dict[str, Any], where: str) -> str:
 
 def _split(
     entry: dict[str, Any], tag: str, where: str
-) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Sort a node's remaining keys into arguments and properties."""
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    """Sort a node's remaining keys into arguments, properties and values."""
     options: dict[str, Any] = {}
     props: dict[str, Any] = {}
+    defaults: dict[str, Any] = {}
     accepts = allowed_properties(_PRODUCES[tag]) if tag in _PRODUCES else frozenset()
+    carries = (
+        {key for key, _ in default_values_for(_PRODUCES[tag])}
+        if tag in _PRODUCES
+        else frozenset()
+    )
 
     for key, value in entry.items():
         if key == tag or key in _COMMON_KEYS:
             continue
+        if key in ("repeat", "each"):
+            # Reaching `_split` at all means this node was not read out of a
+            # list, since `_children` expands a repeat before building one.
+            raise FormatError(
+                f"{where}: a repeat expands where children are accepted, and "
+                f"this is not one of those places"
+            )
         if key in _OPTIONS.get(tag, frozenset()):
             options[key] = value
+        elif key in _VALUE_SUGAR and key in carries:
+            defaults[key] = value
         elif to_camel(key) in accepts:
             props[key] = value
         else:
-            allowed = _OPTIONS.get(tag, frozenset()) | _COMMON_KEYS | accepts
+            allowed = (
+                _OPTIONS.get(tag, frozenset())
+                | _COMMON_KEYS
+                | accepts
+                | (_VALUE_SUGAR & carries)
+            )
             check_keys({key: value}, allowed, where)
 
-    for key, value in as_object(entry.get("props", {}), f"{where}.props").items():
+    for key, value in _object(entry.get("props", {}), f"{where}.props").items():
         props[key] = value
-    return options, props
+
+    for key, value in props.items():
+        # The same coercion the control will do, run here for the sake of the
+        # message: a combinator handed a whole dictionary reports the value it
+        # could not take without saying which key it came from, and a node can
+        # carry twenty. The faithful encoding reads properties one at a time
+        # and names them for the same reason.
+        try:
+            Property(key, value)
+        except (TypeError, ValueError) as exc:
+            raise FormatError(f"{where}: {key}: {exc}") from exc
+
+    return options, props, defaults
 
 
 def _control(
@@ -385,12 +611,30 @@ def _control(
     if tag == "inset":
         if "by" not in options:
             raise FormatError(f"{where}: inset needs a `by` to shrink it by")
+        if props:
+            # `inset` hands back the control it was given, so a property here
+            # has nowhere to go. A declared one is already refused by `_split`,
+            # which knows the tag produces nothing; this is the `props` escape
+            # hatch, which goes round that check and would otherwise vanish.
+            named = ", ".join(repr(key) for key in sorted(props))
+            raise FormatError(
+                f"{where}: inset returns the control it was handed and takes no "
+                f"properties of its own; put {named} on that control"
+            )
         return ui.inset(_node(value, f"{where}.inset", deferred), options["by"])
 
-    if value is not None and not isinstance(value, (str, dict)):
+    if value is not None and not isinstance(value, str):
         raise FormatError(f"{where}: {tag} takes its name, found {describe(value)}")
     if isinstance(value, str):
-        props.setdefault("name", value)
+        if "name" in props:
+            # Both spellings are legal on their own, so one of the two is
+            # always a mistake -- most likely a generator filling in a
+            # template that already carried a name.
+            raise FormatError(
+                f"{where}: {tag} is named twice, {value!r} by position and "
+                f"{props['name']!r} by key; keep one"
+            )
+        props["name"] = value
     control: Control = _CONTROLS[tag](**props)
     return control
 
@@ -400,8 +644,8 @@ def _children(data: Any, where: str, deferred: list[_Deferred]) -> list[Control]
     built: list[Control] = []
     for index, item in enumerate(as_list(data, where)):
         spot = f"{where}[{index}]"
-        entry = as_object(item, spot)
-        if "repeat" in entry:
+        entry = _object(item, spot)
+        if _repeats(entry):
             built.extend(_repeat(entry, spot, deferred))
         else:
             built.append(_node(entry, spot, deferred))
@@ -410,17 +654,18 @@ def _children(data: Any, where: str, deferred: list[_Deferred]) -> list[Control]
 
 def _node(data: Any, where: str, deferred: list[_Deferred]) -> Control:
     """Read one node: the tag, its argument, and everything hanging off it."""
-    entry = as_object(data, where)
+    entry = _object(data, where)
     tag = _tag(entry, where)
-    options, props = _split(entry, tag, where)
+    options, props, defaults = _split(entry, tag, where)
 
     try:
         control = _control(tag, entry[tag], options, props, where, deferred)
     except FormatError:
         raise
-    except (TypeError, ValueError) as exc:
+    except Exception as exc:
         # A combinator refusing what it was given: a row that cannot fit its
-        # children, a property that will not coerce, a bad argument type.
+        # children, a property that will not coerce, a bad argument type. The
+        # net is wide on purpose -- see `_message` for why.
         raise FormatError(f"{where}: {exc}") from exc
 
     identifier = entry.get("id")
@@ -432,9 +677,25 @@ def _node(data: Any, where: str, deferred: list[_Deferred]) -> Control:
         control.id = identifier
 
     if "values" in entry:
+        if defaults:
+            named = ", ".join(repr(key) for key in sorted(defaults))
+            raise FormatError(
+                f"{where}: {named} and `values` both set what this control "
+                f"starts at; keep one"
+            )
         control.values = [
             _value(item, f"{where}.values[{index}]")
             for index, item in enumerate(as_list(entry["values"], f"{where}.values"))
+        ]
+
+    for key, value in defaults.items():
+        if not isinstance(value, str):
+            raise FormatError(
+                f"{where}: {key} takes the text to show, found {describe(value)}"
+            )
+        control.values = [
+            replace(existing, default=value) if existing.key == key else existing
+            for existing in control.values
         ]
 
     for index, item in enumerate(
@@ -447,7 +708,7 @@ def _node(data: Any, where: str, deferred: list[_Deferred]) -> Control:
 
 
 def _value(data: Any, where: str) -> Value:
-    entry = as_object(data, where)
+    entry = _object(data, where)
     check_keys(entry, {field.name for field in fields(Value)}, where)
     return Value(**entry)
 
@@ -455,11 +716,110 @@ def _value(data: Any, where: str) -> Value:
 # -- bindings ----------------------------------------------------------------
 
 
+def _partial(data: Any, where: str) -> Partial:
+    """Read one partial: what it reads, and how it is converted on the way out."""
+    if isinstance(data, str):
+        # The one place a string cannot be guessed at. In `source` it is the
+        # key of a value, which is what `ui` reads it as; here the reading
+        # wanted as often is the text itself, so neither is assumed.
+        raise FormatError(
+            f"{where}: a partial is an object saying what it reads; write "
+            f'{{"value": {data!r}}} for one of the control\'s values, or '
+            f'{{"const": {data!r}}} for the text itself'
+        )
+
+    entry = _object(data, where)
+    found = [key for key in entry if key in _PARTIALS]
+    if len(found) != 1:
+        kinds = ", ".join(sorted(_PARTIALS))
+        raise FormatError(
+            f"{where}: a partial is one of {kinds}"
+            + (f", found {' and '.join(repr(f) for f in found)}" if found else "")
+        )
+
+    kind = found[0]
+    builder, what = _PARTIALS[kind]
+    accepted = set(builder.__kwdefaults__ or {})
+    check_keys(entry, accepted | {kind}, where)
+
+    options = {key: item for key, item in entry.items() if key != kind}
+    target = entry[kind]
+
+    try:
+        if kind == "index":
+            # An index reads where the control sits, so there is nothing to
+            # name. Insisting on `null` keeps every partial the same shape.
+            if target is not None:
+                raise FormatError(
+                    f"{where}: index reads the control's own position and takes "
+                    f"nothing of its own, so its value is null"
+                )
+            read: Partial = builder(**options)
+        elif isinstance(target, str):
+            read = builder(target, **options)
+        else:
+            raise FormatError(f"{where}: {kind} takes {what}, found {describe(target)}")
+    except FormatError:
+        raise
+    except Exception as exc:
+        raise FormatError(f"{where}: {exc}") from exc
+    return read
+
+
+def _trigger(data: Any, where: str) -> Trigger:
+    """Read one trigger: the value watched, and what about it fires the binding."""
+    entry = _object(data, where)
+    check_keys(entry, {"var", "on"}, where)
+
+    var = entry.get("var", "x")
+    if not isinstance(var, str):
+        raise FormatError(f"{where}: var names a value, found {describe(var)}")
+
+    condition = entry.get("on", str(TriggerCondition.ANY))
+    if not isinstance(condition, str):
+        raise FormatError(
+            f"{where}: on should be a string, found {describe(condition)}"
+        )
+    try:
+        return Trigger(var, TriggerCondition(condition))
+    except ValueError as exc:
+        raise FormatError(f"{where}: {exc}") from exc
+
+
+def _read_partials(kind: str, options: dict[str, Any], where: str) -> dict[str, Any]:
+    """One binding's arguments, with any partial or trigger written in it read."""
+    for key in sorted(_PARTIAL_ARGS[kind] & set(options)):
+        spot = f"{where}.{key}"
+        if key == "args":
+            options[key] = [
+                _partial(item, f"{spot}[{index}]")
+                for index, item in enumerate(as_list(options[key], spot))
+            ]
+        elif isinstance(options[key], dict):
+            options[key] = _partial(options[key], spot)
+
+    if "triggers" in options:
+        spot = f"{where}.triggers"
+        options["triggers"] = [
+            _trigger(item, f"{spot}[{index}]")
+            for index, item in enumerate(as_list(options["triggers"], spot))
+        ]
+    return options
+
+
+def _takes(kind: str, target: Any, where: str) -> None:
+    """Refuse a binding's positional argument before the combinator sees it."""
+    wanted, what = _TAKES[kind]
+    # A boolean is an `int` to Python and a mistake in a file.
+    if isinstance(target, bool) or not isinstance(target, wanted):
+        raise FormatError(f"{where}: {kind} takes {what}, found {describe(target)}")
+
+
 def _message(
     data: Any, control: Control, where: str, deferred: list[_Deferred]
 ) -> Message:
     """Read one binding, deferring a `connect` until its destination exists."""
-    entry = as_object(data, where)
+    entry = _object(data, where)
     found = [key for key in entry if key in _MESSAGES]
     if len(found) != 1:
         kinds = ", ".join(sorted(_MESSAGES))
@@ -469,36 +829,29 @@ def _message(
         )
 
     kind = found[0]
-    for key in entry:
-        if key in _PARTIAL_ONLY:
-            raise FormatError(
-                f"{where}: {key} takes partials, which this dialect has no "
-                f"notation for; build that binding in Python, or write the "
-                f"layout in the faithful encoding"
-            )
-
     builder = _MESSAGES[kind]
-    accepted = {
-        name for name in builder.__kwdefaults__ or {} if name not in _PARTIAL_ONLY
-    }
+    accepted = set(builder.__kwdefaults__ or {})
     check_keys(entry, accepted | {kind}, where)
 
     options = {key: item for key, item in entry.items() if key != kind}
     target = entry[kind]
 
+    _takes(kind, target, where)
+    options = _read_partials(kind, options, where)
+    if isinstance(target, dict):
+        target = _partial(target, f"{where}.{kind}")
+
     if kind == "connect":
-        if not isinstance(target, str):
-            raise FormatError(
-                f"{where}: connect takes the name of the control it writes to, "
-                f"found {describe(target)}"
-            )
         binding = ui.connect("", **options)
         deferred.append(_Deferred(binding, target, where))
         return binding
 
     try:
         message: Message = builder(target, **options)
-    except (TypeError, ValueError) as exc:
+    except Exception as exc:
+        # Anything at all: a combinator reaching for an attribute the file's
+        # value does not have is still a file that could not be read, and a
+        # message without the node it belongs to is no use to whoever wrote it.
         raise FormatError(f"{where}: {exc}") from exc
     return message
 
@@ -537,7 +890,7 @@ def build(data: Any) -> Document:
             this release does not read, or holds a node that cannot be built.
             The message names the node it gave up on.
     """
-    document = as_object(data, "the layout")
+    document = _object(data, "the layout")
     check_keys(document, _ENVELOPE_KEYS, "the layout")
 
     declared = document.get("format")
@@ -558,12 +911,12 @@ def build(data: Any) -> Document:
         raise FormatError(f"lexml should be a string, found {describe(version)}")
 
     deferred: list[_Deferred] = []
-    described = as_object(document["root"], "root")
+    described = _object(document["root"], "root")
     root = _node(described, "root", deferred)
 
     # Every control type defaults a frame, so the root having one says nothing
     # about whether the layout asked for a canvas. What the file wrote does.
-    given = as_object(described.get("props", {}), "root.props")
+    given = _object(described.get("props", {}), "root.props")
     if "frame" not in described and "frame" not in given:
         root.set("frame", CANVAS)
 

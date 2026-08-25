@@ -198,6 +198,39 @@ def test_sizes_must_match_the_children():
         ui.resolve(strip, (0, 0, 300, 100))
 
 
+def test_a_layout_that_will_not_divide_names_the_branch_it_failed_on():
+    """A layout is a tree, and its arithmetic is not local.
+
+    A row fails because of the frame its grandparent handed down, so the
+    message has to say which row -- on a hundred-node layout the sum alone
+    says nothing about where to look.
+    """
+    faders = ui.row(py2tosc.fader(), py2tosc.fader(), name="faders", gap=100, pad=50)
+    panel = ui.column(faders, name="mixer")
+
+    with pytest.raises(ValueError, match=r"mixer/faders: a width of 100 cannot hold"):
+        ui.resolve(panel, (0, 0, 100, 100))
+
+
+def test_a_control_with_no_name_appears_as_its_type():
+    """The same convention `validate` uses for a path."""
+    panel = ui.column(ui.row(py2tosc.fader(), py2tosc.fader(), gap=100, pad=50))
+    with pytest.raises(ValueError, match=r"<GROUP>/<GROUP>: "):
+        ui.resolve(panel, (0, 0, 100, 100))
+
+
+@pytest.mark.parametrize("sizes", ["3 1", "31", {"a": 1}, 2.5])
+def test_sizes_takes_a_count_or_a_list_and_says_so(sizes):
+    """A string is a sequence of characters, which is the trap worth closing.
+
+    Read as one, `"3 1"` fails on `float(' ')` a long way from the call, and
+    `"31"` does not fail at all -- it silently means two slots.
+    """
+    strip = ui.row(py2tosc.fader(), py2tosc.fader(), sizes=sizes)
+    with pytest.raises(ValueError, match="sizes takes a number of slots or a list"):
+        ui.resolve(strip, (0, 0, 300, 100))
+
+
 def test_padding_larger_than_the_frame_raises():
     key = ui.stack(py2tosc.button(), pad=80)
     with pytest.raises(ValueError, match="does not fit"):

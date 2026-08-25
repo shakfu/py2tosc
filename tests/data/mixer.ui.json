@@ -1,12 +1,13 @@
 {
   "format": "py2tosc.ui",
+  "//": "eight channels over a bank of mutes, in a canvas divided three to one",
   "root": {
     "column": [
       {"row": [
-        {"repeat": 8, "of": {"fader": "ch$i", "messages": [
+        {"fader": "ch$i", "messages": [
           {"osc": "/mixer/{name}"},
           {"midi_cc": "$i0"}
-        ]}}
+        ], "repeat": 8}
       ], "gap": 4},
       {"grid": "BUTTON", "columns": 8, "rows": 2, "name": "mutes"}
     ],

@@ -136,8 +136,11 @@ def value(
 
     Returns:
         A `VALUE` partial.
+
+    Raises:
+        ValueError: If `conversion` is not one the format defines.
     """
-    return Partial(PartialType.VALUE, conversion, key, scale[0], scale[1])
+    return Partial(PartialType.VALUE, Conversion(conversion), key, scale[0], scale[1])
 
 
 def const(
@@ -157,8 +160,13 @@ def const(
 
     Returns:
         A `CONSTANT` partial.
+
+    Raises:
+        ValueError: If `conversion` is not one the format defines.
     """
-    return Partial(PartialType.CONSTANT, conversion, text, scale[0], scale[1])
+    return Partial(
+        PartialType.CONSTANT, Conversion(conversion), text, scale[0], scale[1]
+    )
 
 
 def prop(
@@ -177,8 +185,13 @@ def prop(
 
     Returns:
         A `PROPERTY` partial.
+
+    Raises:
+        ValueError: If `conversion` is not one the format defines.
     """
-    return Partial(PartialType.PROPERTY, conversion, key, scale[0], scale[1])
+    return Partial(
+        PartialType.PROPERTY, Conversion(conversion), key, scale[0], scale[1]
+    )
 
 
 def index(
@@ -197,8 +210,11 @@ def index(
 
     Returns:
         An `INDEX` partial.
+
+    Raises:
+        ValueError: If `conversion` is not one the format defines.
     """
-    return Partial(PartialType.INDEX, conversion, "", scale[0], scale[1])
+    return Partial(PartialType.INDEX, Conversion(conversion), "", scale[0], scale[1])
 
 
 def path(address: str) -> list[Partial]:
@@ -278,7 +294,14 @@ def path(address: str) -> list[Partial]:
 def _triggers(
     on: TriggerCondition | str, var: str, triggers: Sequence[Trigger] | None
 ) -> list[Trigger]:
-    return list(triggers) if triggers is not None else [Trigger(var, on)]
+    if triggers is not None:
+        return list(triggers)
+    # A string is legitimate -- a loaded message holds one where a built one
+    # holds the enum -- but only a string the format knows. An unchecked one
+    # reaches the file as a condition TouchOSC has never heard of, and nothing
+    # downstream looks at it again: not the codec, which writes what it is
+    # given, and not `validate`, which has no rule for it.
+    return [Trigger(var, TriggerCondition(on))]
 
 
 def osc(

@@ -136,6 +136,118 @@ def _check_destination(
         )
 
 
+def _check_triggers(control: Control, message: object, here: str) -> Iterator[Issue]:
+    """Check that a binding fires on a value the control it sits on has.
+
+    A trigger names the value that fires a message, so one naming a value the
+    control does not carry never fires: the layout loads, round-trips and
+    validates as well formed while the binding is inert. `ui.labelled` is the
+    common way to arrive there, since it returns the group holding a control
+    and its caption rather than the control, and a `GROUP` carries `touch` and
+    nothing else.
+
+    This rule is the one thing here settled by experiment rather than by the
+    corpus, because the corpus says the opposite of what it appears to. The
+    editor writes 152 bindings that fire on a value their control does not
+    have -- 104 on labels, 48 on grids -- which by the usual standard would
+    retire the rule. A layout built to ask TouchOSC directly settles it: two
+    labels differing only in their trigger, both written to by the same
+    button, and only the one firing on `text` sends anything. The other 152
+    are dead in TouchOSC's own examples, and `tests/test_validate.py` names
+    the files rather than tolerating them.
+    """
+    carried = _carried(control)
+    for trigger in getattr(message, "triggers", None) or []:
+        if trigger.var and trigger.var not in carried:
+            yield Issue(
+                WARNING,
+                here,
+                f"{type(message).__name__} fires on value {trigger.var!r} on a "
+                f"{control.control_type.value}, which carries "
+                f"{', '.join(sorted(carried))}",
+            )
+
+
+def _carried(control: Control) -> set[str]:
+    """The values a control has, as far as the document says.
+
+    A file may omit `<values>` altogether, and decoding deliberately does not
+    fill in a type's defaults, so an empty list means unstated rather than
+    none -- 11 faders in the corpus are written that way.
+    """
+    return {value.key for value in control.values} or {
+        key for key, _ in default_values_for(control.control_type)
+    }
+
+
+def _check_source(
+    message: LocalMessage, control: Control, here: str
+) -> Iterator[Issue]:
+    """Check that a local message sends a value the control it sits on has.
+
+    The mirror of `_check_destination`, and the same failure: a binding that
+    reads nothing sends nothing, while the layout stays well formed. All 361
+    local bindings in the corpus that send a value send one their control
+    carries.
+
+    A local message sends a constant or a property just as readily, and those
+    say nothing about the control's values, so only a `VALUE` source is
+    checked.
+    """
+    if str(message.type) != str(PartialType.VALUE) or not message.value:
+        return
+
+    carried = _carried(control)
+    if message.value.split(".", 1)[0] not in carried:
+        yield Issue(
+            WARNING,
+            here,
+            f"LocalMessage sends value {message.value!r} from a "
+            f"{control.control_type.value}, which carries "
+            f"{', '.join(sorted(carried))}",
+        )
+
+
+def _check_reads(control: Control, message: object, here: str) -> Iterator[Issue]:
+    """Check that what a binding sends is read from a value the control has.
+
+    The other half of the trigger rule, and the worse half. A trigger that
+    names a value the control does not carry fires nothing; an argument that
+    reads one is sent anyway, as `0`. So a binding that looks dead is not
+    silent -- it transmits a plausible number to whatever is listening, which
+    a synth on the other end has no way to tell from an instruction.
+
+    Both were watched going out of TouchOSC from the same layout: two labels
+    differing only in their trigger, and the one that fired sent `FLOAT(0)`
+    for the `x` a label does not have.
+
+    An OSC address, a MIDI slot and an OSC argument all read the same way, so
+    all three are checked. A constant, a property or an index says nothing
+    about the control's values and is left alone.
+    """
+    carried = _carried(control)
+    read = (
+        list(getattr(message, "path", None) or [])
+        + list(getattr(message, "arguments", None) or [])
+        + list(getattr(message, "values", None) or [])
+    )
+
+    for partial in read:
+        if str(partial.type) != str(PartialType.VALUE):
+            continue
+        # A `Partial` holds the key it reads in `value`; a `MidiValue` in `key`.
+        key = getattr(partial, "value", None) or getattr(partial, "key", None)
+        if not key or key.split(".", 1)[0] in carried:
+            continue
+        yield Issue(
+            WARNING,
+            here,
+            f"{type(message).__name__} reads value {key!r} on a "
+            f"{control.control_type.value}, which carries "
+            f"{', '.join(sorted(carried))}",
+        )
+
+
 def _check_control(
     control: Control, trail: list[str], known: dict[str, Control]
 ) -> Iterator[Issue]:
@@ -203,6 +315,8 @@ def _check_control(
         # No rule about empty triggers: the editor writes send-enabled OSC
         # bindings with none, 40 times across the corpus, so whatever that
         # means it is not a mistake.
+        yield from _check_triggers(control, message, here)
+        yield from _check_reads(control, message, here)
         if isinstance(message, GamepadMessage) and not message.target_var:
             yield Issue(WARNING, here, "GamepadMessage has no target_var to write to")
         # A LocalMessage addresses its destination by node id, and a stale one
@@ -213,6 +327,8 @@ def _check_control(
         # has not filled in yet, and the editor writes them -- five times
         # across the corpus -- so it is a normal intermediate state rather than
         # a mistake. Only a destination that names something is checked.
+        if isinstance(message, LocalMessage):
+            yield from _check_source(message, control, here)
         if isinstance(message, LocalMessage) and message.dst_id:
             destination = known.get(message.dst_id)
             if destination is None:

@@ -374,11 +374,20 @@ def build() -> py2tosc.Document:
     pager = ui.pager(
         faders_page(), pads_page(), xy_page(), matrix_page(), name="pager1"
     )
-    # The pager reports which page it switched to.
+    # The pager reports which page it switched to. Both halves of the MIDI
+    # binding have to say `page`: the trigger that fires it, and the slots it
+    # sends. A default `MidiMessage` reads `x`, which a PAGER does not have --
+    # it would have fired on every page change and sent 0 each time, which is
+    # what the original's slots say and what this demo previously did not.
     pager.messages += [
         py2tosc.MidiMessage(
             triggers=[py2tosc.Trigger("page", "ANY")],
             message=py2tosc.MidiCommand("PROGRAMCHANGE"),
+            values=[
+                py2tosc.MidiValue("CONSTANT", "", 0, 15),
+                py2tosc.MidiValue("VALUE", "page", 1, 2),
+                py2tosc.MidiValue("VALUE", "page", 0, 127),
+            ],
         ),
         ui.osc("/page", args=[ui.value("page")], var="page"),
     ]

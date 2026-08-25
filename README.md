@@ -1,6 +1,6 @@
 # py2tosc
 
-Generate and edit TouchOSC layouts from Python.
+Roundtrip generation and editing of TouchOSC layouts (`.tosc`) from Python.
 
 ![Tests](https://github.com/shakfu/py2tosc/actions/workflows/tests.yaml/badge.svg) ![PyPI](https://img.shields.io/pypi/v/py2tosc) ![License](https://img.shields.io/github/license/shakfu/py2tosc)
 
@@ -49,6 +49,10 @@ A `.tosc` file is a zlib-compressed XML tree; py2tosc is a careful binding to th
 
 ## Building a layout
 
+`py2tosc` includes a combinator library, `py2tosc.ui`, built around the combinator pattern —- a style of library design in which components are constructed by combining simpler pieces.
+
+A combinator here is a function that takes controls and returns a control, so its result is valid input to the next one and layouts nest by ordinary function composition -- `row(column(a, b), c)` -- with no special case for the outermost call or the innermost.
+
 `py2tosc.ui` describes an arrangement and sizes it afterwards, so a layout is written from the inside out and nothing needs coordinates:
 
 ```python
@@ -77,7 +81,7 @@ doc.resolve()  # hand the root frame down the tree, sizing everything
 doc.save("mixer.tosc")
 ```
 
-Each combinator returns the container it built, so layouts nest by ordinary composition -- `row(column(a, b), c)`. `row`, `column`, `tiles` and `stack` arrange controls inside a group; `pager` and `grid` build the two containers the format names. `resolve` hands the frame at the top down the tree.
+`row`, `column`, `tiles` and `stack` arrange controls inside a group; `pager` and `grid` build the two containers the format names. `resolve` hands the frame at the top down the tree.
 
 ```python
 pads = [py2tosc.button(name=f"pad{n}") for n in range(1, 17)]
@@ -102,18 +106,18 @@ The eager `py2tosc.layout` functions are still there and unchanged, for when you
 
 ## Bindings
 
-A control says what it sends. `ui` builds the same message objects the format stores, from a shorter description:
+A control by itself sends nothing. A **binding** is a message attached to a control, which defines what it sends and what triggers it. The first line below creates a fader; the second attaches a binding to it.
 
 ```python
 fader = py2tosc.fader(name="cutoff")
-
-fader.messages += [
-    ui.osc("/synth/{parent.name}/{name}"),   # expands into the partials the file wants
-    ui.midi_cc(74, channel=1),
-]
+fader.messages.append(ui.osc("/synth/{parent.name}/{name}"))
 ```
 
-Braces mark a property lookup, mirroring f-strings, so an address follows the controls if they are renamed. `midi_cc` and `midi_note` cover the common MIDI bindings, and `connect` wires one control to another in a line rather than seven keyword arguments:
+With that fader inside a group named `comp`, moving it sends `/synth/comp/cutoff 0.62`: the address is resolved on the device when the message is sent, and the argument is the fader's current value. The braces are TouchOSC's templating, not Python's, so renaming the group or the control changes the address the layout sends without editing the binding.
+
+What the file stores for that one line is four partials, a trigger and a pair of send/receive flags. `ui` returns exactly those objects and can reach nothing a hand-built `OscMessage` could not -- it is a shorter way to say the same thing, not a second vocabulary. `ui.midi_cc(74)` binds the same fader to a MIDI controller instead, and `ui.midi_note` does the same for notes.
+
+`connect` wires one control to another in a line rather than seven keyword arguments:
 
 ```python
 readout = py2tosc.label(name="readout")
@@ -122,7 +126,11 @@ key = py2tosc.button(name="C", messages=[
 ])
 ```
 
-Duplicating wired controls works the way you would hope -- a copied subtree drives its own copy, not the original:
+Pressing the key writes `C` into the readout: the button sends its own `name` property to the label's `text` value, which is the value a label displays. A local binding stays inside the layout and sends nothing over the network, which is how twelve keys can share one readout instead of carrying twelve messages of their own.
+
+**Both ends of a binding are addressed to a value**: the one that fires it, and the one it carries. `ui.osc()` defaults to `x` at both ends, which is right for a fader and wrong for a label -- a label carries `text` and `touch`, so a binding left on `x` never fires, and if anything did fire it would send `0`. Nothing about such a file is malformed, and TouchOSC will not tell you, which is why [validation](#checking-a-layout) reports both halves.
+
+Copying a wired subtree remaps its local bindings, so the copy drives its own controls rather than the originals:
 
 ```python
 strip = ui.stack(readout, key, name="strip")
@@ -153,7 +161,7 @@ doc = py2tosc.Document(root=ui.tiles(
 doc.resolve()
 ```
 
-When the data is already a JSON file, `py2tosc build` does this without a script at all, and `py2tosc.surface` is the same thing from Python.
+When the data is already a JSON file, `py2tosc build` does this without a script at all, and `py2tosc.surface` is the same thing from Python. A [layout description](https://shakfu.github.io/py2tosc/guide/ui-json/) can carry the same rows itself, which is the way to take when the generated part is one section of a larger layout rather than the whole of it.
 
 `tests/demos/` has the longer version, building a paged MIDI and OSC surface from a plugin's exported parameter list, along with a numpad wired entirely with local messages and a rebuild of a layout TouchOSC ships.
 
@@ -226,13 +234,30 @@ for issue in doc.validate():
 doc.save("mixer.xml")
 ```
 
-That is the same export the editor writes, which is worth reaching for when you
-want to read a layout in a text editor or put one under version control.
+The XML is the format to reach for when a layout has to be read in a text editor or kept under version control.
+
+A `.json` suffix writes [the JSON encoding](https://shakfu.github.io/py2tosc/guide/json/) instead: the same tree, round-tripping byte for byte like the XML, and easier to read a diff of at one line per property rather than five. `load` reads all three back, deciding from the content rather than the extension.
+
+A second JSON dialect works the other way round. The encoding above records a layout that already exists, frames and all; [a description](https://shakfu.github.io/py2tosc/guide/ui-json/) states what nests in what and leaves the combinators to build it and `resolve` to size it:
+
+```json
+{
+  "format": "py2tosc.ui",
+  "root": {
+    "column": [
+      {"row": [{"fader": "ch$i", "messages": [{"midi_cc": "$i0"}], "repeat": 8}], "gap": 4},
+      {"grid": "BUTTON", "columns": 8, "rows": 2, "name": "mutes"}
+    ],
+    "sizes": [3, 1], "gap": 8, "pad": 8, "frame": [0, 0, 1024, 768]
+  }
+}
+```
+
+`py2tosc.load` builds and resolves that like any other layout. It exists for when the layout is decided by something that is not code -- a config file people who do not write Python have to review, a web tool, another program -- and it repeats over rows of data as well as over a counter, so a parameter list can drive one part of a layout while the rest is written by hand. It is read and never written: a resolved layout has frames and no memory of the row that placed them, so `save` always writes the faithful encoding.
 
 ## From the command line
 
-Installing py2tosc also puts a `py2tosc` command on your path, because most of
-what is above is file-shaped and should not need a script written first:
+Installing py2tosc also puts a `py2tosc` command on your path, because most of what is above is file-shaped and should not need a script written first:
 
 ```console
 $ py2tosc show mixer.tosc
@@ -253,26 +278,21 @@ GROUP  (0, 0, 640, 860)  2 children
 | `convert` | The same layout as `.tosc`, `.xml` or `.json`, chosen by the output's extension. |
 | `build` | A control surface generated from a list of parameters. |
 
-`validate` is the one worth wiring into something. It exits `0` clean, `1` on a
-layout that is wrong and `2` on a command line that is, so it drops into a
-pre-commit hook without further ceremony:
+`validate` is the one worth automating. It exits `0` on a clean layout, `1` on one with errors and `2` on a bad command line, so it works in a pre-commit hook or a CI job without a wrapper:
 
 ```console
 $ py2tosc validate mixer.tosc
 mixer.tosc: clean
 ```
 
-`build` takes JSON -- a list of names, or objects where only `name` is required
-and `cc` and `channel` are optional -- and lays it out across as many pages as
-it needs, a fader per parameter bound to both MIDI and OSC:
+`build` takes JSON -- a list of names, or objects where only `name` is required and `cc` and `channel` are optional -- and lays it out across as many pages as it needs, a fader per parameter bound to both MIDI and OSC:
 
 ```console
 $ py2tosc build params.json -o surface.tosc
 4 parameters -> 1 page, 15 controls -> surface.tosc
 ```
 
-`--midi-only` and `--osc-only` leave out the other binding, `--columns` and
-`--rows` set the shape of each page, and `--size 320x480` sets the canvas.
+`--midi-only` and `--osc-only` leave out the other binding, `--columns` and `--rows` set the shape of each page, and `--size 320x480` sets the canvas.
 
 ## Design
 

@@ -49,9 +49,19 @@ def test_show_reports_scripts(capsys):
 
 
 def test_validate_is_quiet_and_zero_on_a_clean_layout(capsys):
-    code, out, _ = run(capsys, "validate", EXAMPLES / "simple_mk2.tosc")
+    # `simple_mk2.tosc` used to be the file here and is no longer clean: it
+    # holds four bindings addressed to a value its `multitoggle` does not
+    # have, which is a finding about the file rather than about the rule.
+    code, out, _ = run(capsys, "validate", EXAMPLES / "hexkeys.tosc")
     assert code == 0
     assert "clean" in out
+
+
+def test_validate_reports_warnings_and_still_exits_zero(capsys):
+    """A warning is advisory: it is printed, and it is not a failure."""
+    code, out, _ = run(capsys, "validate", EXAMPLES / "simple_mk2.tosc")
+    assert code == 0
+    assert "fires on value 'x'" in out
 
 
 def test_validate_exits_non_zero_on_an_error(capsys, tmp_path):

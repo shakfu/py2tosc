@@ -14,7 +14,8 @@ so a deferred layout never becomes part of a `.tosc` file.
 from __future__ import annotations
 
 import math
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Iterator, Sequence
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 
 from .control import Control
@@ -46,7 +47,19 @@ def _round(value: float) -> int:
 
 def ratios(sizes: int | Sequence[float]) -> list[float]:
     """Normalise a slot count or a set of weights into fractions summing to 1."""
-    values = [1.0] * sizes if isinstance(sizes, int) else [float(s) for s in sizes]
+    wanted = "sizes takes a number of slots or a list of weights"
+    # A string is a sequence of characters, so it would otherwise be read as
+    # one weight per character and fail a long way from the call.
+    countable = isinstance(sizes, int) and not isinstance(sizes, bool)
+    listed = isinstance(sizes, Sequence) and not isinstance(sizes, (str, bytes))
+    if not countable and not listed:
+        raise ValueError(f"{wanted}, not {sizes!r}")
+    try:
+        # A bool is an `int` to Python and was refused above, so the narrowing
+        # here is the same test `countable` made.
+        values = [1.0] * sizes if isinstance(sizes, int) else [float(s) for s in sizes]
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{wanted}: {exc}") from exc
     if not values:
         raise ValueError("sizes must describe at least one slot")
     total = sum(values)
@@ -315,6 +328,25 @@ def child_frames(spec: Layout, control: Control, count: int) -> list[Frame]:
     ]
 
 
+def _named(control: Control) -> str:
+    """What to call one control in a message, matching `validate`'s paths."""
+    return control.get("name") or f"<{control.control_type.value}>"
+
+
+@contextmanager
+def _under(control: Control) -> Iterator[None]:
+    """Name this branch on anything that will not divide below it.
+
+    A layout is a tree and its arithmetic is not local -- a row fails because
+    of the frame its grandparent handed down -- so the message has to say
+    which one, and the path accumulates as the error unwinds.
+    """
+    try:
+        yield
+    except ValueError as exc:
+        raise ValueError(f"{_named(control)}/{exc}") from exc
+
+
 def resolve(control: Control, frame: Sequence[float] | None = None) -> Control:
     """Assign frames to everything a layout combinator described.
 
@@ -339,14 +371,19 @@ def resolve(control: Control, frame: Sequence[float] | None = None) -> Control:
     spec = getattr(control, "_layout", None)
     if spec is None:
         for child in control.children:
-            resolve(child)
+            with _under(control):
+                resolve(child)
         return control
 
     spec.resolved = True
     if control.children:
-        frames = child_frames(spec, control, len(control.children))
+        try:
+            frames = child_frames(spec, control, len(control.children))
+        except ValueError as exc:
+            raise ValueError(f"{_named(control)}: {exc}") from exc
         for child, child_frame in zip(control.children, frames):
-            resolve(child, inset_frame(child, child_frame))
+            with _under(control):
+                resolve(child, inset_frame(child, child_frame))
     return control
 
 

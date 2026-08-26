@@ -40,9 +40,12 @@ Four rules are the whole of it.
   rows where `repeat` counts, binding every field of a row the way `repeat`
   binds `$i`, which is how a layout whose names and numbers follow no sequence
   is described. Substitution reaches values and never keys, so one repeat
-  builds one kind of thing -- unless its `of` holds a `case` naming a field and
-  a `when` holding a complete node per value that field takes, which is how a
-  table of mixed controls is written without a key ever coming from a row.
+  builds one kind of thing -- unless a `case` names a field and a `when` holds
+  a complete node per value that field takes, which is how a table of mixed
+  controls is written without a key ever coming from a row. A choice appears
+  under a repeat's `of`, or among a node's children or bindings, where a branch
+  may hold several nodes or none -- so a row can decide whether something is
+  there at all, not only which thing it is.
 - **A sibling key that is not an argument is a property.** Checked against what
   the type accepts, so `gpa` is a message rather than a custom property nobody
   asked for. Genuinely custom keys go under `props`. `text` is the exception
@@ -113,8 +116,11 @@ DIALECT = "py2tosc.ui"
 
 #: The dialect version. A change that would stop an already written file from
 #: reading gets a new one. Schema 2 added the choice a repeat makes with `case`
-#: and `when`, which an older reader would refuse as a node naming no tag.
-SCHEMA = 2
+#: and `when`, which an older reader would refuse as a node naming no tag;
+#: schema 3 let that choice appear among children and bindings too, and let a
+#: branch hold several nodes or none, so a row can decide whether a binding is
+#: there at all rather than only which control carries it.
+SCHEMA = 3
 
 #: Every schema this release reads. `SCHEMA` names the newest of them and says
 #: nothing about the floor, which is the half a producer needs: this dialect is
@@ -258,6 +264,15 @@ _REPEAT_KEYS = frozenset({"repeat", "each", "of", "from", "as"})
 #: What a choice is written with, where an `of` holds one instead of a node.
 _CHOICE_KEYS = frozenset({"case", "when"})
 
+#: The lists a choice can appear in, and what its branches are checked as. A
+#: choice expands where it stands, exactly as a repeat does, so these are the
+#: places something can expand into.
+_SLOTS: dict[str, str] = {
+    **{tag: "children" for tag in _ARRANGE},
+    "group": "children",
+    "messages": "bindings",
+}
+
 
 def _object(data: Any, where: str) -> dict[str, Any]:
     """Insist on an object, and drop the comments from it.
@@ -376,11 +391,102 @@ def _interpolate(
     return _PLACEHOLDER.sub(replace, source)
 
 
+def _is_choice(value: Any) -> bool:
+    """Whether one object is a choice rather than a node."""
+    if not isinstance(value, dict):
+        return False
+    return bool(_CHOICE_KEYS & {k for k in value if not k.startswith(_COMMENT)})
+
+
+def _branch_list(branch: Any) -> list[Any]:
+    """One branch as the list it stands for.
+
+    A branch is a node, or a list of them spliced where the choice stood --
+    including none, which is how a row says a binding is not there at all
+    rather than which binding it is.
+    """
+    return branch if isinstance(branch, list) else [branch]
+
+
+def _check_choice(entry: dict[str, Any], slot: str, where: str) -> dict[str, Any]:
+    """Everything about a choice that is knowable before a row selects.
+
+    Every branch, not only the one taken, because keys are literal and so the
+    whole table is checkable against the tag table here -- which is the
+    property the value-only substitution rule exists to keep. What a branch is
+    checked *as* depends on where the choice stands, which is what `slot`
+    carries: a list of children wants nodes, a `messages` list wants bindings.
+    """
+    entry = _object(entry, where)
+    check_keys(entry, _CHOICE_KEYS, where)
+    missing = sorted(_CHOICE_KEYS - set(entry))
+    if missing:
+        raise FormatError(
+            f"{where}: a choice reads a field with `case` and holds the "
+            f"branches it chooses between under `when`; {missing[0]!r} is missing"
+        )
+
+    if not isinstance(entry["case"], str):
+        raise FormatError(
+            f"{where}: case reads the field that chooses a branch, "
+            f"found {describe(entry['case'])}"
+        )
+
+    table = _object(entry["when"], f"{where}.when")
+    if not table:
+        raise FormatError(f"{where}.when: a choice needs a branch to choose")
+
+    for name, branch in table.items():
+        spot = f"{where}.when[{name!r}]"
+        if isinstance(branch, list) and slot == "node":
+            raise FormatError(
+                f"{spot}: a repeat builds one node per pass, so a branch here "
+                f"is one node; a branch holds a list only among children or "
+                f"bindings"
+            )
+        for index, node in enumerate(_branch_list(branch)):
+            at = spot if not isinstance(branch, list) else f"{spot}[{index}]"
+            written = _object(node, at)
+            if slot == "bindings":
+                _binding_kind(written, at)
+            else:
+                _tag(written, at)
+    return entry
+
+
+def _pick(
+    entry: dict[str, Any],
+    bindings: dict[str, Any],
+    inner: frozenset[str],
+    where: str,
+) -> Any:
+    """Which branch one row takes, or `None` if this pass cannot say.
+
+    A choice inside a nested repeat selects on a name that repeat binds, so the
+    outer pass leaves it alone exactly as it leaves that repeat's counters
+    alone, and the inner pass does the choosing.
+    """
+    picked = _interpolate(entry["case"], bindings, inner, where)
+    if isinstance(picked, str) and _PLACEHOLDER.search(picked):
+        return None
+
+    name = _spelled(picked)
+    table = entry["when"]
+    if name not in table:
+        written = ", ".join(repr(key) for key in table)
+        raise FormatError(
+            f"{where}: case read {name!r}, and no branch is written for it; "
+            f"when holds {written}"
+        )
+    return table[name]
+
+
 def _substitute(
     value: Any,
     bindings: dict[str, Any],
     where: str,
     inner: frozenset[str] = frozenset(),
+    slot: str = "node",
 ) -> Any:
     """A copy of one repeated node with the counters filled in.
 
@@ -401,13 +507,24 @@ def _substitute(
     if isinstance(value, str):
         return _interpolate(value, bindings, inner, where)
     if isinstance(value, list):
-        return [_substitute(item, bindings, where, inner) for item in value]
+        return [_substitute(item, bindings, where, inner, slot) for item in value]
     if isinstance(value, dict):
+        if slot != "node" and _is_choice(value):
+            entry = _check_choice(value, slot, where)
+            picked = _pick(entry, bindings, inner, where)
+            if picked is not None:
+                # A list stays a list: `_children` and the bindings loop splice
+                # it where the choice stood, the way a repeat expands in place.
+                return _substitute(picked, bindings, where, inner, slot)
         held = _template(value) if _repeats(value) else frozenset()
         nested = _counters(value) if held else frozenset()
         return {
             key: _substitute(
-                item, bindings, where, inner | nested if key in held else inner
+                item,
+                bindings,
+                where,
+                inner | nested if key in held else inner,
+                _SLOTS.get(key, "node"),
             )
             for key, item in value.items()
             if not key.startswith(_COMMENT)
@@ -467,74 +584,6 @@ def _rows(entry: dict[str, Any], counter: str, where: str) -> list[dict[str, Any
     ]
 
 
-def _branches(described: Any, where: str) -> tuple[str, dict[str, Any]] | None:
-    """The branches an `of` chooses between, or `None` if it holds a node.
-
-    Substitution reaches values and never keys, so the tag stays fixed in the
-    template and one repeat would otherwise build one kind of thing. A table of
-    parameters is mixed by nature -- a bypass wants a button, a cutoff wants a
-    fader -- and this is how a row says which: `case` reads a field, and `when`
-    holds a complete node per value that field can take.
-
-    The invariant is untouched. Every key stays literal, so every branch is
-    checkable against the tag table here, before any row is looked at, which is
-    what a node built out of a substituted key could never be.
-
-    A branch nothing selects is not an error. An `each` of nothing is already
-    the thing a generator with nothing to emit writes, and that leaves every
-    branch unselected -- so a template carrying a branch for a kind this
-    particular table has no rows of is the same shape, and the same answer.
-    """
-    if not isinstance(described, dict):
-        return None
-    entry = _object(described, f"{where}.of")
-    if not _CHOICE_KEYS & set(entry):
-        return None
-
-    check_keys(entry, _CHOICE_KEYS, f"{where}.of")
-    missing = sorted(_CHOICE_KEYS - set(entry))
-    if missing:
-        raise FormatError(
-            f"{where}.of: a choice reads a field with `case` and holds the "
-            f"branches it chooses between under `when`; {missing[0]!r} is missing"
-        )
-
-    case = entry["case"]
-    if not isinstance(case, str):
-        raise FormatError(
-            f"{where}.of: case reads the field that chooses a branch, "
-            f"found {describe(case)}"
-        )
-
-    table = _object(entry["when"], f"{where}.of.when")
-    if not table:
-        raise FormatError(f"{where}.of.when: a choice needs a branch to choose")
-
-    branches = {}
-    for name, branch in table.items():
-        spot = f"{where}.of.when[{name!r}]"
-        node = _object(branch, spot)
-        # Checked now rather than when a row reaches it, so a branch no row
-        # happens to select is still a branch that names one thing.
-        _tag(node, spot)
-        branches[name] = node
-    return case, branches
-
-
-def _choose(
-    case: str, branches: dict[str, Any], bindings: dict[str, Any], where: str
-) -> Any:
-    """Which branch one row builds."""
-    name = _spelled(_substitute(case, bindings, where))
-    if name not in branches:
-        written = ", ".join(repr(key) for key in branches)
-        raise FormatError(
-            f"{where}: case read {name!r}, and no branch is written for it; "
-            f"when holds {written}"
-        )
-    return branches[name]
-
-
 def _repeat(
     entry: dict[str, Any], where: str, deferred: list[_Deferred]
 ) -> list[Control]:
@@ -588,7 +637,11 @@ def _repeat(
     # Read once, before any row is: what the branches are is a property of the
     # template, and a table with something wrong with it should say so whether
     # or not there are rows to reach it.
-    choice = _branches(described, where) if "of" in entry else None
+    choice = (
+        _check_choice(described, "node", f"{where}.of")
+        if "of" in entry and _is_choice(described)
+        else None
+    )
 
     built = []
     for step, row in enumerate(_rows(entry, counter, where)):
@@ -597,7 +650,14 @@ def _repeat(
         spot = f"{where}#{step + 1}"
         # Only the branch a row selects is substituted into, so a branch reads
         # the fields its own rows carry and no others.
-        template = described if choice is None else _choose(*choice, bindings, spot)
+        template = described
+        if choice is not None:
+            picked = _pick(choice, bindings, frozenset(), spot)
+            if picked is None:
+                raise FormatError(
+                    f"{spot}: case reads a name no enclosing repeat binds"
+                )
+            template = picked
         built.append(_node(_substitute(template, bindings, spot), spot, deferred))
     return built
 
@@ -750,12 +810,49 @@ def _control(
     return control
 
 
-def _children(data: Any, where: str, deferred: list[_Deferred]) -> list[Control]:
-    """Every child of one node, with any `repeat` expanded where it stood."""
-    built: list[Control] = []
+def _spliced(data: Any, where: str) -> list[tuple[str, Any]]:
+    """One list with what a choice expanded to opened out where it stood.
+
+    A branch holding a list arrives here as a list inside a list, since
+    substitution puts back what the branch held. Flattening one level is what
+    makes a choice expand in place the way a repeat does, and it is only one
+    level: a list nested any deeper was written that way and is a mistake the
+    node reader should report.
+    """
+    opened: list[tuple[str, Any]] = []
     for index, item in enumerate(as_list(data, where)):
         spot = f"{where}[{index}]"
+        if isinstance(item, list):
+            opened.extend((f"{spot}[{inner}]", held) for inner, held in enumerate(item))
+        else:
+            opened.append((spot, item))
+    return opened
+
+
+def _refuse_bare_choice(entry: dict[str, Any], where: str) -> None:
+    """A choice that no repeat ever reached, reported as what it is.
+
+    Substitution is what selects, and substitution only runs inside a repeat.
+    So a choice written outside one is never chosen from, and would otherwise
+    arrive at the node reader as an object naming no tag -- a message about a
+    node, for something that is not one.
+    """
+    if _is_choice(entry) and not _repeats(entry):
+        # A repeat carrying these keys is the short form of a choice, which
+        # `_repeat` refuses with a message about where a choice goes. This is
+        # the other case: a choice nothing will ever select from.
+        raise FormatError(
+            f"{where}: a choice is selected by a value a repeat binds, and "
+            f"nothing here is inside a repeat"
+        )
+
+
+def _children(data: Any, where: str, deferred: list[_Deferred]) -> list[Control]:
+    """Every child of one node, with any `repeat` or choice expanded in place."""
+    built: list[Control] = []
+    for spot, item in _spliced(data, where):
         entry = _object(item, spot)
+        _refuse_bare_choice(entry, spot)
         if _repeats(entry):
             built.extend(_repeat(entry, spot, deferred))
         else:
@@ -809,12 +906,9 @@ def _node(data: Any, where: str, deferred: list[_Deferred]) -> Control:
             for existing in control.values
         ]
 
-    for index, item in enumerate(
-        as_list(entry.get("messages", []), f"{where}.messages")
-    ):
-        control.messages.append(
-            _message(item, control, f"{where}.messages[{index}]", deferred)
-        )
+    for spot, item in _spliced(entry.get("messages", []), f"{where}.messages"):
+        _refuse_bare_choice(_object(item, spot), spot)
+        control.messages.append(_message(item, control, spot, deferred))
     return control
 
 
@@ -926,11 +1020,9 @@ def _takes(kind: str, target: Any, where: str) -> None:
         raise FormatError(f"{where}: {kind} takes {what}, found {describe(target)}")
 
 
-def _message(
-    data: Any, control: Control, where: str, deferred: list[_Deferred]
-) -> Message:
-    """Read one binding, deferring a `connect` until its destination exists."""
-    entry = _object(data, where)
+def _binding_kind(entry: dict[str, Any], where: str) -> str:
+    """Which of the four a binding is. Split out so a choice can check a
+    branch it holds without building it."""
     found = [key for key in entry if key in _MESSAGES]
     if len(found) != 1:
         kinds = ", ".join(sorted(_MESSAGES))
@@ -938,8 +1030,15 @@ def _message(
             f"{where}: a binding is one of {kinds}"
             + (f", found {' and '.join(repr(f) for f in found)}" if found else "")
         )
+    return found[0]
 
-    kind = found[0]
+
+def _message(
+    data: Any, control: Control, where: str, deferred: list[_Deferred]
+) -> Message:
+    """Read one binding, deferring a `connect` until its destination exists."""
+    entry = _object(data, where)
+    kind = _binding_kind(entry, where)
     builder = _MESSAGES[kind]
     accepted = set(builder.__kwdefaults__ or {})
     check_keys(entry, accepted | {kind}, where)
@@ -991,15 +1090,31 @@ def _needs(entry: dict[str, Any]) -> int:
     be generated from anything the reader already knows: no table records when
     a spelling arrived, so this is a hand-written historical record, and a
     schema-bumping change that forgets to add a branch here under-reports
-    silently. Anyone adding one should add it here in the same commit.
+    silently. `tests/test_schema_corpus.py` is what makes that a failing test
+    rather than a wrong answer -- adding a schema means adding a description
+    there, and that description has to need exactly the schema it declares.
 
-    The condition mirrors `_branches` exactly rather than looking for the keys
-    anywhere, so a custom property that happens to be called `case` is not
+    The conditions mirror what the reader accepts rather than looking for the
+    keys anywhere, so a custom property that happens to be called `case` is not
     mistaken for a choice.
     """
+    # Schema 3: a choice among children or bindings, or a branch holding a
+    # list rather than one node.
+    for key in _SLOTS:
+        held = entry.get(key)
+        if isinstance(held, list) and any(_is_choice(item) for item in held):
+            return 3
+    if _is_choice(entry):
+        table = entry.get("when")
+        if isinstance(table, dict) and any(
+            isinstance(branch, list) for branch in table.values()
+        ):
+            return 3
+
+    # Schema 2: a repeat choosing among branches.
     held = entry.get("of")
-    if _repeats(entry) and isinstance(held, dict) and _CHOICE_KEYS & set(held):
-        return 2  # a repeat that chooses among branches
+    if _repeats(entry) and _is_choice(held):
+        return 2
     return SCHEMAS.start
 
 

@@ -4,6 +4,43 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- `ui_json` schema 3: a choice can appear wherever a list of children or bindings is allowed, and a branch can hold a list -- several nodes, or none. Schema 2 let a row choose which control it built; `messages` stayed written in the template, so one `each` still built one *set of bindings*. A generated parameter table runs into that immediately: there are 128 controller numbers and plugins routinely have more parameters, so a row past the last one has no CC to bind at all.
+
+  ```json
+  {
+    "each": [
+      {"n": "cutoff", "cc": true,  "num": 74},
+      {"n": "drive",  "cc": false, "num": 0}
+    ],
+    "of": {"fader": "$n", "messages": [
+      {"osc": "/mh/param/$n"},
+      {"case": "$cc", "when": {"true": [{"midi_cc": "$num"}], "false": []}}
+    ]}
+  }
+  ```
+
+  A branch of `[]` is how a row says nothing goes here; a branch holding several nodes splices them all in. That is the same "expands in place" rule `repeat` already had, now followed by a choice too, which is the reason this is a generalisation rather than a second mechanism.
+
+  **It is what keeps a mixed table additive.** One choice per question -- one for the widget kind, one for whether there is a CC -- makes three kinds and two CC states five branches; a single table of complete templates makes them six, and a third question makes that twelve where the nested form makes it seven. minihost hit exactly this while generating a surface and worked around it by doubling the arms, which is what prompted the change.
+
+  Two rules follow from where a choice can now appear. A branch under a repeat's `of` is one node, because a repeat builds one node per pass, and a list there is refused with a message saying so. A branch among children or bindings is one node, or a list of them. Only the branch a row takes is substituted into, at any depth, which is what lets rows be ragged -- the `true` branch above reads `$num`, and the row that does not take it carries no `num` field. Every branch is still checked before any row selects, against what the slot it stands in accepts: a children list wants nodes, a `messages` list wants bindings.
+
+  A choice written outside a repeat is refused rather than left to fail later. Selecting is something substitution does and substitution only runs inside a repeat, so such a choice would never be chosen from, and would otherwise reach the node reader as an object naming no tag -- a message about a node, for something that is not one.
+
+  Descriptions declaring schema 1 or 2 keep building.
+
+- A description per schema, and the guard that makes the schema table honest. `required_schema` and the `py2tosc validate` warning both rest on `_needs`, a hand-written record of which schema each spelling arrived in. It is the one table here that cannot be generated, because nothing in the reader records *when* a spelling was introduced, and a bump that forgets to extend it under-reports silently -- which is worse than no check, since it reads as a clean bill of health exactly when the warning should fire.
+
+  `tests/data/schemas/` now holds one description per schema, each declaring the lowest number that builds it and using what that number introduced, and `tests/test_schema_corpus.py` closes both halves of the hole. A schema with no description fails, so `SCHEMA = 4` without a fixture is a failing test rather than an untested number. A description whose declared schema is not what `required_schema` computes fails, so a fixture added without the matching `_needs` branch is a failing test rather than a wrong answer. Both were confirmed by making each mistake on purpose before relying on them.
+
+  The corpus does a second job the generated-table drift test cannot: `scripts/check_json.py` carries its own hand-written copy of `_needs`, and code is not a table, so nothing else compares the two. Every description here is run through both.
+
+### Fixed
+
+- `case` ignored the counters an inner repeat had yet to bind, so a choice nested inside another repeat was selected by the outer pass using the outer repeat's value for that name. Introduced with the choice form and caught by a test written for the schema 3 work rather than by a report; a nested choice now falls through to the pass that binds what it selects on, exactly as a nested counter already did.
+
 ## [0.5.2]
 
 ### Added

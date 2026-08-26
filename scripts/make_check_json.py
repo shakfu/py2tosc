@@ -44,6 +44,8 @@ def tables() -> dict[str, Any]:
             "schemas": list(ui_json.SCHEMAS),
             "envelope_keys": sorted(ui_json._ENVELOPE_KEYS),
             "repeat_keys": sorted(ui_json._REPEAT_KEYS | ui_json._CHOICE_KEYS),
+            "choice_keys": sorted(ui_json._CHOICE_KEYS),
+            "slots": dict(sorted(ui_json._SLOTS.items())),
             "common_keys": sorted(ui_json._COMMON_KEYS),
             "value_sugar": sorted(ui_json._VALUE_SUGAR),
             "tags": sorted(ui_json._TAGS),

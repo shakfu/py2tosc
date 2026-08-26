@@ -235,9 +235,47 @@ which builds a fader, a button and a fader, in that order -- the order the rows 
 
 **A branch nothing selects is not an error.** An `each` of nothing is already the thing a generator with nothing to emit writes, and that leaves every branch unselected -- so a hand-written template carrying a branch for a kind this particular table has no rows of is the same shape, and gets the same answer. A row selecting a branch that was *not* written is an error, and it names the value it read.
 
-The selector is matched as the file spells it: a number reads as `"1"`, a boolean as `"true"`. A counting `repeat` can choose too -- `{"case": "$i", "when": {...}}` -- though a layout that varies by position usually reads better written out.
+**A branch name is always a quoted string**, because a JSON object's keys are strings and nothing else: `{"true": []}` is a branch table and `{true: []}` is a syntax error, in this format as in every other JSON one. So the value a `case` reads is matched against the name by spelling it, and it is spelled the way the file spells one -- the same rule that turns `"ch$i"` into `"ch1"` and writes a boolean as `true` rather than Python's `True`. A counting `repeat` can choose too, `{"case": "$i", "when": {"1": ..., "2": ...}}`, though a layout that varies by position usually reads better written out.
+
+Two consequences worth knowing, and they fail differently. A number is spelled exactly, so `1.0` looks for a `"1.0"` branch and does not match `"1"` -- which is an error naming the value it read, `case read '1.0', and no branch is written for it`, rather than a wrong branch quietly taken. And a spelling is only a spelling, so the boolean `true` and the string `"true"` select the same branch; if that distinction matters, put the discriminant in the data as its own field rather than leaning on how a value happens to spell.
 
 This is a schema 2 feature. A description using it will not build on a release that reads only schema 1, which is what the number is for.
+
+### Rows that do not all carry the same bindings
+
+One `each` builds one *set of bindings*, for the same reason it built one kind of control: `messages` is written in the template. A generated table runs into this immediately -- there are 128 controller numbers and plugins routinely have more parameters, so a row past the last one has no CC to bind at all.
+
+**A choice can also appear among children or among bindings, and a branch can hold several nodes or none.** So a row says whether a binding is there:
+
+```json
+{
+  "each": [
+    {"n": "cutoff", "cc": true,  "num": 74},
+    {"n": "drive",  "cc": false, "num": 0}
+  ],
+  "of": {"fader": "$n", "messages": [
+    {"osc": "/mh/param/$n"},
+    {"case": "$cc", "when": {"true": [{"midi_cc": "$num"}], "false": []}}
+  ]}
+}
+```
+
+`cutoff` gets both bindings and `drive` gets only the OSC one. A branch of `[]` is how a row says *nothing goes here*, and a branch holding several nodes splices them all in -- the same "expands in place" rule `repeat` has, which is what a choice now follows too.
+
+**This is what keeps a mixed table additive rather than multiplicative.** Written as one choice per question -- one for the widget kind, one for whether there is a CC -- three widget kinds and two CC states are five branches. Written as a single table of complete templates they are six, and a third question makes them twelve while the nested form makes them seven.
+
+Two rules follow from where a choice can now appear:
+
+| | |
+|-|-|
+| A branch under a repeat's `of` | One node. A repeat builds one node per pass, so a list there is refused. |
+| A branch among children or bindings | One node, or a list of them, spliced where the choice stood. `[]` is allowed. |
+
+**Only the branch a row takes is substituted into, at any depth.** That is what lets rows be ragged: the `true` branch above reads `$num`, and the row that does not take it carries no `num` field at all.
+
+**A choice outside a repeat is refused.** Selecting is something substitution does, and substitution only runs inside a repeat, so a choice written anywhere else would never be chosen from. It says so rather than arriving at the node reader as an object naming no tag.
+
+This is a schema 3 feature.
 
 ### Arithmetic, and what to do instead
 
@@ -404,7 +442,7 @@ Its tables are generated from py2tosc by `scripts/make_check_json.py` and compar
 
 ## Stability
 
-This dialect is a description of what `py2tosc.ui` does, so it inherits `ui`'s carve-out from the [stability policy](../stability.md): it may change in a minor release, where the faithful encoding may not. It carries a `schema` number of its own for the case where a change would stop an already written description from building, and it is at 2.
+This dialect is a description of what `py2tosc.ui` does, so it inherits `ui`'s carve-out from the [stability policy](../stability.md): it may change in a minor release, where the faithful encoding may not. It carries a `schema` number of its own for the case where a change would stop an already written description from building, and it is at 3.
 
 **The `schema` key is the producer's to stamp.** This is the one format here written by something other than py2tosc, and a description carrying no `schema` means "whatever the reader is" -- harmless in a file a person wrote and opened once, and the ambiguity a version number exists to remove in one a program emits. `py2tosc.ui_json.required_schema(data)` is the number to stamp -- the lowest schema that builds that description -- so a generator can ask rather than remember. On the reading side, `SCHEMAS` is every schema the installed release builds and `supports(n)` asks about one, so a generator can also check that the release it is running against will read what it is about to write. A schema above the range is a `SchemaError` rather than a bare `FormatError`, because it is the one reading failure whose remedy is not in the file.
 

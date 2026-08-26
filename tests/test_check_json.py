@@ -156,6 +156,21 @@ REFUSED = [
     ),
     ({"row": [{"each": [{"k": "a"}], "of": {"case": "$k"}}]}, "'when' is missing"),
     ({"row": [{"each": [{"k": "a"}], "of": {"case": "$k", "when": {}}}]}, "needs a branch"),
+    # schema 3: a choice among children or among bindings
+    (
+        {"row": [{"each": [{"k": "a"}], "of": {"fader": "x", "messages": [
+            {"case": "$k", "when": {"a": {"osc": "/x"}, "b": {"nope": 1}}}]}}]},
+        "when['b']: a binding is one of",
+    ),
+    (
+        {"row": [{"each": [{"k": "a"}], "of": {"row": [
+            {"case": "$k", "when": {"a": {"fader": "x"}, "b": {"nope": 1}}}]}}]},
+        "when['b']: nothing here names a control",
+    ),
+    (
+        {"row": [{"case": "$k", "when": {"a": {"fader": "x"}}}]},
+        "nothing here is inside a repeat",
+    ),
 ]
 
 

@@ -1,0 +1,21 @@
+{
+  "format": "py2tosc.ui",
+  "schema": 2,
+  "//": "What schema 2 added: a repeat choosing among fully written branches. One row per widget kind, which is the case the form was added for.",
+  "root": {
+    "row": [
+      {"each": [
+        {"kind": "cont", "n": "cutoff", "cc": 74},
+        {"kind": "sw",   "n": "bypass", "cc": 75},
+        {"kind": "sel",  "n": "wave",   "cc": 76, "steps": 4}
+      ],
+       "of": {"case": "$kind", "when": {
+         "cont": {"fader":  "$n", "messages": [{"midi_cc": "$cc"}]},
+         "sw":   {"button": "$n", "messages": [{"midi_cc": "$cc"}]},
+         "sel":  {"radio":  "$n", "steps": "$steps", "messages": [{"midi_cc": "$cc"}]}
+       }}}
+    ],
+    "gap": 6, "pad": 8, "name": "two",
+    "frame": [0, 0, 800, 480]
+  }
+}

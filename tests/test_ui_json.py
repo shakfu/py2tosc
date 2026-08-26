@@ -1114,6 +1114,307 @@ def test_a_choice_in_the_short_form_is_refused():
     assert "a choice is what a repeat repeats, so it goes under `of`" in str(caught.value)
 
 
+def _selected(rows, when):
+    """One choice over a table of rows, as the count of bindings each built."""
+    doc = built(
+        {
+            "row": [
+                {
+                    "each": rows,
+                    "of": {"fader": "f", "messages": [{"case": "$k", "when": when}]},
+                }
+            ]
+        }
+    )
+    return [len(control.messages) for control in doc.root.children]
+
+
+def test_a_branch_name_is_matched_by_spelling_the_value():
+    """A JSON key is a string, so the value has to be spelled to meet it.
+
+    The same spelling used everywhere else a bound value is written into text,
+    which is why a boolean reads `true` rather than Python's `True`.
+    """
+    assert _selected([{"k": True}, {"k": False}], {"true": [{"osc": "/a"}], "false": []}) == [1, 0]
+    assert _selected([{"k": 2}], {"1": [], "2": [{"osc": "/a"}]}) == [1]
+
+
+def test_a_number_is_spelled_exactly_and_says_so_when_it_misses():
+    """`1.0` is not `1`, and the message names the value it read.
+
+    Documented in the guide, so it is a promise rather than an accident: the
+    failure is loud and names the spelling, where a near-match quietly taken
+    would be the bad outcome.
+    """
+    with pytest.raises(FormatError) as caught:
+        _selected([{"k": 1.0}], {"1": [{"osc": "/a"}]})
+    assert "case read '1.0', and no branch is written for it" in str(caught.value)
+    assert _selected([{"k": 1.0}], {"1.0": [{"osc": "/a"}]}) == [1]
+
+
+def test_a_spelling_is_only_a_spelling():
+    """The boolean and the string select the same branch.
+
+    Documented rather than fixed: telling them apart would mean a key carrying
+    a type, which is the thing keys here deliberately do not do. A description
+    that needs the distinction puts it in the data as its own field.
+    """
+    assert _selected([{"k": True}, {"k": "true"}], {"true": [{"osc": "/a"}]}) == [1, 1]
+
+
+# -- a choice where a list is accepted ---------------------------------------
+
+
+def _binding_kinds(control):
+    return [type(message).__name__ for message in control.messages]
+
+
+def test_a_row_decides_whether_a_binding_is_there_at_all():
+    """Schema 3, and the case it was added for.
+
+    A generated parameter table runs out of controller numbers at the 128th,
+    and a row past it has no CC to bind. Before this, `messages` was fixed in
+    the template, so the only way to say it was a second arm per widget kind --
+    which multiplies, where this adds.
+    """
+    doc = built(
+        {
+            "row": [
+                {
+                    "each": [
+                        {"n": "cutoff", "cc": True, "num": 74},
+                        {"n": "drive", "cc": False, "num": 0},
+                    ],
+                    "of": {
+                        "fader": "$n",
+                        "messages": [
+                            {"osc": "/p/$n"},
+                            {
+                                "case": "$cc",
+                                "when": {"true": [{"midi_cc": "$num"}], "false": []},
+                            },
+                        ],
+                    },
+                }
+            ]
+        }
+    )
+    cutoff, drive = doc.root.children
+    assert _binding_kinds(cutoff) == ["OscMessage", "MidiMessage"]
+    assert _binding_kinds(drive) == ["OscMessage"]
+    assert cutoff.messages[1].message.data1 == 74
+
+
+def test_a_branch_may_hold_several_nodes():
+    """A branch is spliced where the choice stood, the way a repeat expands."""
+    doc = built(
+        {
+            "row": [
+                {
+                    "each": [{"n": "a", "k": "both"}, {"n": "b", "k": "one"}],
+                    "of": {
+                        "fader": "$n",
+                        "messages": [
+                            {
+                                "case": "$k",
+                                "when": {
+                                    "both": [{"osc": "/a/$n"}, {"midi_cc": 7}],
+                                    "one": [{"osc": "/a/$n"}],
+                                },
+                            }
+                        ],
+                    },
+                }
+            ]
+        }
+    )
+    assert [len(c.messages) for c in doc.root.children] == [2, 1]
+
+
+def test_a_choice_expands_where_children_are_accepted():
+    doc = built(
+        {
+            "column": [
+                {
+                    "each": [{"k": "pair"}, {"k": "one"}, {"k": "none"}],
+                    "of": {
+                        "row": [
+                            {
+                                "case": "$k",
+                                "when": {
+                                    "pair": [{"fader": "l"}, {"fader": "r"}],
+                                    "one": {"fader": "m"},
+                                    "none": [],
+                                },
+                            }
+                        ]
+                    },
+                }
+            ]
+        }
+    )
+    assert [len(row.children) for row in doc.root.children] == [2, 1, 0]
+
+
+def test_only_the_branch_a_row_takes_is_substituted_into_at_any_depth():
+    """Which is what lets rows be ragged, and is the whole point.
+
+    The `true` branch reads `$num`, and the row that does not take it has no
+    `num` field at all. Substituting every branch would make that an error
+    about a name nobody bound.
+    """
+    doc = built(
+        {
+            "row": [
+                {
+                    "each": [{"n": "a", "cc": True, "num": 9}, {"n": "b", "cc": False}],
+                    "of": {
+                        "fader": "$n",
+                        "messages": [
+                            {
+                                "case": "$cc",
+                                "when": {"true": [{"midi_cc": "$num"}], "false": []},
+                            }
+                        ],
+                    },
+                }
+            ]
+        }
+    )
+    assert [len(c.messages) for c in doc.root.children] == [1, 0]
+
+
+def test_a_branch_is_checked_before_any_row_selects_it_in_either_slot():
+    """The property value-only substitution exists to keep, at both slots."""
+    with pytest.raises(FormatError) as caught:
+        built(
+            {
+                "row": [
+                    {
+                        "each": [{"k": "a"}],
+                        "of": {
+                            "fader": "x",
+                            "messages": [
+                                {"case": "$k", "when": {"a": {"osc": "/x"}, "b": {"nope": 1}}}
+                            ],
+                        },
+                    }
+                ]
+            }
+        )
+    assert "when['b']: a binding is one of" in str(caught.value)
+
+    with pytest.raises(FormatError) as caught:
+        built(
+            {
+                "row": [
+                    {
+                        "each": [{"k": "a"}],
+                        "of": {"row": [{"case": "$k", "when": {"a": {"fader": "x"}, "b": {"nope": 1}}}]},
+                    }
+                ]
+            }
+        )
+    assert "when['b']: nothing here names a control" in str(caught.value)
+
+
+def test_a_branch_holding_a_list_is_refused_where_one_node_is_wanted():
+    """A repeat builds one node per pass, so its `of` branch is one node."""
+    with pytest.raises(FormatError) as caught:
+        built(
+            {
+                "row": [
+                    {
+                        "each": [{"k": "a"}],
+                        "of": {"case": "$k", "when": {"a": [{"fader": "x"}]}},
+                    }
+                ]
+            }
+        )
+    assert "a branch here is one node" in str(caught.value)
+
+
+def test_a_choice_outside_a_repeat_says_so():
+    """Substitution is what selects, and it only runs inside a repeat."""
+    with pytest.raises(FormatError) as caught:
+        built({"row": [{"case": "$k", "when": {"a": {"fader": "x"}}}]})
+    assert "nothing here is inside a repeat" in str(caught.value)
+
+
+def test_an_inner_repeat_owns_the_choice_that_selects_on_its_counter():
+    """The outer pass leaves it alone, exactly as it leaves the counter alone."""
+    doc = built(
+        {
+            "column": [
+                {
+                    "each": [{"bank": "A"}, {"bank": "B"}],
+                    "as": "outer",
+                    "of": {
+                        "row": [
+                            {
+                                "repeat": 2,
+                                "of": {
+                                    "fader": "$bank$i",
+                                    "messages": [
+                                        {
+                                            "case": "$i",
+                                            "when": {
+                                                "1": [{"midi_cc": 1}],
+                                                "2": [],
+                                            },
+                                        }
+                                    ],
+                                },
+                            }
+                        ]
+                    },
+                }
+            ]
+        }
+    )
+    rows = [[(c.get("name"), len(c.messages)) for c in row.children] for row in doc.root.children]
+    assert rows == [[("A1", 1), ("A2", 0)], [("B1", 1), ("B2", 0)]]
+
+
+def test_required_schema_tells_the_two_choice_forms_apart():
+    """Schema 2 is a choice under `of`; schema 3 is one anywhere else."""
+    under_of = described_choice = {
+        "row": [
+            {"each": [{"k": "a"}], "of": {"case": "$k", "when": {"a": {"fader": "x"}}}}
+        ]
+    }
+    assert ui_json.required_schema(built_source(under_of)) == 2
+
+    in_messages = {
+        "row": [
+            {
+                "each": [{"k": "a"}],
+                "of": {
+                    "fader": "x",
+                    "messages": [{"case": "$k", "when": {"a": {"osc": "/x"}}}]
+                },
+            }
+        ]
+    }
+    assert ui_json.required_schema(built_source(in_messages)) == 3
+
+    list_branch = {
+        "row": [
+            {
+                "each": [{"k": "a"}],
+                "of": {"case": "$k", "when": {"a": [{"fader": "x"}]}},
+            }
+        ]
+    }
+    assert ui_json.required_schema(built_source(list_branch)) == 3
+    assert described_choice is under_of
+
+
+def built_source(root, **envelope):
+    """The envelope a description would carry, without building it."""
+    return {"format": ui_json.DIALECT, "root": root, **envelope}
+
+
 # -- what a description needs ------------------------------------------------
 
 

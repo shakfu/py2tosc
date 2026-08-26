@@ -1,0 +1,33 @@
+{
+  "format": "py2tosc.ui",
+  "schema": 3,
+  "//": "What schema 3 added: a choice standing where a list of bindings is accepted, and a branch holding a list. The case is a generated parameter table where the controller numbers ran out -- a row past the 128th has no CC to bind, and the row says so rather than the template guessing.",
+  "root": {
+    "row": [
+      {"each": [
+        {"kind": "cont", "n": "cutoff", "cc": true,  "num": 74},
+        {"kind": "sw",   "n": "bypass", "cc": true,  "num": 75},
+        {"kind": "cont", "n": "drive",  "cc": false, "num": 0},
+        {"kind": "sw",   "n": "hold",   "cc": false, "num": 0}
+      ],
+       "of": {"case": "$kind", "when": {
+         "cont": {"fader": "$n", "messages": [
+           {"osc": "/mh/param/$n"},
+           {"case": "$cc", "when": {
+             "true":  [{"midi_cc": "$num"}],
+             "false": []
+           }}
+         ]},
+         "sw": {"button": "$n", "messages": [
+           {"osc": "/mh/param/$n"},
+           {"case": "$cc", "when": {
+             "true":  [{"midi_cc": "$num"}],
+             "false": []
+           }}
+         ]}
+       }}}
+    ],
+    "gap": 6, "pad": 8, "name": "three",
+    "frame": [0, 0, 800, 480]
+  }
+}

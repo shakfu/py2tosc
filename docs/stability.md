@@ -71,8 +71,9 @@ provisional.**
 `py2tosc.ui_json` is provisional for the same reason and by the same rule. It is
 a JSON description of what the combinators do, so it cannot be steadier than
 what it describes. It carries a `schema` number of its own for the case where a
-change would stop an already written description from building; it is at 2,
-where the choice a repeat makes with `case` and `when` arrived. Because this
+change would stop an already written description from building; it is at 3: schema 2
+added the choice a repeat makes with `case` and `when`, and schema 3 let
+that choice appear among children and bindings too. Because this
 is the one dialect py2tosc reads and never writes, the producer stamps that
 number, and `ui_json.SCHEMAS` and `ui_json.supports` are what a producer asks
 before it does.

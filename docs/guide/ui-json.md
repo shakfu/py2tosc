@@ -202,6 +202,43 @@ A field is read as `$name`, so a key that cannot be written that way is refused 
 
 This is also what closes the gap with [`py2tosc build`](../cli.md#build), which takes a list of parameters and lays out a surface from it. A description can now say the same thing, and say the rest of the layout around it.
 
+### Rows that are not all the same kind
+
+One `each` builds one kind of thing, because substitution reaches values and never keys: the tag is written in the template, so a row can change what a control is *called*, *bound to* and *numbered*, but not what it *is*. A table generated from a plugin's parameters is mixed by nature -- a bypass wants a `button`, a waveform selector wants a `radio`, a cutoff wants a `fader`.
+
+**`case` reads a field and `when` holds a complete node per value it can take.** The `of` holds the table instead of a node:
+
+```json
+{
+  "each": [
+    {"kind": "cont", "name": "cutoff", "cc": 74},
+    {"kind": "sw",   "name": "bypass", "cc": 75},
+    {"kind": "cont", "name": "reso",   "cc": 76}
+  ],
+  "of": {"case": "$kind", "when": {
+    "cont": {"fader":  "$name", "messages": [{"midi_cc": "$cc"}]},
+    "sw":   {"button": "$name", "messages": [{"midi_cc": "$cc"}]}
+  }}
+}
+```
+
+which builds a fader, a button and a fader, in that order -- the order the rows are in, which for a generated table is the order the plugin author chose.
+
+| | |
+|-|-|
+| `case` | The string whose substituted value names the branch. Usually one field, `"$kind"`, but any string that substitutes will do. |
+| `when` | The branches, keyed by the value that selects them. Each is a complete node, and at least one is required. |
+
+**Every key is still literal.** No key anywhere is built from a row, so every branch is checked against the tag table before any row is looked at -- a branch naming two tags, or none, is refused whether or not a row happens to reach it. That checkability is the reason keys are not substituted in the first place, and `{"$kind": "$name"}` would also read worse than what it replaced.
+
+**Only the branch a row selects is substituted into**, so a branch reads the fields its own rows carry and no others. A `sw` row needs no `steps` field for a `radio` branch that mentions one.
+
+**A branch nothing selects is not an error.** An `each` of nothing is already the thing a generator with nothing to emit writes, and that leaves every branch unselected -- so a hand-written template carrying a branch for a kind this particular table has no rows of is the same shape, and gets the same answer. A row selecting a branch that was *not* written is an error, and it names the value it read.
+
+The selector is matched as the file spells it: a number reads as `"1"`, a boolean as `"true"`. A counting `repeat` can choose too -- `{"case": "$i", "when": {...}}` -- though a layout that varies by position usually reads better written out.
+
+This is a schema 2 feature. A description using it will not build on a release that reads only schema 1, which is what the number is for.
+
 ### Arithmetic, and what to do instead
 
 What a repeat still cannot do is arithmetic. There is no `$i * 2`, and adding one would mean an expression language inside a JSON string, which is a bigger thing than this format is. Two ways round it: `from` moves where a counter starts, and `each` puts the number in the data, where a generator or a person can compute whatever they like before writing the file.
@@ -343,8 +380,41 @@ $ py2tosc validate mixer.ui.json
 mixer.ui.json: clean
 ```
 
+## Checking a description without py2tosc
+
+`py2tosc validate` is the check when py2tosc is installed. When it is not -- which is the ordinary case for the program *writing* these files -- `scripts/check_json.py` in this repository is a single file with no imports beyond the standard library, meant to be copied into that program's own tree:
+
+```console
+$ python check_json.py synth.ui.json
+synth.ui.json: warning: <envelope>: the description declares schema 1 and uses schema 2; a release reading only schema 1 will refuse it with a message about a node
+```
+
+```python
+from check_json import check
+
+problems = check(json.loads(text))
+assert not problems, problems
+```
+
+It reads both dialects, telling them apart by `format` exactly as `py2tosc.load` does, and exits `0`, `1` and `2` on the same meanings the [CLI](../cli.md#exit-codes) gives them. This is what makes the schema stamp checkable by the only party that can get it right: a generator can assert in its own test suite that the file it wrote is well formed and stamps what it needs, without putting the compiler in its dependency list.
+
+It is deliberately conservative. Everything it calls an error, py2tosc refuses too, so a false positive would be the failure that matters; the reverse is not promised, because it resolves nothing and so cannot see a layout that will not fit, a `sizes` that does not match its children, or a property value that will not coerce. What it does see is the failure class the dialect exists to close -- a key nothing reads -- plus a `$name` no repeat binds, a binding a control cannot carry, and a schema stamped below what the file uses.
+
+Its tables are generated from py2tosc by `scripts/make_check_json.py` and compared against the live ones by `tests/test_check_json.py`, so a copy that has gone stale is a failing test here rather than a wrong answer somewhere else. A description declaring a schema newer than the tables know says so, and says to regenerate.
+
 ## Stability
 
-This dialect is a description of what `py2tosc.ui` does, so it inherits `ui`'s carve-out from the [stability policy](../stability.md): it may change in a minor release, where the faithful encoding may not. It carries a `schema` number for the case where a change would stop an already written description from building.
+This dialect is a description of what `py2tosc.ui` does, so it inherits `ui`'s carve-out from the [stability policy](../stability.md): it may change in a minor release, where the faithful encoding may not. It carries a `schema` number of its own for the case where a change would stop an already written description from building, and it is at 2.
+
+**The `schema` key is the producer's to stamp.** This is the one format here written by something other than py2tosc, and a description carrying no `schema` means "whatever the reader is" -- harmless in a file a person wrote and opened once, and the ambiguity a version number exists to remove in one a program emits. `py2tosc.ui_json.required_schema(data)` is the number to stamp -- the lowest schema that builds that description -- so a generator can ask rather than remember. On the reading side, `SCHEMAS` is every schema the installed release builds and `supports(n)` asks about one, so a generator can also check that the release it is running against will read what it is about to write. A schema above the range is a `SchemaError` rather than a bare `FormatError`, because it is the one reading failure whose remedy is not in the file.
+
+Understating the stamp is the mistake nothing catches by building, because the reader that could catch it is by definition new enough to build the file -- it is caught by whoever opens it on an older release, and what they see is a message about a node. So `py2tosc validate` warns on a description that declares less than it uses, or that stamps nothing while using something new:
+
+```console
+$ py2tosc validate synth.ui.json
+warning: <envelope>: the description declares schema 1 and uses schema 2; a release reading only schema 1 will refuse it with a message about a node
+```
+
+One limit is worth knowing. `required_schema` detects spellings, not meanings: a schema that changed what an existing spelling *does* leaves a description textually identical, so it reports the older number and the warning stays quiet. For that class the guard is a file of expected output, not a version number.
 
 Nothing it produces is unusual. What comes out is an ordinary `Control` tree, indistinguishable from one built in Python, so if the dialect ever becomes inconvenient the layouts it built remain valid.

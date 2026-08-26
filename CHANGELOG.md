@@ -4,6 +4,75 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.5.2]
+
+### Added
+
+- A repeat can choose what it builds. Substitution reaches values and never keys, so the tag stays fixed in the template and one `each` built one kind of control -- which made the dialect's best feature unavailable to exactly the caller its docstring describes, a generator emitting a table it did not write. A generated parameter table is mixed by nature: a bypass wants a `button`, a waveform selector a `radio`, a cutoff a `fader`. An `of` can now hold a branch table instead of a node, and a row says which branch:
+
+  ```json
+  {
+    "each": [
+      {"kind": "cont", "name": "cutoff", "cc": 74},
+      {"kind": "sw",   "name": "bypass", "cc": 75}
+    ],
+    "of": {"case": "$kind", "when": {
+      "cont": {"fader":  "$name", "messages": [{"midi_cc": "$cc"}]},
+      "sw":   {"button": "$name", "messages": [{"midi_cc": "$cc"}]}
+    }}
+  }
+  ```
+
+  Value-only substitution is a design invariant rather than a limitation worked around here, and this keeps it. Every key stays literal, so every branch is checked against the tag table before any row is looked at -- a branch naming two tags or none is refused whether or not a row reaches it, which is a check a node whose type came from a row could not have. `{"$kind": "$name"}` would also read worse than what it replaced.
+
+  Two decisions are worth stating because neither is forced. Only the branch a row selects is substituted into, so a branch reads the fields its own rows carry and no others -- a `sw` row needs no `steps` for a `radio` branch that mentions one. And a branch nothing selects is not an error: an `each` of nothing is already what a generator with nothing to emit writes, and that leaves every branch unselected, so a template carrying a branch for a kind this table has no rows of is the same shape and gets the same answer. A row selecting a branch nobody wrote *is* an error, and names the value it read.
+
+  This is `ui_json` schema 2. A description using it will not build on a release that reads only schema 1, which is what the number is for; descriptions declaring schema 1 keep building, since files are durable and readers advance.
+
+- `SCHEMAS` and `supports()` on both JSON dialects, and a `SchemaError` for the failure they exist to prevent. `SCHEMA` names the newest schema a release reads and says nothing about the floor, so a program writing either dialect could not ask what the installed py2tosc accepts -- the only way to find out was to build and catch `FormatError`, which conflates "this schema is newer than I read" with "node 14 has a property that is not a property", two failures whose remedies have nothing in common.
+
+  `py2tosc.ui_json.SCHEMAS` is a `range` of every schema that release builds and `supports(n)` asks about one, so a generator can check before it writes rather than after, and fail with a sentence naming its own remedy. `py2tosc.json_codec` carries the same pair. A schema above the range is now `py2tosc.SchemaError`, a subclass of `FormatError`, for callers that would rather try than check; a `schema` key that is not a number at all stays a plain `FormatError`, because that one is an envelope with something wrong with it.
+
+  This matters most for `ui_json`, which is read and never written: the producer stamps the schema, and a description carrying no `schema` key means "whatever the reader is", which is the ambiguity a version number exists to remove. The guide now says so.
+
+  Both requests came from [minihost](https://github.com/shakfu/minihost), whose planned `touch` command generates a control surface from a plugin's parameters -- a generator rather than a hand-author, which is the caller that finds both gaps.
+
+- `py2tosc.ui_json.required_schema()`, and a `py2tosc validate` warning built on it. `SCHEMAS` answers what a release reads; this answers what a description needs -- the lowest schema that builds it, which is the number to stamp. Asking rather than remembering is what keeps the key honest, because this is the one dialect py2tosc reads and never writes, so the `schema` value is a claim the writer makes about its own output and nothing downstream audits it.
+
+  Understating the stamp is the mistake nothing catches by building, and the reason is structural: the reader that would catch it is by definition new enough to build the file. It is caught instead by whoever opens the description on an older release, where it passes the schema gate and then fails deep inside with `nothing here names a control or a layout` pointing at a node that is fine -- exactly the message `SchemaError` was added to replace. So `py2tosc validate` now warns on a description that declares less than it uses, or that stamps nothing while using something new, which puts the finding in front of the producer before the file is shipped:
+
+  ```console
+  $ py2tosc validate synth.ui.json
+  warning: <envelope>: the description declares schema 1 and uses schema 2; a release reading only schema 1 will refuse it with a message about a node
+  ```
+
+  A warning rather than a refusal, and the distinction is the whole design. Refusing would only ever fire on a file the refusing reader can build, so it would manufacture failures for working descriptions while doing nothing for the case that hurts; firing on a file that currently works is what a linter is for. Exit codes are unchanged -- a warning alone still exits 0, as every other warning does.
+
+  Two limits are stated rather than papered over. `required_schema` detects spellings, not meanings: a future schema that changed what an existing spelling *does* would leave a description textually identical, so it reports the older number and the warning stays quiet -- for that class the guard is a file of expected output. And `_needs`, the table behind it, is the one thing here that cannot be generated from what the reader already knows, since nothing records when a spelling arrived. It is a hand-written historical record, a schema bump that forgets to extend it under-reports silently, and its docstring says so.
+
+- `scripts/check_json.py`, a standalone checker for both JSON dialects. One file, nothing imported beyond the standard library, meant to be copied into a project that *writes* these files. That is the case it exists for: a program generating a layout description wants its own tests to say the file is well formed, and requiring py2tosc for that would put the compiler in the dependency list of a program whose whole point is not to need one.
+
+  ```console
+  $ python check_json.py synth.ui.json
+  synth.ui.json: warning: <envelope>: the description declares schema 1 and uses schema 2; a release reading only schema 1 will refuse it with a message about a node
+  ```
+
+  It reads both dialects, told apart by `format` exactly as `py2tosc.load` tells them apart, exposes `check(data)` returning a list of findings, and exits `0`, `1` and `2` on the meanings the CLI already gives them. It is what makes the schema stamp checkable by the only party that can get it right, since the producer is the one that writes the number.
+
+  Conservative by construction: everything it calls an error, py2tosc refuses too. `tests/test_check_json.py` pins that in both directions worth pinning -- every description and every layout in the corpus passes it, and a table of refusals asserts the reader and the checker reject the same files for the same stated reason. The reverse is not promised and the docstring says so: nothing here resolves a layout, so a `sizes` that does not divide, a row too narrow for its children, and a property value that will not coerce are all invisible to it. What it does see is the failure class this format has to close -- a key nothing reads, silently ignored, so a `childs` drops a subtree and the result looks like a file that read correctly -- plus a `$name` no repeat binds, a binding a control cannot carry, and a schema stamped below the spellings the file uses.
+
+  Its tables are a copy, and a copy drifts, so they are generated rather than written: `scripts/make_check_json.py` reads them off the live modules -- no table is retyped -- and a test compares the committed copy against freshly generated ones. As data rather than as text, because `json.dumps` and `ruff format` lay the same literal out differently and a byte comparison would call the file stale every time it was formatted, which trains people to regenerate without reading. A description declaring a schema newer than the tables know says exactly that, and says to regenerate.
+
+### Changed
+
+- Every script in `scripts/` takes its command line through `argparse`, so each answers `--help` and states its own exit codes rather than printing its docstring and hoping. `check_enums.py` keeps the arguments and codes it had. `make_check_json.py` gains `--check`, which reports whether the checker's tables are current and writes nothing, which is the form a CI step wants.
+
+- A `schema` key that is not a number is now its own message. Both dialects folded that case in with a schema that is merely too new, so `{"schema": "one"}` was reported as `schema 'one' is newer than this release reads` -- a sentence about the future for a file with a string where a number goes. It now says `schema should be a number, found a string`, and only a number above the range is a `SchemaError`.
+
+- A `schema` below the range is refused rather than read. `{"schema": 0}` was accepted by both dialects, because the only test was against the newest; there has never been a schema 0, so a file declaring one is wrong about itself and now hears so. Nothing published declares a schema outside its dialect's range, so this refuses no file that existed before it.
+
+- `make lint-check`, `make format` and `make typecheck` cover `scripts/` as well as `src/`, since a script other projects copy should be held to the bar the package is. `scripts/check_enums.py` predates the rule and is named out of the mypy half; bringing it up is a separate job.
+
 ## [0.5.1]
 
 ### Added

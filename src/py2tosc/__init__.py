@@ -52,7 +52,7 @@ from .enums import (
     Shape,
     TriggerCondition,
 )
-from .errors import FormatError, Py2ToscError
+from .errors import FormatError, Py2ToscError, SchemaError
 from .json_codec import from_json, to_json
 from .messages import (
     ALL_CONNECTIONS,
@@ -71,7 +71,7 @@ from .messages import (
 from .properties import Color, Frame, Property, to_color, to_frame
 from .validate import Issue, ValidationError, validate
 
-__version__ = "0.5.1"
+__version__ = "0.5.2"
 
 # Sorted rather than grouped by topic, because RUF022 asks for it and the
 # grouping lives in the API reference instead. See docs/api/.
@@ -110,6 +110,7 @@ __all__ = [
     "Py2ToscError",
     "RadioType",
     "Response",
+    "SchemaError",
     "Shape",
     "Trigger",
     "TriggerCondition",

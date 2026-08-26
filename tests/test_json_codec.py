@@ -15,7 +15,7 @@ import pytest
 
 import py2tosc
 from py2tosc import json_codec, ui
-from py2tosc.errors import FormatError
+from py2tosc.errors import FormatError, SchemaError
 
 from _corpus import CORPUS, DATA, EDITOR_WRITTEN, payload
 from py2tosc.cli import CANNOT_RUN, OK, main
@@ -561,3 +561,28 @@ def test_an_unreadable_json_layout_is_a_message_and_not_a_traceback(tmp_path, ca
 
     assert caught.value.code == CANNOT_RUN
     assert "did you mean 'children'?" in capsys.readouterr().err
+
+
+# -- what this release reads -------------------------------------------------
+
+
+def test_the_schema_range_is_what_the_newest_says():
+    assert json_codec.SCHEMAS == range(1, json_codec.SCHEMA + 1)
+    assert json_codec.supports(json_codec.SCHEMA)
+    assert not json_codec.supports(json_codec.SCHEMA + 1)
+    assert not json_codec.supports(0)
+
+
+def test_a_schema_this_release_does_not_read_has_its_own_type():
+    """A `FormatError` is about the file; this one is about the reader."""
+    with pytest.raises(SchemaError) as caught:
+        json_codec.from_json('{"schema": 99, "root": {"type": "GROUP"}}')
+    assert "upgrade py2tosc" in str(caught.value)
+    assert isinstance(caught.value, FormatError)
+
+
+def test_a_schema_that_is_not_a_number_is_an_envelope_problem():
+    with pytest.raises(FormatError) as caught:
+        json_codec.from_json('{"schema": "one", "root": {"type": "GROUP"}}')
+    assert "schema should be a number, found a string" in str(caught.value)
+    assert not isinstance(caught.value, SchemaError)

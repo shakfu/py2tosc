@@ -16,7 +16,7 @@ import pytest
 import py2tosc
 from _corpus import DATA, DEMOS, PROJECT_ROOT
 from py2tosc import Trigger, ui, ui_json
-from py2tosc.errors import FormatError
+from py2tosc.errors import FormatError, SchemaError
 
 #: The worked example, which is also what the guide embeds. Keeping the one
 #: copy in `tests/data` means the page and the test cannot describe different
@@ -915,3 +915,279 @@ def test_the_description_on_disk_loads_like_any_other_layout():
     doc = py2tosc.load(DESCRIPTION)
     assert len(list(doc.walk())) == 27
     assert doc.validate() == []
+
+
+# -- a repeat that chooses what it builds ------------------------------------
+
+
+#: The table the guide's choice example holds, kept here so the two cannot
+#: describe different layouts: the test reads the page rather than a copy.
+CHOICE = {
+    "each": [
+        {"kind": "cont", "name": "cutoff", "cc": 74},
+        {"kind": "sw", "name": "bypass", "cc": 75},
+        {"kind": "cont", "name": "reso", "cc": 76},
+    ],
+    "of": {
+        "case": "$kind",
+        "when": {
+            "cont": {"fader": "$name", "messages": [{"midi_cc": "$cc"}]},
+            "sw": {"button": "$name", "messages": [{"midi_cc": "$cc"}]},
+        },
+    },
+}
+
+
+def test_a_row_chooses_which_kind_of_control_it_builds():
+    """The case the invariant made unreachable: a table of mixed controls.
+
+    Substitution reaches values and never keys, so a tag cannot come from a
+    row. What comes from a row is which fully written branch is built, which
+    leaves every key literal and the plugin's own parameter order intact.
+    """
+    doc = built({"row": [CHOICE]})
+    faders = [(c.control_type.value, c.get("name")) for c in doc.root.children]
+    assert faders == [("FADER", "cutoff"), ("BUTTON", "bypass"), ("FADER", "reso")]
+    assert [c.messages[0].message.data1 for c in doc.root.children] == [74, 75, 76]
+
+
+def test_the_guide_shows_the_choice_it_is_checked_against():
+    """The page's example, read off the page rather than copied into it."""
+    text = GUIDE.read_text()
+    section = text[text.index("### Rows that are not all the same kind") :]
+    opened = section.index("```json") + len("```json")
+    assert json.loads(section[opened : section.index("```", opened)]) == CHOICE
+
+
+def test_only_the_branch_a_row_selects_is_substituted_into():
+    """So a branch reads the fields its own rows carry, and no others."""
+    doc = built(
+        {
+            "row": [
+                {
+                    "each": [
+                        {"kind": "sw", "n": "bypass"},
+                        {"kind": "sel", "n": "wave", "steps": 4},
+                    ],
+                    "of": {
+                        "case": "$kind",
+                        "when": {
+                            "sw": {"button": "$n"},
+                            "sel": {"radio": "$n", "steps": "$steps"},
+                        },
+                    },
+                }
+            ]
+        }
+    )
+    chosen = doc.root.children[1]
+    assert chosen.control_type.value == "RADIO"
+    assert chosen.get("steps") == 4
+
+
+def test_a_branch_no_row_selects_is_not_an_error():
+    """An `each` of nothing already leaves every branch unselected.
+
+    A hand-written template carrying a branch for a kind this particular table
+    has no rows of is the same shape, so it gets the same answer.
+    """
+    template = {
+        "case": "$kind",
+        "when": {"a": {"fader": "$n"}, "b": {"button": "$n"}, "c": {"box": "$n"}},
+    }
+    doc = built({"row": [{"each": [{"kind": "a", "n": "one"}], "of": template}]})
+    assert [c.control_type.value for c in doc.root.children] == ["FADER"]
+
+    empty = built({"row": [{"each": [], "of": template}], "// ": "nothing to emit"})
+    assert empty.root.children == []
+
+
+def test_a_counting_repeat_can_choose_too():
+    doc = built(
+        {
+            "row": [
+                {
+                    "repeat": 3,
+                    "of": {
+                        "case": "$i",
+                        "when": {
+                            "1": {"button": "one"},
+                            "2": {"fader": "two"},
+                            "3": {"button": "three"},
+                        },
+                    },
+                }
+            ]
+        }
+    )
+    kinds = [c.control_type.value for c in doc.root.children]
+    assert kinds == ["BUTTON", "FADER", "BUTTON"]
+
+
+def test_a_selector_is_matched_as_the_file_spells_it():
+    """A boolean reads `true`, the way the row wrote it, not Python's `True`."""
+    doc = built(
+        {
+            "row": [
+                {
+                    "each": [{"sw": True, "n": "a"}, {"sw": False, "n": "b"}],
+                    "of": {
+                        "case": "$sw",
+                        "when": {"true": {"button": "$n"}, "false": {"fader": "$n"}},
+                    },
+                }
+            ]
+        }
+    )
+    assert [c.control_type.value for c in doc.root.children] == ["BUTTON", "FADER"]
+
+
+def test_a_choice_nests_inside_a_repeat_that_counts():
+    """The outer pass fills its own names and leaves the inner pass's alone."""
+    doc = built(
+        {
+            "column": [
+                {
+                    "each": [
+                        {"kind": "faders", "tag": "A"},
+                        {"kind": "buttons", "tag": "B"},
+                    ],
+                    "as": "bank",
+                    "of": {
+                        "case": "$kind",
+                        "when": {
+                            "faders": {"row": [{"fader": "$tag$i", "repeat": 3}]},
+                            "buttons": {"row": [{"button": "$tag$i", "repeat": 2}]},
+                        },
+                    },
+                }
+            ]
+        }
+    )
+    banks = [[c.get("name") for c in row.children] for row in doc.root.children]
+    assert banks == [["A1", "A2", "A3"], ["B1", "B2"]]
+
+
+@pytest.mark.parametrize(
+    "of, message",
+    [
+        # a row selecting a branch nobody wrote, named with the value it read
+        (
+            {"case": "$kind", "when": {"cont": {"fader": "$n"}}},
+            "case read 'sw', and no branch is written for it; when holds 'cont'",
+        ),
+        # half a choice
+        ({"case": "$kind"}, "'when' is missing"),
+        ({"when": {"cont": {"fader": "$n"}}}, "'case' is missing"),
+        ({"case": "$kind", "whn": {}}, "did you mean 'when'?"),
+        # a choice with nothing to choose between
+        ({"case": "$kind", "when": {}}, "a choice needs a branch to choose"),
+        ({"case": 7, "when": {"a": {"fader": "b"}}}, "case reads the field"),
+        # a branch checked against the tag table before any row reaches it
+        (
+            {"case": "$kind", "when": {"cont": {"fadr": "$n"}}},
+            "of.when['cont']: nothing here names a control or a layout",
+        ),
+        (
+            {"case": "$kind", "when": {"cont": {"fader": "a", "row": []}}},
+            "of.when['cont']: 'fader' and 'row' both name something",
+        ),
+    ],
+)
+def test_a_choice_that_will_not_build_says_why(of, message):
+    with pytest.raises(FormatError) as caught:
+        built({"row": [{"each": [{"kind": "sw", "n": "a"}], "of": of}]})
+    assert message in str(caught.value)
+
+
+def test_a_branch_is_checked_even_when_no_row_reaches_it():
+    """The table is the template's, so an `each` of nothing still checks it."""
+    with pytest.raises(FormatError) as caught:
+        built({"row": [{"each": [], "of": {"case": "$k", "when": {"a": {"fadr": 1}}}}]})
+    assert "when['a']: nothing here names a control" in str(caught.value)
+
+
+def test_a_choice_in_the_short_form_is_refused():
+    """The short form *is* the node, and a choice is a table of them."""
+    with pytest.raises(FormatError) as caught:
+        built({"row": [{"each": [{"k": "a"}], "case": "$k", "when": {"a": {"box": "b"}}}]})
+    assert "a choice is what a repeat repeats, so it goes under `of`" in str(caught.value)
+
+
+# -- what a description needs ------------------------------------------------
+
+
+def test_required_schema_reports_the_lowest_that_builds():
+    """What a producer stamps, asked rather than remembered."""
+    assert ui_json.required_schema({"root": {"row": [{"fader": "ch$i", "repeat": 2}]}}) == 1
+    assert ui_json.required_schema({"root": {"row": [CHOICE]}}) == 2
+    assert ui_json.supports(ui_json.required_schema({"root": {"row": [CHOICE]}}))
+
+
+def test_required_schema_finds_a_choice_at_any_depth():
+    deep = {"root": {"column": [{"row": [{"stack": [CHOICE]}]}]}}
+    assert ui_json.required_schema(deep) == 2
+
+
+def test_required_schema_reads_the_shape_rather_than_the_keys():
+    """A custom property called `case` is not a choice, and must not read as one."""
+    named = {"root": {"fader": "a", "props": {"case": 1, "when": 2}}}
+    assert ui_json.required_schema(named) == 1
+    assert ui_json.required_schema({"each": [], "of": "not an object"}) == 1
+    assert ui_json.required_schema({"case": "$k", "when": {}}) == 1
+
+
+def test_required_schema_answers_for_anything_it_is_given():
+    """It says which spellings are used, not whether they are used correctly.
+
+    A description this cannot build still gets an answer, because a producer
+    asking what to stamp has not finished writing the file yet.
+    """
+    for junk in ("text", 7, None, [], {}, {"root": None}):
+        assert ui_json.required_schema(junk) == 1
+    assert ui_json.required_schema({"each": [{"k": "a"}], "of": {"when": {}}}) == 2
+
+
+def test_what_required_schema_says_is_what_the_reader_does():
+    """The two cannot disagree without one of them being wrong.
+
+    `_needs` is a hand-written record of when a spelling arrived, and nothing
+    generates it, so this is the check that it still matches the reader.
+    """
+    described = {"format": ui_json.DIALECT, "root": {"row": [CHOICE]}}
+    assert ui_json.required_schema(described) == 2
+    assert ui_json.build({**described, "schema": 2}).root.children
+
+
+# -- what this release reads -------------------------------------------------
+
+
+def test_the_schema_range_is_what_the_newest_says():
+    assert ui_json.SCHEMAS == range(1, ui_json.SCHEMA + 1)
+    assert ui_json.supports(ui_json.SCHEMA)
+    assert ui_json.supports(1)
+    assert not ui_json.supports(ui_json.SCHEMA + 1)
+    assert not ui_json.supports(0)
+
+
+def test_a_description_from_an_older_schema_still_builds():
+    """Files are durable and readers advance, which is what a floor is for."""
+    doc = built({"row": [{"fader": "ch$i", "repeat": 2}]}, schema=1)
+    assert [c.get("name") for c in doc.root.children] == ["ch1", "ch2"]
+
+
+def test_a_schema_this_release_does_not_read_has_its_own_type():
+    """The one reading failure whose remedy is not in the file."""
+    with pytest.raises(SchemaError) as caught:
+        built({"group": []}, schema=ui_json.SCHEMA + 1)
+    assert "upgrade py2tosc" in str(caught.value)
+    assert f"py2tosc.ui schemas 1-{ui_json.SCHEMA}" in str(caught.value)
+    assert isinstance(caught.value, FormatError)
+
+
+def test_a_schema_that_is_not_a_number_is_an_envelope_problem():
+    """Which is a different failure from a schema that is merely too new."""
+    with pytest.raises(FormatError) as caught:
+        built({"group": []}, schema="two")
+    assert "schema should be a number, found a string" in str(caught.value)
+    assert not isinstance(caught.value, SchemaError)

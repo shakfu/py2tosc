@@ -27,11 +27,11 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import NoReturn
 
-from . import surface
+from . import surface, ui_json
 from .codegen import to_python
 from .control import Control
 from .document import Document, load
-from .validate import ERROR
+from .validate import ERROR, WARNING, Issue
 
 __all__ = ["main"]
 
@@ -131,9 +131,58 @@ def show(args: argparse.Namespace) -> int:
     return OK
 
 
+def _stamped(path: Path) -> list[Issue]:
+    """Warn when a layout description claims a schema below the one it uses.
+
+    Only this dialect can get it wrong. The faithful encoding stamps its own
+    envelope, so the number there cannot disagree with the content; a
+    description is written by something that is not py2tosc, which makes the
+    stamp a claim nothing downstream audits.
+
+    Getting it wrong is not caught by building, because the reader that would
+    catch it is by definition new enough to build the file. It is caught by
+    whoever opens the file on an older release, and what they see is a message
+    about a node rather than about their py2tosc. So this is a warning for the
+    producer, and it is worth having only before the file is shipped.
+    """
+    try:
+        data = json.loads(path.read_text())
+    except (OSError, ValueError):
+        return []
+    if not isinstance(data, dict) or data.get("format") != ui_json.DIALECT:
+        return []
+
+    needed = ui_json.required_schema(data)
+    declared = data.get("schema")
+    if isinstance(declared, bool) or not isinstance(declared, (int, type(None))):
+        # `build` has the better complaint about a schema that is not a
+        # number, and there is nothing to add to it here.
+        return []
+    if declared is None:
+        # No stamp means "whatever the reader is", which is only wrong once
+        # the description needs more than the oldest release would assume.
+        if needed == ui_json.SCHEMAS.start:
+            return []
+        said = "carries no schema key"
+    elif declared >= needed:
+        return []
+    else:
+        said = f"declares schema {declared}"
+
+    return [
+        Issue(
+            WARNING,
+            "<envelope>",
+            f"the description {said} and uses schema {needed}; a release "
+            f"reading only schema {needed - 1} will refuse it with a message "
+            f"about a node",
+        )
+    ]
+
+
 def validate(args: argparse.Namespace) -> int:
     """Report what TouchOSC will reject or quietly ignore."""
-    issues = _load(args.file).validate()
+    issues = _stamped(args.file) + _load(args.file).validate()
     for issue in issues:
         print(issue)
     if not issues:

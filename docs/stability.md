@@ -71,7 +71,11 @@ provisional.**
 `py2tosc.ui_json` is provisional for the same reason and by the same rule. It is
 a JSON description of what the combinators do, so it cannot be steadier than
 what it describes. It carries a `schema` number of its own for the case where a
-change would stop an already written description from building.
+change would stop an already written description from building; it is at 2,
+where the choice a repeat makes with `case` and `when` arrived. Because this
+is the one dialect py2tosc reads and never writes, the producer stamps that
+number, and `ui_json.SCHEMAS` and `ui_json.supports` are what a producer asks
+before it does.
 
 Everything `ui` builds is an ordinary `Control`, `OscMessage` or `MidiMessage`.
 Nothing it produces can reach a file that hand-written code could not. If a
@@ -99,7 +103,9 @@ two exceptions, since it round-trips the model rather than the file: a layout
 written to JSON and read back reproduces the bytes it started as. That encoding
 carries a `schema` number of its own. A change that would stop an already
 written file from reading gets a new one, and a file declaring an older schema
-keeps reading.
+keeps reading. `json_codec.SCHEMAS` is every schema a release reads, and one
+above it is refused with a `SchemaError` -- the only reading failure whose
+remedy is to upgrade py2tosc rather than to fix the file.
 
 **Loading never rejects a layout TouchOSC accepts.** The format permits
 properties nobody has heard of -- that is what makes custom properties useful

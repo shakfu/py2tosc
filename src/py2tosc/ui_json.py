@@ -39,7 +39,10 @@ Four rules are the whole of it.
   which keeps a long template separate from the count. `each` walks a list of
   rows where `repeat` counts, binding every field of a row the way `repeat`
   binds `$i`, which is how a layout whose names and numbers follow no sequence
-  is described.
+  is described. Substitution reaches values and never keys, so one repeat
+  builds one kind of thing -- unless its `of` holds a `case` naming a field and
+  a `when` holding a complete node per value that field takes, which is how a
+  table of mixed controls is written without a key ever coming from a row.
 - **A sibling key that is not an argument is a property.** Checked against what
   the type accepts, so `gpa` is a message rather than a custom property nobody
   asked for. Genuinely custom keys go under `props`. `text` is the exception
@@ -72,7 +75,7 @@ from dataclasses import dataclass, fields, replace
 from typing import Any
 
 from . import ui
-from ._reading import as_list, as_object, check_keys, describe
+from ._reading import as_list, as_object, check_keys, describe, read_schema
 from .control import (
     Control,
     box,
@@ -94,15 +97,30 @@ from .errors import FormatError
 from .messages import LocalMessage, Message, Partial, Trigger, Value
 from .properties import Property, to_camel
 
-__all__ = ["DIALECT", "SCHEMA", "build", "from_json"]
+__all__ = [
+    "DIALECT",
+    "SCHEMA",
+    "SCHEMAS",
+    "build",
+    "from_json",
+    "required_schema",
+    "supports",
+]
 
 #: What the envelope must call itself. Unlike the faithful encoding's marker
 #: this one is required, because it is what tells the two dialects apart.
 DIALECT = "py2tosc.ui"
 
 #: The dialect version. A change that would stop an already written file from
-#: reading gets a new one.
-SCHEMA = 1
+#: reading gets a new one. Schema 2 added the choice a repeat makes with `case`
+#: and `when`, which an older reader would refuse as a node naming no tag.
+SCHEMA = 2
+
+#: Every schema this release reads. `SCHEMA` names the newest of them and says
+#: nothing about the floor, which is the half a producer needs: this dialect is
+#: read and never written, so whatever writes a description is the thing that
+#: has to know what the installed reader accepts, and stamp what it emits.
+SCHEMAS = range(1, SCHEMA + 1)
 
 #: The canvas a root with no frame of its own gets, matching `Document.new`.
 CANVAS = (0, 0, 1024, 768)
@@ -237,6 +255,9 @@ _COMMENT = "//"
 #: being repeated, in the short form.
 _REPEAT_KEYS = frozenset({"repeat", "each", "of", "from", "as"})
 
+#: What a choice is written with, where an `of` holds one instead of a node.
+_CHOICE_KEYS = frozenset({"case", "when"})
+
 
 def _object(data: Any, where: str) -> dict[str, Any]:
     """Insist on an object, and drop the comments from it.
@@ -318,6 +339,16 @@ def _lookup(
     )
 
 
+def _spelled(value: Any) -> str:
+    """How a bound value reads as text: the file's spelling, not Python's.
+
+    Written into a longer string, or matched against the name of a branch. A
+    boolean comes out `true` either way, which is what the row that holds one
+    wrote, rather than the `True` Python would print.
+    """
+    return str(value).lower() if isinstance(value, bool) else str(value)
+
+
 def _interpolate(
     source: str, bindings: dict[str, Any], inner: frozenset[str], where: str
 ) -> Any:
@@ -340,9 +371,7 @@ def _interpolate(
         found = _lookup(name, bindings, inner, where)
         if found is None:
             return match.group(0)
-        # Written into a larger string, a boolean is spelled the way the file
-        # spells one rather than the way Python does.
-        return str(found).lower() if isinstance(found, bool) else str(found)
+        return _spelled(found)
 
     return _PLACEHOLDER.sub(replace, source)
 
@@ -438,6 +467,74 @@ def _rows(entry: dict[str, Any], counter: str, where: str) -> list[dict[str, Any
     ]
 
 
+def _branches(described: Any, where: str) -> tuple[str, dict[str, Any]] | None:
+    """The branches an `of` chooses between, or `None` if it holds a node.
+
+    Substitution reaches values and never keys, so the tag stays fixed in the
+    template and one repeat would otherwise build one kind of thing. A table of
+    parameters is mixed by nature -- a bypass wants a button, a cutoff wants a
+    fader -- and this is how a row says which: `case` reads a field, and `when`
+    holds a complete node per value that field can take.
+
+    The invariant is untouched. Every key stays literal, so every branch is
+    checkable against the tag table here, before any row is looked at, which is
+    what a node built out of a substituted key could never be.
+
+    A branch nothing selects is not an error. An `each` of nothing is already
+    the thing a generator with nothing to emit writes, and that leaves every
+    branch unselected -- so a template carrying a branch for a kind this
+    particular table has no rows of is the same shape, and the same answer.
+    """
+    if not isinstance(described, dict):
+        return None
+    entry = _object(described, f"{where}.of")
+    if not _CHOICE_KEYS & set(entry):
+        return None
+
+    check_keys(entry, _CHOICE_KEYS, f"{where}.of")
+    missing = sorted(_CHOICE_KEYS - set(entry))
+    if missing:
+        raise FormatError(
+            f"{where}.of: a choice reads a field with `case` and holds the "
+            f"branches it chooses between under `when`; {missing[0]!r} is missing"
+        )
+
+    case = entry["case"]
+    if not isinstance(case, str):
+        raise FormatError(
+            f"{where}.of: case reads the field that chooses a branch, "
+            f"found {describe(case)}"
+        )
+
+    table = _object(entry["when"], f"{where}.of.when")
+    if not table:
+        raise FormatError(f"{where}.of.when: a choice needs a branch to choose")
+
+    branches = {}
+    for name, branch in table.items():
+        spot = f"{where}.of.when[{name!r}]"
+        node = _object(branch, spot)
+        # Checked now rather than when a row reaches it, so a branch no row
+        # happens to select is still a branch that names one thing.
+        _tag(node, spot)
+        branches[name] = node
+    return case, branches
+
+
+def _choose(
+    case: str, branches: dict[str, Any], bindings: dict[str, Any], where: str
+) -> Any:
+    """Which branch one row builds."""
+    name = _spelled(_substitute(case, bindings, where))
+    if name not in branches:
+        written = ", ".join(repr(key) for key in branches)
+        raise FormatError(
+            f"{where}: case read {name!r}, and no branch is written for it; "
+            f"when holds {written}"
+        )
+    return branches[name]
+
+
 def _repeat(
     entry: dict[str, Any], where: str, deferred: list[_Deferred]
 ) -> list[Control]:
@@ -471,6 +568,12 @@ def _repeat(
     else:
         # Nothing here names a node, so this is the long form with something
         # wrong with it. A misspelled `of` is the likeliest and worth saying.
+        if _CHOICE_KEYS & set(entry):
+            raise FormatError(
+                f"{where}: a choice is what a repeat repeats, so it goes under "
+                f"`of`; the short form is the node itself, and a choice is a "
+                f"table of nodes rather than one"
+            )
         check_keys(entry, _REPEAT_KEYS, where)
         raise FormatError(
             f"{where}: a repeat needs an `of` to repeat, or a tag of its own "
@@ -482,12 +585,20 @@ def _repeat(
     if not isinstance(counter, str) or not counter.isidentifier():
         raise FormatError(f"{where}: as should name a counter, found {counter!r}")
 
+    # Read once, before any row is: what the branches are is a property of the
+    # template, and a table with something wrong with it should say so whether
+    # or not there are rows to reach it.
+    choice = _branches(described, where) if "of" in entry else None
+
     built = []
     for step, row in enumerate(_rows(entry, counter, where)):
         bindings: dict[str, Any] = {counter: start + step, f"{counter}0": step}
         bindings.update(row)
         spot = f"{where}#{step + 1}"
-        built.append(_node(_substitute(described, bindings, spot), spot, deferred))
+        # Only the branch a row selects is substituted into, so a branch reads
+        # the fields its own rows carry and no others.
+        template = described if choice is None else _choose(*choice, bindings, spot)
+        built.append(_node(_substitute(template, bindings, spot), spot, deferred))
     return built
 
 
@@ -873,6 +984,79 @@ def _resolve_connections(doc: Document, deferred: list[_Deferred]) -> None:
 # -- the document ------------------------------------------------------------
 
 
+def _needs(entry: dict[str, Any]) -> int:
+    """The schema one node needs, ignoring what is nested inside it.
+
+    The table `required_schema` stands on, and the one thing here that cannot
+    be generated from anything the reader already knows: no table records when
+    a spelling arrived, so this is a hand-written historical record, and a
+    schema-bumping change that forgets to add a branch here under-reports
+    silently. Anyone adding one should add it here in the same commit.
+
+    The condition mirrors `_branches` exactly rather than looking for the keys
+    anywhere, so a custom property that happens to be called `case` is not
+    mistaken for a choice.
+    """
+    held = entry.get("of")
+    if _repeats(entry) and isinstance(held, dict) and _CHOICE_KEYS & set(held):
+        return 2  # a repeat that chooses among branches
+    return SCHEMAS.start
+
+
+def required_schema(data: Any) -> int:
+    """The lowest schema that builds a description.
+
+    What a producer stamps. Asking rather than remembering is what keeps the
+    `schema` key honest: this dialect is read and never written, so the number
+    is a claim the writer makes about its own output, and nothing downstream
+    audits it. A generated file whose stamp is below what it uses still builds
+    on a new enough reader and fails on an older one with a message about a
+    node, which is the confusion `supports` exists to prevent.
+
+    It detects spellings, not meanings. A schema that changed what an existing
+    spelling *does* -- different default sizing, say -- leaves a description
+    textually identical, so this returns the older number and says nothing. For
+    that class the guard is a golden file, not a version number.
+
+    Nothing here validates. A description this cannot build gets an answer
+    anyway, because the question is what spellings it uses rather than whether
+    they are used correctly; `build` is what says no.
+
+    Args:
+        data: The decoded JSON. The whole envelope, or any part of one.
+
+    Returns:
+        The lowest schema in `SCHEMAS` that reads it.
+    """
+    needed = SCHEMAS.start
+    pending: list[Any] = [data]
+    while pending:
+        item = pending.pop()
+        if isinstance(item, dict):
+            needed = max(needed, _needs(item))
+            pending.extend(item.values())
+        elif isinstance(item, list):
+            pending.extend(item)
+    return needed
+
+
+def supports(schema: int) -> bool:
+    """Whether this release builds a description declaring that schema.
+
+    The question a generator has before it writes one. Asking here is what lets
+    it fail with a sentence naming its own remedy -- this py2tosc reads schemas
+    1 to 2, and the generator emits 3 -- rather than with a `SchemaError` raised
+    from inside a file that is not the thing that is wrong.
+
+    Args:
+        schema: The schema number a description declares or would declare.
+
+    Returns:
+        True if this release reads it.
+    """
+    return schema in SCHEMAS
+
+
 def build(data: Any) -> Document:
     """Build a layout from already-parsed JSON.
 
@@ -886,9 +1070,10 @@ def build(data: Any) -> Document:
         The document.
 
     Raises:
-        FormatError: If the envelope is not this dialect, declares a schema
-            this release does not read, or holds a node that cannot be built.
-            The message names the node it gave up on.
+        FormatError: If the envelope is not this dialect, or holds a node that
+            cannot be built. The message names the node it gave up on.
+        SchemaError: If the description declares a schema this release does not
+            read. `supports` answers that before a file is written.
     """
     document = _object(data, "the layout")
     check_keys(document, _ENVELOPE_KEYS, "the layout")
@@ -897,11 +1082,7 @@ def build(data: Any) -> Document:
     if declared != DIALECT:
         raise FormatError(f"{declared!r} is not a {DIALECT} layout")
 
-    schema = document.get("schema", SCHEMA)
-    if isinstance(schema, bool) or not isinstance(schema, int) or schema > SCHEMA:
-        raise FormatError(
-            f"schema {schema!r} is newer than this release reads (schema {SCHEMA})"
-        )
+    read_schema(document, SCHEMAS, DIALECT)
 
     if "root" not in document:
         raise FormatError("the layout holds no root node")
@@ -940,6 +1121,7 @@ def from_json(source: str | bytes) -> Document:
     Raises:
         FormatError: If the source is not JSON, or is not a layout this can
             build.
+        SchemaError: If it declares a schema this release does not read.
     """
     try:
         return build(json.loads(source))

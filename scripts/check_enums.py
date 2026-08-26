@@ -13,7 +13,7 @@ a BUTTON called "pentagon" should come back as PENTAGON.
 
 from __future__ import annotations
 
-import sys
+import argparse
 from pathlib import Path
 
 import py2tosc
@@ -42,13 +42,30 @@ def name_of(enum, value):
         return f"UNKNOWN ({value})", False
 
 
-def main(argv: list[str]) -> int:
-    if not argv:
-        print(__doc__)
-        return 2
+def _parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="check_enums.py",
+        description=(
+            "Report what a layout's enumerated properties actually hold, so a "
+            "value this library cannot name is visible rather than assumed."
+        ),
+        epilog=(
+            "exit codes: 0 every value has a name, 1 some do not, "
+            "3 a file could not be read. Naming a control after the setting "
+            "you gave it makes the output self-checking."
+        ),
+    )
+    parser.add_argument(
+        "files", metavar="FILE", nargs="+", help="the layouts to report on"
+    )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _parser().parse_args(argv)
 
     unknown = 0
-    for arg in argv:
+    for arg in args.files:
         path = Path(arg)
         try:
             doc = py2tosc.load(path)
@@ -101,4 +118,4 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1:]))
+    raise SystemExit(main())

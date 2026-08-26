@@ -15,9 +15,9 @@ import difflib
 from collections.abc import Collection
 from typing import Any
 
-from .errors import FormatError
+from .errors import FormatError, SchemaError
 
-__all__ = ["as_list", "as_object", "check_keys", "describe"]
+__all__ = ["as_list", "as_object", "check_keys", "describe", "read_schema"]
 
 
 def describe(value: Any) -> str:
@@ -66,3 +66,37 @@ def check_keys(entry: dict[str, Any], allowed: Collection[str], where: str) -> N
             else "expected one of " + ", ".join(sorted(allowed))
         )
         raise FormatError(f"{where}: unknown key {key!r}; {hint}")
+
+
+def read_schema(document: dict[str, Any], schemas: range, dialect: str) -> int:
+    """Which schema a file declares, refused if this release does not read it.
+
+    Saying nothing means the newest this release reads, which is what a file
+    written by hand means by saying nothing -- but a producer should stamp it,
+    since a description with no `schema` key means "whatever the reader is",
+    and that is the ambiguity a version number exists to remove.
+
+    Two failures, and they are separated because their remedies are: a schema
+    above the range is a file this release cannot read, where the description
+    is fine and the reader is old, and that one gets its own type. A schema
+    that is not a number at all is an envelope with something wrong with it,
+    like any other bad key.
+    """
+    newest = schemas.stop - 1
+    schema = document.get("schema", newest)
+    if isinstance(schema, bool) or not isinstance(schema, int):
+        raise FormatError(f"schema should be a number, found {describe(schema)}")
+
+    reads = (
+        f"{dialect} schema {newest}"
+        if len(schemas) == 1
+        else f"{dialect} schemas {schemas.start}-{newest}"
+    )
+    if schema > newest:
+        raise SchemaError(
+            f"schema {schema} is newer than this release reads ({reads}); "
+            f"upgrade py2tosc"
+        )
+    if schema < schemas.start:
+        raise SchemaError(f"schema {schema} is older than this release reads ({reads})")
+    return schema

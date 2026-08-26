@@ -8,6 +8,8 @@ The format itself is described in [The .json format](../guide/json.md).
 
 ::: py2tosc.from_json
 
+::: py2tosc.json_codec.supports
+
 ::: py2tosc.json_codec.encode
 
 ::: py2tosc.json_codec.decode

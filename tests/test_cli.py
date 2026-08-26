@@ -291,3 +291,82 @@ def test_a_bad_size_is_a_usage_error(text, tmp_path, capsys):
     with pytest.raises(SystemExit) as raised:
         main(["build", str(names), "--size", text])
     assert raised.value.code == CANNOT_RUN
+
+
+# -- what a description says about itself ------------------------------------
+
+
+def _described(tmp_path, name, **envelope):
+    """One layout description on disk, with the envelope filled in around it."""
+    path = tmp_path / name
+    path.write_text(
+        json.dumps(
+            {
+                "format": "py2tosc.ui",
+                **envelope,
+                "root": {
+                    "row": [
+                        {
+                            "each": [{"k": "a", "n": "x"}, {"k": "b", "n": "y"}],
+                            "of": {
+                                "case": "$k",
+                                "when": {
+                                    "a": {"fader": "$n"},
+                                    "b": {"button": "$n"},
+                                },
+                            },
+                        }
+                    ],
+                    "frame": [0, 0, 800, 400],
+                },
+            }
+        )
+    )
+    return path
+
+
+def test_validate_warns_when_a_description_understates_its_schema(capsys, tmp_path):
+    """The mistake nothing else catches: the reader that could is too new.
+
+    A description stamped below what it uses builds here and fails on an older
+    release with a message about a node, so the warning is for the producer,
+    before the file is shipped.
+    """
+    code, out, _ = run(capsys, "validate", _described(tmp_path, "low.ui.json", schema=1))
+    assert code == OK
+    assert "declares schema 1 and uses schema 2" in out
+    assert "clean" not in out
+
+
+def test_validate_warns_when_a_description_carries_no_schema_at_all(capsys, tmp_path):
+    """No stamp means whatever the reader is, which an old reader reads as 1."""
+    out = run(capsys, "validate", _described(tmp_path, "none.ui.json"))[1]
+    assert "carries no schema key and uses schema 2" in out
+
+
+def test_validate_is_quiet_about_a_description_that_stamped_it_right(capsys, tmp_path):
+    code, out, _ = run(capsys, "validate", _described(tmp_path, "ok.ui.json", schema=2))
+    assert code == OK
+    assert "clean" in out
+    assert "schema" not in out
+
+
+def test_validate_says_nothing_about_the_schema_of_the_other_dialect(capsys, tmp_path):
+    """The faithful encoding stamps its own envelope, so it cannot disagree."""
+    path = tmp_path / "faithful.json"
+    py2tosc.Document(root=py2tosc.group(name="root")).save(path)
+    out = run(capsys, "validate", path)[1]
+    assert "schema" not in out
+
+
+def test_validate_is_quiet_about_a_description_that_uses_nothing_new(capsys, tmp_path):
+    path = tmp_path / "plain.ui.json"
+    path.write_text(
+        json.dumps(
+            {
+                "format": "py2tosc.ui",
+                "root": {"row": [{"fader": "ch$i", "repeat": 2}], "frame": [0, 0, 8, 4]},
+            }
+        )
+    )
+    assert "schema" not in run(capsys, "validate", path)[1]

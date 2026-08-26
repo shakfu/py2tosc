@@ -84,7 +84,7 @@ Properties are trimmed here for length; a real fader carries twenty-three of the
 | Key | |
 |-----|--|
 | `format` | Always `py2tosc.layout`. Identifies the file as this and not some other JSON. |
-| `schema` | The envelope version, currently `1`. A reader refuses a file that declares a higher one rather than guessing at it. |
+| `schema` | The envelope version, currently `1`. A reader refuses a file that declares a higher one rather than guessing at it, and says so with a `SchemaError`. `py2tosc.json_codec.SCHEMAS` and `supports(n)` answer the same question without a file, for a program deciding what to write. |
 | `lexml` | The format version written into the `.tosc`. TouchOSC 1.5 uses `"6"`; older releases wrote `"3"`. A string, as it is in the XML. |
 | `root` | The one node every other node lives inside, always a `GROUP`. |
 

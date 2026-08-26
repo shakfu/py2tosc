@@ -70,6 +70,22 @@ mixer.tosc: clean
 Warnings alone do not fail. See [Validation](guide/validation.md) for what each
 rule means.
 
+A [layout description](guide/ui-json.md) gets one check the other formats do
+not: whether the `schema` it declares covers the spellings it uses. That is the
+one dialect py2tosc reads and never writes, so the number is the producer's
+claim about its own output, and understating it is not caught by building --
+the reader that would catch it is by definition new enough to build the file.
+
+```console
+$ py2tosc validate synth.ui.json
+warning: <envelope>: the description declares schema 1 and uses schema 2; a release reading only schema 1 will refuse it with a message about a node
+```
+
+The program that *writes* a description usually does not have py2tosc at all,
+which is the case `scripts/check_json.py` covers: one file, standard library
+only, both dialects, the same exit codes as this page. See [Checking a
+description without py2tosc](guide/ui-json.md#checking-a-description-without-py2tosc).
+
 ## decompile
 
 Writes the layout out as the Python that would build it, to stdout unless you

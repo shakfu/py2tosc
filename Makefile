@@ -28,18 +28,21 @@ test:
 cov:
 	@uv run pytest --cov=py2tosc --cov-report=term-missing --cov-report=html
 
+# The standalone checker is held to the same bar as the package, because it
+# is code other projects copy. `check_enums.py` predates the rule and is not
+# named here; adding it is a separate job.
 typecheck:
-	@uv run mypy --strict src/
+	@uv run mypy --strict src/ scripts/check_json.py scripts/make_check_json.py
 
 lint:
-	@uv run ruff check --fix src/
+	@uv run ruff check --fix src/ scripts/
 
 lint-check:
-	@uv run ruff check src/
-	@uv run ruff format --check src/
+	@uv run ruff check src/ scripts/
+	@uv run ruff format --check src/ scripts/
 
 format:
-	@uv run ruff format src/
+	@uv run ruff format src/ scripts/
 
 # `qa` rewrites files: it is the target you run while working. `check-all` never
 # writes to src/ and runs the same gates CI does, so a clean run here means a

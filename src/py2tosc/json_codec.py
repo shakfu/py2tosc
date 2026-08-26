@@ -62,7 +62,7 @@ from dataclasses import MISSING, fields, is_dataclass
 from enum import Enum
 from typing import Any
 
-from ._reading import as_list, as_object, check_keys, describe
+from ._reading import as_list, as_object, check_keys, describe, read_schema
 from .control import Control
 from .document import Document
 from .enums import ControlType, PropertyType
@@ -85,10 +85,12 @@ __all__ = [
     "FORMAT",
     "NON_FINITE",
     "SCHEMA",
+    "SCHEMAS",
     "build",
     "decode",
     "encode",
     "from_json",
+    "supports",
     "to_json",
 ]
 
@@ -98,6 +100,12 @@ FORMAT = "py2tosc.layout"
 #: The envelope version. Bumped only by a change that a reader written against
 #: the previous one cannot parse; adding an optional key is not one of those.
 SCHEMA = 1
+
+#: Every schema this release reads. `SCHEMA` names the newest of them and says
+#: nothing about the floor, which is the half a producer needs: a generator
+#: asks what the installed py2tosc accepts before writing a file, rather than
+#: writing one and reading the answer out of an exception.
+SCHEMAS = range(1, SCHEMA + 1)
 
 #: The one-key object a non-finite number is written as, since JSON has no
 #: notation for one and `Infinity` is not JSON.
@@ -509,14 +517,31 @@ def from_json(source: str | bytes) -> Document:
         The parsed document.
 
     Raises:
-        FormatError: If the source is not JSON, is not a py2tosc layout,
-            declares a schema this release does not read, or holds a node that
-            cannot be read. The message names the node it gave up on.
+        FormatError: If the source is not JSON, is not a py2tosc layout, or
+            holds a node that cannot be read. The message names the node it
+            gave up on.
+        SchemaError: If it declares a schema this release does not read.
     """
     try:
         return build(json.loads(source))
     except json.JSONDecodeError as exc:
         raise FormatError(f"not valid JSON: {exc}") from exc
+
+
+def supports(schema: int) -> bool:
+    """Whether this release reads a file declaring that schema.
+
+    The question a producer has before it writes one, and the reason to ask it
+    rather than to build and catch: an answer here names its own remedy, where
+    a `SchemaError` several steps into a file is about the file.
+
+    Args:
+        schema: The schema number a file declares or would declare.
+
+    Returns:
+        True if this release reads it.
+    """
+    return schema in SCHEMAS
 
 
 def build(data: Any) -> Document:
@@ -533,8 +558,9 @@ def build(data: Any) -> Document:
         The document.
 
     Raises:
-        FormatError: If it is not a py2tosc layout, declares a schema this
-            release does not read, or holds a node that cannot be read.
+        FormatError: If it is not a py2tosc layout, or holds a node that cannot
+            be read.
+        SchemaError: If it declares a schema this release does not read.
     """
     document = as_object(data, "the layout")
     check_keys(document, _ENVELOPE_KEYS, "the layout")
@@ -545,11 +571,7 @@ def build(data: Any) -> Document:
     if declared != FORMAT:
         raise FormatError(f"{declared!r} is not a py2tosc layout")
 
-    schema = document.get("schema", SCHEMA)
-    if not isinstance(schema, int) or isinstance(schema, bool) or schema > SCHEMA:
-        raise FormatError(
-            f"schema {schema!r} is newer than this release reads (schema {SCHEMA})"
-        )
+    read_schema(document, SCHEMAS, FORMAT)
 
     if "root" not in document:
         raise FormatError("the layout holds no root node")

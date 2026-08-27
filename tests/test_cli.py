@@ -370,3 +370,34 @@ def test_validate_is_quiet_about_a_description_that_uses_nothing_new(capsys, tmp
         )
     )
     assert "schema" not in run(capsys, "validate", path)[1]
+
+
+# -- render ------------------------------------------------------------------
+
+
+def test_render_writes_a_picture(capsys, tmp_path):
+    out = tmp_path / "layout.svg"
+    code, _, _ = run(capsys, "render", DATA / "fader_with_label.tosc", "-o", out)
+    assert code == OK
+    assert out.read_text().startswith("<svg")
+
+
+def test_render_goes_to_stdout_without_an_output(capsys):
+    code, out, _ = run(capsys, "render", DATA / "fader_with_label.tosc")
+    assert code == OK
+    assert out.startswith("<svg")
+
+
+def test_render_clips_only_when_asked(capsys, tmp_path):
+    """Off by default: an overflowing control is a defect worth seeing."""
+    plain = run(capsys, "render", DATA / "pagers.tosc")[1]
+    clipped = run(capsys, "render", DATA / "pagers.tosc", "--clip")[1]
+    assert "clipPath" not in plain
+    assert "clipPath" in clipped
+
+
+def test_render_draws_a_description_without_compiling_it(capsys):
+    """The case it is for: seeing what a generated description came out as."""
+    code, out, _ = run(capsys, "render", DATA / "mixer.ui.json")
+    assert code == OK
+    assert out.count("p2t-control") == 27

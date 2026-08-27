@@ -1492,3 +1492,41 @@ def test_a_schema_that_is_not_a_number_is_an_envelope_problem():
         built({"group": []}, schema="two")
     assert "schema should be a number, found a string" in str(caught.value)
     assert not isinstance(caught.value, SchemaError)
+
+
+def test_the_inner_repeat_owns_a_counter_both_of_them_bind():
+    """Two repeats that both take the default counter name.
+
+    The outer used to win, so every inner pass came out identical and carried
+    the outer row's number: `A1, A1, A1` where three distinct faders were
+    described. It built and it validated, which is why nothing caught it.
+    """
+    doc = built(
+        {
+            "column": [
+                {
+                    "each": [{"bank": "A"}, {"bank": "B"}],
+                    "of": {"row": [{"repeat": 3, "of": {"fader": "$bank$i"}}]},
+                }
+            ]
+        }
+    )
+    names = [[c.get("name") for c in row.children] for row in doc.root.children]
+    assert names == [["A1", "A2", "A3"], ["B1", "B2", "B3"]]
+
+
+def test_naming_the_outer_counter_still_reaches_both():
+    """The spelling that always worked has to keep working."""
+    doc = built(
+        {
+            "column": [
+                {
+                    "repeat": 2,
+                    "as": "bank",
+                    "of": {"row": [{"repeat": 2, "of": {"fader": "b$bank-$i"}}]},
+                }
+            ]
+        }
+    )
+    names = [[c.get("name") for c in row.children] for row in doc.root.children]
+    assert names == [["b1-1", "b1-2"], ["b2-1", "b2-2"]]

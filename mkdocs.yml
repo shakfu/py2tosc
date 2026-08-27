@@ -112,6 +112,7 @@ nav:
       - The JSON encoding: api/json.md
       - Layout descriptions: api/ui-json.md
       - Generating Python: api/codegen.md
+      - Rendering: api/render.md
       - Control surfaces: api/surface.md
   - Coming from tosclib: migrating.md
   - Stability: stability.md

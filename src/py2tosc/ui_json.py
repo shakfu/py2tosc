@@ -342,11 +342,15 @@ def _lookup(
 
     `None` is the sentinel for "not this pass's to fill", which is why a record
     field may not hold null: the two would be indistinguishable here.
+
+    Held-back names are checked first. Both repeats bind `$i` when neither
+    names its counter with `as`, and the inner one owns it there: it is the
+    pass that will fill it in.
     """
-    if name in bindings:
-        return bindings[name]
     if name in inner:
         return None
+    if name in bindings:
+        return bindings[name]
     known = ", ".join(f"${key}" for key in sorted(bindings))
     raise FormatError(
         f"{where}: ${name} is not one of the names this repeat binds ({known}); "

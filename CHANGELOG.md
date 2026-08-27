@@ -4,9 +4,33 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
 
 ## [Unreleased]
 
+## [0.6.0]
+
 ### Added
 
-- `ui_json` schema 3: a choice can appear wherever a list of children or bindings is allowed, and a branch can hold a list -- several nodes, or none. Schema 2 let a row choose which control it built; `messages` stayed written in the template, so one `each` still built one *set of bindings*. A generated parameter table runs into that immediately: there are 128 controller numbers and plugins routinely have more parameters, so a row past the last one has no CC to bind at all.
+- `py2tosc.to_svg`, `py2tosc.to_html` and a `py2tosc render` command: a layout drawn as SVG. It reads a description as readily as a `.tosc`, so a `.ui.json` can be seen without compiling it. The output extension picks the wrapper -- `.html` adds the layout's name, its control count and whatever `validate` found.
+
+  ```console
+  $ py2tosc render synth.ui.json -o synth.svg
+  $ py2tosc render mixer.tosc -o mixer.html
+  ```
+
+  Frames in this format are relative to the parent, so the control tree maps onto nested `<g transform="translate(x, y)">` and the renderer does no coordinate arithmetic. The exception is a pager: its pages are laid out side by side, because stacked they overdraw each other and only the last is visible.
+
+  What it promises is that a reader can see where every control is, how big it is and what kind it is -- not that it matches a screenshot. TouchOSC cannot be scripted, so there is no oracle for pixel fidelity. A Lua script can set any property at runtime, so what is drawn is the document rather than the running state.
+
+  Two decisions were settled by comparing against TouchOSC output:
+
+    - **Fills are partial rather than opaque.** Every control the combinators build carries one default colour, so opaque fills turn 27 controls into one rectangle. TouchOSC's own drawing of the same layout hides the GRID's four buttons in black on black.
+    - **Clipping is a flag, not a default** (`--clip`, `to_svg(doc, clip=True)`). A control overflowing its parent is a defect worth seeing; clipping hides it.
+
+  The same comparison found three fidelity gaps: a fader draws its `bar`, `cursor` and `grid` ruling; a radio fills the step it is on; an XY draws its `gridX`/`gridY`. Without the cursor, a fader at 0 is an empty box -- every fader in `grid-faders.tosc` sits at 0. `scripts/render_review.py` writes each picture beside its `.tosc` for that comparison.
+
+  Values are emitted as CSS custom properties (`--v`, `--span`) rather than baked into coordinates, so a later runtime sets a variable instead of reimplementing the geometry. Rules live in one `<style>` inside the SVG, prefixed `p2t-` so an inline SVG cannot leak selectors into the page.
+
+  Nothing reads SVG back, which is why it is `render` rather than a `convert` target. Provisional under the stability policy, like `py2tosc.ui`.
+
+- `ui_json` schema 3: a choice can appear wherever a list of children or bindings is allowed, and a branch can hold a list -- several nodes, or none. Schema 2 let a row choose which control it built, but `messages` stayed fixed in the template, so one `each` built one set of bindings. A generated parameter table hits this at once: there are 128 controller numbers and more parameters than that, so a row past the last has no CC to bind.
 
   ```json
   {
@@ -21,25 +45,31 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
   }
   ```
 
-  A branch of `[]` is how a row says nothing goes here; a branch holding several nodes splices them all in. That is the same "expands in place" rule `repeat` already had, now followed by a choice too, which is the reason this is a generalisation rather than a second mechanism.
+  A branch of `[]` emits nothing; a branch of several nodes splices them all in, the same "expands in place" rule `repeat` already had.
 
-  **It is what keeps a mixed table additive.** One choice per question -- one for the widget kind, one for whether there is a CC -- makes three kinds and two CC states five branches; a single table of complete templates makes them six, and a third question makes that twelve where the nested form makes it seven. minihost hit exactly this while generating a surface and worked around it by doubling the arms, which is what prompted the change.
+  This keeps a mixed table additive. One choice per question -- widget kind, then whether there is a CC -- is five branches for three kinds and two CC states, against six for a single table of complete templates, and seven against twelve once a third question is added. minihost hit this generating a surface and worked around it by doubling the arms.
 
-  Two rules follow from where a choice can now appear. A branch under a repeat's `of` is one node, because a repeat builds one node per pass, and a list there is refused with a message saying so. A branch among children or bindings is one node, or a list of them. Only the branch a row takes is substituted into, at any depth, which is what lets rows be ragged -- the `true` branch above reads `$num`, and the row that does not take it carries no `num` field. Every branch is still checked before any row selects, against what the slot it stands in accepts: a children list wants nodes, a `messages` list wants bindings.
+  Rules:
 
-  A choice written outside a repeat is refused rather than left to fail later. Selecting is something substitution does and substitution only runs inside a repeat, so such a choice would never be chosen from, and would otherwise reach the node reader as an object naming no tag -- a message about a node, for something that is not one.
+    - A branch under a repeat's `of` is one node, since a repeat builds one node per pass. A list there is refused.
+    - A branch among children or bindings is one node or a list of them.
+    - Only the branch a row takes is substituted into, at any depth, so rows can be ragged: the `true` branch above reads `$num` and the row that skips it has no `num` field.
+    - Every branch is checked before any row selects, against what its slot accepts -- a children list wants nodes, a `messages` list wants bindings.
+    - A choice outside a repeat is refused. Substitution is what selects, and it only runs inside a repeat.
 
   Descriptions declaring schema 1 or 2 keep building.
 
-- A description per schema, and the guard that makes the schema table honest. `required_schema` and the `py2tosc validate` warning both rest on `_needs`, a hand-written record of which schema each spelling arrived in. It is the one table here that cannot be generated, because nothing in the reader records *when* a spelling was introduced, and a bump that forgets to extend it under-reports silently -- which is worse than no check, since it reads as a clean bill of health exactly when the warning should fire.
+- One description per schema in `tests/data/schemas/`, and `tests/test_schema_corpus.py` to guard `_needs` -- the hand-written record of which schema each spelling arrived in. Nothing in the reader records when a spelling was introduced, so that table cannot be generated, and a bump that forgets to extend it makes `required_schema` and the `py2tosc validate` warning under-report silently.
 
-  `tests/data/schemas/` now holds one description per schema, each declaring the lowest number that builds it and using what that number introduced, and `tests/test_schema_corpus.py` closes both halves of the hole. A schema with no description fails, so `SCHEMA = 4` without a fixture is a failing test rather than an untested number. A description whose declared schema is not what `required_schema` computes fails, so a fixture added without the matching `_needs` branch is a failing test rather than a wrong answer. Both were confirmed by making each mistake on purpose before relying on them.
+  Two assertions close that: a schema with no description fails, so `SCHEMA = 4` without a fixture is a failing test; and a description whose declared schema differs from `required_schema` fails, so a fixture without the matching `_needs` branch is a failing test. Both were confirmed by making each mistake deliberately.
 
-  The corpus does a second job the generated-table drift test cannot: `scripts/check_json.py` carries its own hand-written copy of `_needs`, and code is not a table, so nothing else compares the two. Every description here is run through both.
+  Every description also runs through `scripts/check_json.py`, which carries its own copy of `_needs` that the generated-table drift test cannot see.
 
 ### Fixed
 
-- `case` ignored the counters an inner repeat had yet to bind, so a choice nested inside another repeat was selected by the outer pass using the outer repeat's value for that name. Introduced with the choice form and caught by a test written for the schema 3 work rather than by a report; a nested choice now falls through to the pass that binds what it selects on, exactly as a nested counter already did.
+- Two nested repeats that both took the default counter name lost the inner one. `_lookup` checked the current pass's bindings before the names it was holding back, so `{"each": [...], "of": {"row": [{"repeat": 3, "of": {"fader": "ch$i"}}]}}` built three identical controls carrying the outer row's number rather than `ch1, ch2, ch3`. It built and validated, so nothing caught it. Held-back names now win, which is what `_substitute` already documented. Naming the outer counter with `as` was the workaround and still works.
+
+- `case` ignored the counters an inner repeat had yet to bind, so a choice nested inside another repeat was selected by the outer pass using the outer repeat's value for that name. Introduced with the choice form in 0.5.2 and caught by a test written for schema 3. A nested choice now falls through to the pass that binds what it selects on, as a nested counter already did.
 
 ## [0.5.2]
 
@@ -519,6 +549,9 @@ First release: py2tosc is a rewrite of [tosclib](https://github.com/AlbertoV5/to
 
 py2tosc began as a fork of [tosclib](https://github.com/AlbertoV5/tosclib), which had twelve releases between 2022-05-20 and 2022-06-09, ending at 0.3.5. That history belongs to a different distribution and is not restated here; see [the tosclib releases](https://pypi.org/project/tosclib/#history).
 
+[0.6.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.6.0
+[0.5.2]: https://github.com/shakfu/py2tosc/releases/tag/v0.5.2
+[0.5.1]: https://github.com/shakfu/py2tosc/releases/tag/v0.5.1
 [0.5.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.5.0
 [0.4.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.4.0
 [0.3.3]: https://github.com/shakfu/py2tosc/releases/tag/v0.3.3

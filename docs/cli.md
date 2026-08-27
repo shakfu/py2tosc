@@ -98,6 +98,28 @@ $ py2tosc decompile mixer.tosc -o mixer.py
 Useful when the layout exists and the script does not. See
 [Generating Python](api/codegen.md).
 
+## render
+
+Draws the layout as an SVG picture of itself, for looking at rather than for
+loading. Takes a description as readily as a `.tosc`, so a generated
+`.ui.json` can be seen without compiling it first.
+
+```console
+$ py2tosc render synth.ui.json -o synth.svg
+$ py2tosc render mixer.tosc -o mixer.html
+$ py2tosc render mixer.tosc --clip -o mixer.svg
+```
+
+The output's extension picks the wrapper, as `convert` picks an encoding:
+`.html` gets a page around the picture, carrying the layout's name, its control
+count and whatever `validate` found; anything else gets the picture on its own.
+Without `-o` it goes to stdout as SVG.
+
+`--clip` cuts a control off at the edge of the one holding it, the way TouchOSC
+draws it. Off by default: a control that overflows its parent is a defect worth
+seeing, and clipping hides it behind a layout that looks correct. See
+[Rendering](api/render.md) for what the picture does and does not promise.
+
 ## convert
 
 Rewrites a layout in another format, chosen by the output's extension: `.tosc`

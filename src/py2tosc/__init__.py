@@ -13,7 +13,7 @@ This project has no relation to Hexler, the developer of TouchOSC. Back up your
 layouts before editing them with third party tools.
 """
 
-from . import json_codec, layout, properties, surface, ui, ui_json
+from . import json_codec, layout, properties, render, surface, ui, ui_json
 from .codegen import to_python
 from .control import (
     Control,
@@ -69,9 +69,10 @@ from .messages import (
     Value,
 )
 from .properties import Color, Frame, Property, to_color, to_frame
+from .render import to_html, to_svg
 from .validate import Issue, ValidationError, validate
 
-__version__ = "0.5.2"
+__version__ = "0.6.0"
 
 # Sorted rather than grouped by topic, because RUF022 asks for it and the
 # grouping lives in the API reference instead. See docs/api/.
@@ -136,13 +137,16 @@ __all__ = [
     "radar",
     "radial",
     "radio",
+    "render",
     "save",
     "surface",
     "text",
     "to_color",
     "to_frame",
+    "to_html",
     "to_json",
     "to_python",
+    "to_svg",
     "ui",
     "ui_json",
     "validate",

@@ -31,6 +31,7 @@ from . import surface, ui_json
 from .codegen import to_python
 from .control import Control
 from .document import Document, load
+from .render import to_html, to_svg
 from .validate import ERROR, WARNING, Issue
 
 __all__ = ["main"]
@@ -196,6 +197,19 @@ def decompile(args: argparse.Namespace) -> int:
     return OK
 
 
+def render(args: argparse.Namespace) -> int:
+    """Draw the layout as a picture, for looking at rather than for loading.
+
+    The output's extension picks the wrapper, as `convert` picks an encoding:
+    `.html` gets a page around the picture, anything else gets the picture.
+    """
+    doc = _load(args.file)
+    page = args.output is not None and args.output.suffix.lower() == ".html"
+    drawn = to_html(doc, clip=args.clip) if page else to_svg(doc, clip=args.clip)
+    _write(drawn, args.output)
+    return OK
+
+
 def convert(args: argparse.Namespace) -> int:
     """Rewrite a layout in another format, chosen by the output's extension."""
     doc = _load(args.file)
@@ -291,6 +305,29 @@ def parser() -> argparse.ArgumentParser:
         "-o", "--output", type=Path, help="where to write it (default: stdout)"
     )
     source.set_defaults(run=decompile)
+
+    draw = commands.add_parser(
+        "render", help="draw the layout as an SVG picture of itself"
+    )
+    draw.add_argument(
+        "file", type=Path, help="the layout or description to draw, in any format"
+    )
+    draw.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        help="where to write it, .svg or .html (default: stdout, as SVG)",
+    )
+    draw.add_argument(
+        "--clip",
+        action="store_true",
+        help=(
+            "cut a control off at the edge of the one holding it, as TouchOSC "
+            "does; off by default, since an overflowing control is a defect "
+            "worth seeing rather than hiding"
+        ),
+    )
+    draw.set_defaults(run=render)
 
     swap = commands.add_parser(
         "convert",

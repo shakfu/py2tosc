@@ -4,15 +4,7 @@ Open items only, in the order they are worth doing. Completed work is recorded i
 
 ## Next
 
-- **A renderer, to SVG and to an HTML page around it.** Layout defects are visual and the suite cannot see them: a `sizes` that divides wrongly, a `gap` that eats a row, a `labelled` that mis-splits are assertable today only as coordinates, one frame at a time, and `tests/test_ui_layout.py` is a list of numbers nobody can picture. The guide illustrates layouts with screenshots that lag the code because updating one means opening the editor, reviewing a generated description means reading JSON, and a generator's CI has no way to look at what it emitted. None of that needs TouchOSC, a browser API or a device -- it needs one pure function, and `codegen.to_python` already establishes that an emitter off a resolved document belongs here.
-
-  Scoped in [docs/dev/render.md](docs/dev/render.md), which is where the decisions are. Three of them matter. Frames are relative to the parent, so the control tree maps onto nested `<g transform>` one node for one node and the renderer does no coordinate arithmetic at all -- `ui.resolve` has already done the part that is hard. SVG carries the geometry and HTML is a wrapper around the same string, so the interactive version later is that SVG plus a script tag rather than a second code path. And the constraint that makes "interactive later" free rather than a rewrite: a control's value must not be baked into the coordinates the renderer emits, or the geometry rules end up existing twice, once in Python and once in JavaScript.
-
-  The bar is stated rather than measured, because TouchOSC is the only oracle and cannot be scripted: a reader can see where every control is, how big it is and what kind it is -- not that it looks like a screenshot. Anyone who wants the second thing is starting a different project, and saying so now is what stops this one from becoming it. Transports stay out entirely; minihost's `osc_and_touch.md` section 7 already worked out that a browser cannot send UDP and that a WebSocket server is a real dependency, and that decision belongs there rather than here.
-
-- **A repeat cannot say what an inner one binds.** Two nested repeats that both take the default counter name see the outer one win: `_lookup` checks its bindings before the names it is holding back, so `{"each": [...], "of": {"row": [{"repeat": 2, "of": {"fader": "ch$i"}}]}}` builds every inner pass identically, with the *outer* repeat's `$i`. The module docstring says the opposite -- "a nested repeat is descended into with its own counter names held back, since those are the inner pass's to fill" -- so this is the documented intent losing to the code, and it fails the way this project cares about most: silently, with a layout that builds and is wrong.
-
-  Found while testing the schema 3 work, not by a report. The fix is to check the held-back names first, which is one line, and the reason it is filed rather than done is that it is a behaviour change to a case that builds today: a description relying on the outer counter winning would start binding the inner one. Naming both counters with `as` avoids it entirely, which is worth saying in the guide whatever is decided here.
+Nothing open. The last of it is in `CHANGELOG.md` under Unreleased.
 
 ## Deliberately not yet
 

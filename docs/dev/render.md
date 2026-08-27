@@ -310,6 +310,36 @@ reads or writes a layout, so a change to how something is drawn cannot reach a
 file.
 
 
+## 8b. Settled by looking at the real thing
+
+Recorded because these were decided against real TouchOSC output rather than
+argued from the document, which is the only way they could have been.
+
+**Legibility wins where it conflicts with fidelity.** A shape fills at partial
+opacity with its stroke at full, so a stroke reads against a fill of the same
+colour and nesting shows as density. The evidence: every control the layout
+combinators build carries one default colour, so painting faithfully turns
+twenty-seven controls into one flat rectangle -- and in TouchOSC's own drawing
+of `every-kind`, the GRID's four buttons and the BOX are invisible, black on
+black, where the render shows them. The picture will therefore never match a
+screenshot, and that is the trade taken deliberately.
+
+**Clipping is a flag, not a default.** `to_svg(doc, clip=True)` and
+`py2tosc render --clip` cut a control off at the edge of the one holding it,
+the way the device does. Off by default, because a control that overflows its
+parent is exactly the defect a picture is being drawn to find and clipping
+hides it behind a layout that looks correct. On when the question is what the
+device will actually show. A pager is never clipped either way: its pages are
+laid out past its own frame on purpose.
+
+**Three fidelity gaps were found by comparing, and none by reasoning.** A
+fader draws its `bar`, its `cursor` as a handle with real thickness, and its
+`grid` ruling -- `grid-faders.tosc` has every fader at zero and every one
+shows its cursor, which a bar scaled to nothing does not. A radio fills the
+step it is on. An XY draws its `gridX`/`gridY`. Each was invisible until the
+`.tosc` and the `.svg` were opened side by side, which is what
+`scripts/render_review.py` exists to make cheap.
+
 ## 9. Open questions
 
 Three, and none of them blocks starting.

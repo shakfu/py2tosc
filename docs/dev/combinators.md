@@ -315,7 +315,7 @@ The obvious composition, `stack(button, stack(caption, pad=...))`, fails on the 
 
 So an inset belongs to a *control*, not to a group: `_inset` is a fraction stored on the control and applied by `resolve` to the frame its parent computed. Applying it to the computed frame rather than to the control's current one keeps `resolve` idempotent, which matters because nothing stops it being called twice.
 
-That makes `inset` the load-bearing half of Tier 3 and `labelled` the convenience on top, which is the reverse of what this section assumed.
+That makes `inset` the structural half of Tier 3 and `labelled` the convenience on top, which is the reverse of what this section assumed.
 
 ## Rejected alternatives
 

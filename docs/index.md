@@ -26,14 +26,11 @@ with py2tosc.edit("mixer.tosc", save_as="mixer-restyled.tosc") as doc:
         fader.corner_radius = 2.0
 ```
 
-[`edit`](api/document.md) reads the layout on the way in and writes it back on
-the way out. Without `save_as` it writes over the file it read, so the path is
-named once.
+[`edit`](api/document.md) reads the layout on the way in and writes it back on the way out. Without `save_as` it writes over the file it read, so the path is named once.
 
 ## Building one from scratch
 
-[`py2tosc.ui`](api/ui.md) describes an arrangement and sizes it afterwards, so a
-layout is written from the inside out and nothing needs coordinates:
+[`py2tosc.ui`](api/ui.md) describes an arrangement and sizes it afterwards, so a layout is written from the inside out and nothing needs coordinates:
 
 ```python
 import py2tosc
@@ -61,13 +58,11 @@ doc.resolve()   # hand the root frame down the tree, sizing everything
 doc.save("mixer.tosc")
 ```
 
-The eager [`layout`](api/layout.md) functions are still there and unchanged, for
-when you would rather place children against a parent you already have.
+The eager [`layout`](api/layout.md) functions are still there and unchanged, for when you would rather place children against a parent you already have.
 
 ## Reading one back as code
 
-`to_python` writes a layout out as the script that would build it, which is what
-you want when the layout exists and the source does not:
+`to_python` writes a layout out as the script that would build it, which is what you want when the layout exists and the source does not:
 
 ```python
 print(py2tosc.to_python(py2tosc.load("mixer.tosc")))

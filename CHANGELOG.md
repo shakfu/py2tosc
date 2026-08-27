@@ -22,6 +22,7 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
   Two decisions were settled by comparing against TouchOSC output:
 
     - **Fills are partial rather than opaque.** Every control the combinators build carries one default colour, so opaque fills turn 27 controls into one rectangle. TouchOSC's own drawing of the same layout hides the GRID's four buttons in black on black.
+
     - **Clipping is a flag, not a default** (`--clip`, `to_svg(doc, clip=True)`). A control overflowing its parent is a defect worth seeing; clipping hides it.
 
   The same comparison found three fidelity gaps: a fader draws its `bar`, `cursor` and `grid` ruling; a radio fills the step it is on; an XY draws its `gridX`/`gridY`. Without the cursor, a fader at 0 is an empty box -- every fader in `grid-faders.tosc` sits at 0. `scripts/render_review.py` writes each picture beside its `.tosc` for that comparison.
@@ -52,9 +53,13 @@ Notable changes to py2tosc. The format follows [Keep a Changelog](https://keepac
   Rules:
 
     - A branch under a repeat's `of` is one node, since a repeat builds one node per pass. A list there is refused.
+
     - A branch among children or bindings is one node or a list of them.
+
     - Only the branch a row takes is substituted into, at any depth, so rows can be ragged: the `true` branch above reads `$num` and the row that skips it has no `num` field.
+
     - Every branch is checked before any row selects, against what its slot accepts -- a children list wants nodes, a `messages` list wants bindings.
+
     - A choice outside a repeat is refused. Substitution is what selects, and it only runs inside a repeat.
 
   Descriptions declaring schema 1 or 2 keep building.
@@ -549,15 +554,4 @@ First release: py2tosc is a rewrite of [tosclib](https://github.com/AlbertoV5/to
 
 py2tosc began as a fork of [tosclib](https://github.com/AlbertoV5/tosclib), which had twelve releases between 2022-05-20 and 2022-06-09, ending at 0.3.5. That history belongs to a different distribution and is not restated here; see [the tosclib releases](https://pypi.org/project/tosclib/#history).
 
-[0.6.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.6.0
-[0.5.2]: https://github.com/shakfu/py2tosc/releases/tag/v0.5.2
-[0.5.1]: https://github.com/shakfu/py2tosc/releases/tag/v0.5.1
-[0.5.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.5.0
-[0.4.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.4.0
-[0.3.3]: https://github.com/shakfu/py2tosc/releases/tag/v0.3.3
-[0.3.2]: https://github.com/shakfu/py2tosc/releases/tag/v0.3.2
-[0.3.1]: https://github.com/shakfu/py2tosc/releases/tag/v0.3.1
-[0.3.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.3.0
-[0.2.1]: https://github.com/shakfu/py2tosc/releases/tag/v0.2.1
-[0.2.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.2.0
-[0.1.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.1.0
+[0.6.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.6.0 [0.5.2]: https://github.com/shakfu/py2tosc/releases/tag/v0.5.2 [0.5.1]: https://github.com/shakfu/py2tosc/releases/tag/v0.5.1 [0.5.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.5.0 [0.4.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.4.0 [0.3.3]: https://github.com/shakfu/py2tosc/releases/tag/v0.3.3 [0.3.2]: https://github.com/shakfu/py2tosc/releases/tag/v0.3.2 [0.3.1]: https://github.com/shakfu/py2tosc/releases/tag/v0.3.1 [0.3.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.3.0 [0.2.1]: https://github.com/shakfu/py2tosc/releases/tag/v0.2.1 [0.2.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.2.0 [0.1.0]: https://github.com/shakfu/py2tosc/releases/tag/v0.1.0

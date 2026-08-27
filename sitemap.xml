@@ -2,154 +2,158 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://shakfu.github.io/py2tosc/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/changelog/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/cli/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/getting-started/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/migrating/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/stability/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/api/codegen/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/api/control/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/api/document/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/api/enums/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/api/errors/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/api/json/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/api/layout/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/api/messages/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/api/properties/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
+    </url>
+    <url>
+         <loc>https://shakfu.github.io/py2tosc/api/render/</loc>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/api/surface/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/api/ui-json/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/api/ui/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/api/validate/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/demos/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/demos/control-surface/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/demos/controls/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/demos/copy-scripts/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/demos/custom-property/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/demos/from-json/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/demos/image-converter/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/demos/numpad/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/demos/reaper/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/demos/simple-mk2/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/guide/controls/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/guide/custom-properties/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/guide/format/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/guide/json/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/guide/layouts/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/guide/messages/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/guide/sizes/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/guide/ui-json/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
     <url>
          <loc>https://shakfu.github.io/py2tosc/guide/validation/</loc>
-         <lastmod>2026-08-25</lastmod>
+         <lastmod>2026-08-27</lastmod>
     </url>
 </urlset>

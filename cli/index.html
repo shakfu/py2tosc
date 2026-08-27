@@ -422,6 +422,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#render" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        render
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#convert" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1513,6 +1524,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../api/render/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rendering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../api/surface/" class="md-nav__link">
         
   
@@ -1693,6 +1732,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#render" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        render
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#convert" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1819,20 +1869,48 @@ without further ceremony.</p>
 </code></pre></div>
 <p>Warnings alone do not fail. See <a href="../guide/validation/">Validation</a> for what each
 rule means.</p>
+<p>A <a href="../guide/ui-json/">layout description</a> gets one check the other formats do
+not: whether the <code>schema</code> it declares covers the spellings it uses. That is the
+one dialect py2tosc reads and never writes, so the number is the producer's
+claim about its own output, and understating it is not caught by building --
+the reader that would catch it is by definition new enough to build the file.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>validate<span class="w"> </span>synth.ui.json
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="go">warning: &lt;envelope&gt;: the description declares schema 1 and uses schema 2; a release reading only schema 1 will refuse it with a message about a node</span>
+</code></pre></div>
+<p>The program that <em>writes</em> a description usually does not have py2tosc at all,
+which is the case <code>scripts/check_json.py</code> covers: one file, standard library
+only, both dialects, the same exit codes as this page. See <a href="../guide/ui-json/#checking-a-description-without-py2tosc">Checking a
+description without py2tosc</a>.</p>
 <h2 id="decompile">decompile<a class="headerlink" href="#decompile" title="Permanent link">&para;</a></h2>
 <p>Writes the layout out as the Python that would build it, to stdout unless you
 give it somewhere to go.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>decompile<span class="w"> </span>mixer.tosc<span class="w"> </span>-o<span class="w"> </span>mixer.py
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>decompile<span class="w"> </span>mixer.tosc<span class="w"> </span>-o<span class="w"> </span>mixer.py
 </code></pre></div>
 <p>Useful when the layout exists and the script does not. See
 <a href="../api/codegen/">Generating Python</a>.</p>
+<h2 id="render">render<a class="headerlink" href="#render" title="Permanent link">&para;</a></h2>
+<p>Draws the layout as an SVG picture of itself, for looking at rather than for
+loading. Takes a description as readily as a <code>.tosc</code>, so a generated
+<code>.ui.json</code> can be seen without compiling it first.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>render<span class="w"> </span>synth.ui.json<span class="w"> </span>-o<span class="w"> </span>synth.svg
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>render<span class="w"> </span>mixer.tosc<span class="w"> </span>-o<span class="w"> </span>mixer.html
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>render<span class="w"> </span>mixer.tosc<span class="w"> </span>--clip<span class="w"> </span>-o<span class="w"> </span>mixer.svg
+</code></pre></div>
+<p>The output's extension picks the wrapper, as <code>convert</code> picks an encoding:
+<code>.html</code> gets a page around the picture, carrying the layout's name, its control
+count and whatever <code>validate</code> found; anything else gets the picture on its own.
+Without <code>-o</code> it goes to stdout as SVG.</p>
+<p><code>--clip</code> cuts a control off at the edge of the one holding it, the way TouchOSC
+draws it. Off by default: a control that overflows its parent is a defect worth
+seeing, and clipping hides it behind a layout that looks correct. See
+<a href="../api/render/">Rendering</a> for what the picture does and does not promise.</p>
 <h2 id="convert">convert<a class="headerlink" href="#convert" title="Permanent link">&para;</a></h2>
 <p>Rewrites a layout in another format, chosen by the output's extension: <code>.tosc</code>
 for the compressed file TouchOSC opens, <code>.xml</code> for the readable export the
 editor also writes, <code>.json</code> for the <a href="../guide/json/">JSON encoding</a>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>convert<span class="w"> </span>mixer.tosc<span class="w"> </span>-o<span class="w"> </span>mixer.xml
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>convert<span class="w"> </span>mixer.tosc<span class="w"> </span>-o<span class="w"> </span>mixer.json
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>convert<span class="w"> </span>mixer.json<span class="w"> </span>-o<span class="w"> </span>mixer.tosc
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>convert<span class="w"> </span>mixer.tosc<span class="w"> </span>-o<span class="w"> </span>mixer.xml
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>convert<span class="w"> </span>mixer.tosc<span class="w"> </span>-o<span class="w"> </span>mixer.json
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>convert<span class="w"> </span>mixer.json<span class="w"> </span>-o<span class="w"> </span>mixer.tosc
 </code></pre></div>
 <p>The input is read the same way wherever it comes from, so every subcommand on
 this page takes a <code>.json</code> layout where it takes a <code>.tosc</code>. The format is
@@ -1845,17 +1923,17 @@ memory of the row that placed them.</p>
 <h2 id="build">build<a class="headerlink" href="#build" title="Permanent link">&para;</a></h2>
 <p>Generates a control surface from a list of parameters -- a fader each, paged,
 bound to MIDI and OSC.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>build<span class="w"> </span>parameters.json
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="go">54 parameters -&gt; 5 pages, 169 controls -&gt; build/parameters.tosc</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>build<span class="w"> </span>parameters.json
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="go">54 parameters -&gt; 5 pages, 169 controls -&gt; build/parameters.tosc</span>
 </code></pre></div>
 <p>The input is JSON, in either of two shapes. A list of names is the short form:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">[</span><span class="s2">&quot;Threshold&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Ratio&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Attack&quot;</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">[</span><span class="s2">&quot;Threshold&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Ratio&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Attack&quot;</span><span class="p">]</span>
 </code></pre></div>
 <p>A list of objects is the long one, where only <code>name</code> is required:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">[</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Threshold&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;channel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ratio&quot;</span><span class="p">}</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">[</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Threshold&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;channel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ratio&quot;</span><span class="p">}</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="p">]</span>
 </code></pre></div>
 <p>Two things are worth knowing before pointing it at a file a plugin host wrote.</p>
 <p><strong>An <code>index</code> is ignored.</strong> Hosts export one next to each name, and it is not a
@@ -1905,8 +1983,8 @@ device you actually use.</p>
 480x320, <code>automat5_mk2</code> at 568x320. The default follows the landscape ones,
 because a parameter surface is faders side by side. Match the device instead
 when you know it:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>build<span class="w"> </span>params.json<span class="w"> </span>--size<span class="w"> </span>320x480<span class="w"> </span>--columns<span class="w"> </span><span class="m">2</span><span class="w"> </span>--rows<span class="w"> </span><span class="m">4</span><span class="w">   </span><span class="c1"># a phone</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>build<span class="w"> </span>params.json<span class="w"> </span>--size<span class="w"> </span>1024x768<span class="w">                       </span><span class="c1"># a tablet</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>build<span class="w"> </span>params.json<span class="w"> </span>--size<span class="w"> </span>320x480<span class="w"> </span>--columns<span class="w"> </span><span class="m">2</span><span class="w"> </span>--rows<span class="w"> </span><span class="m">4</span><span class="w">   </span><span class="c1"># a phone</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>build<span class="w"> </span>params.json<span class="w"> </span>--size<span class="w"> </span>1024x768<span class="w">                       </span><span class="c1"># a tablet</span>
 </code></pre></div>
 <p>Caption text is sized from the box it lands in rather than fixed, at the ratio
 the corpus uses, so changing the canvas or the page density does not leave the

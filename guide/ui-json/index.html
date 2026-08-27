@@ -694,6 +694,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#rows-that-are-not-all-the-same-kind" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rows that are not all the same kind
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rows-that-do-not-all-carry-the-same-bindings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rows that do not all carry the same bindings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#arithmetic-and-what-to-do-instead" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -775,6 +797,17 @@
     <span class="md-ellipsis">
       
         When it will not build
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#checking-a-description-without-py2tosc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checking a description without py2tosc
       
     </span>
   </a>
@@ -1598,6 +1631,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/render/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rendering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/surface/" class="md-nav__link">
         
   
@@ -1801,6 +1862,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#rows-that-are-not-all-the-same-kind" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rows that are not all the same kind
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rows-that-do-not-all-carry-the-same-bindings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rows that do not all carry the same bindings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#arithmetic-and-what-to-do-instead" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1882,6 +1965,17 @@
     <span class="md-ellipsis">
       
         When it will not build
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#checking-a-description-without-py2tosc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checking a description without py2tosc
       
     </span>
   </a>
@@ -2223,25 +2317,103 @@
 <p>A field is read as <code>$name</code>, so a key that cannot be written that way is refused rather than left unreachable, and a field named after the counter is refused rather than one of them silently winning. A row holds strings, numbers and booleans; a lone <code>"$cc"</code> keeps its type exactly as <code>"$i0"</code> does, and a boolean written into a longer string comes out as <code>true</code> rather than Python's <code>True</code>.</p>
 <p><strong>An <code>each</code> of nothing builds nothing.</strong> A generator with nothing to emit writes <code>[]</code>, which is data running out rather than a mistake -- where <code>repeat: 0</code> is refused, because nobody writes one on purpose.</p>
 <p>This is also what closes the gap with <a href="../../cli/#build"><code>py2tosc build</code></a>, which takes a list of parameters and lays out a surface from it. A description can now say the same thing, and say the rest of the layout around it.</p>
+<h3 id="rows-that-are-not-all-the-same-kind">Rows that are not all the same kind<a class="headerlink" href="#rows-that-are-not-all-the-same-kind" title="Permanent link">&para;</a></h3>
+<p>One <code>each</code> builds one kind of thing, because substitution reaches values and never keys: the tag is written in the template, so a row can change what a control is <em>called</em>, <em>bound to</em> and <em>numbered</em>, but not what it <em>is</em>. A table generated from a plugin's parameters is mixed by nature -- a bypass wants a <code>button</code>, a waveform selector wants a <code>radio</code>, a cutoff wants a <code>fader</code>.</p>
+<p><strong><code>case</code> reads a field and <code>when</code> holds a complete node per value it can take.</strong> The <code>of</code> holds the table instead of a node:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">&quot;each&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cont&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cutoff&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">74</span><span class="p">},</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sw&quot;</span><span class="p">,</span><span class="w">   </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bypass&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">75</span><span class="p">},</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cont&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;reso&quot;</span><span class="p">,</span><span class="w">   </span><span class="nt">&quot;cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">76</span><span class="p">}</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">  </span><span class="p">],</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">  </span><span class="nt">&quot;of&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;case&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$kind&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;when&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">    </span><span class="nt">&quot;cont&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;fader&quot;</span><span class="p">:</span><span class="w">  </span><span class="s2">&quot;$name&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;midi_cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$cc&quot;</span><span class="p">}]},</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">    </span><span class="nt">&quot;sw&quot;</span><span class="p">:</span><span class="w">   </span><span class="p">{</span><span class="nt">&quot;button&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$name&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;midi_cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$cc&quot;</span><span class="p">}]}</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">  </span><span class="p">}}</span>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="p">}</span>
+</code></pre></div>
+<p>which builds a fader, a button and a fader, in that order -- the order the rows are in, which for a generated table is the order the plugin author chose.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>case</code></td>
+<td>The string whose substituted value names the branch. Usually one field, <code>"$kind"</code>, but any string that substitutes will do.</td>
+</tr>
+<tr>
+<td><code>when</code></td>
+<td>The branches, keyed by the value that selects them. Each is a complete node, and at least one is required.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Every key is still literal.</strong> No key anywhere is built from a row, so every branch is checked against the tag table before any row is looked at -- a branch naming two tags, or none, is refused whether or not a row happens to reach it. That checkability is the reason keys are not substituted in the first place, and <code>{"$kind": "$name"}</code> would also read worse than what it replaced.</p>
+<p><strong>Only the branch a row selects is substituted into</strong>, so a branch reads the fields its own rows carry and no others. A <code>sw</code> row needs no <code>steps</code> field for a <code>radio</code> branch that mentions one.</p>
+<p><strong>A branch nothing selects is not an error.</strong> An <code>each</code> of nothing is already the thing a generator with nothing to emit writes, and that leaves every branch unselected -- so a hand-written template carrying a branch for a kind this particular table has no rows of is the same shape, and gets the same answer. A row selecting a branch that was <em>not</em> written is an error, and it names the value it read.</p>
+<p><strong>A branch name is always a quoted string</strong>, because a JSON object's keys are strings and nothing else: <code>{"true": []}</code> is a branch table and <code>{true: []}</code> is a syntax error, in this format as in every other JSON one. So the value a <code>case</code> reads is matched against the name by spelling it, and it is spelled the way the file spells one -- the same rule that turns <code>"ch$i"</code> into <code>"ch1"</code> and writes a boolean as <code>true</code> rather than Python's <code>True</code>. A counting <code>repeat</code> can choose too, <code>{"case": "$i", "when": {"1": ..., "2": ...}}</code>, though a layout that varies by position usually reads better written out.</p>
+<p>Two consequences worth knowing, and they fail differently. A number is spelled exactly, so <code>1.0</code> looks for a <code>"1.0"</code> branch and does not match <code>"1"</code> -- which is an error naming the value it read, <code>case read '1.0', and no branch is written for it</code>, rather than a wrong branch quietly taken. And a spelling is only a spelling, so the boolean <code>true</code> and the string <code>"true"</code> select the same branch; if that distinction matters, put the discriminant in the data as its own field rather than leaning on how a value happens to spell.</p>
+<p>This is a schema 2 feature. A description using it will not build on a release that reads only schema 1, which is what the number is for.</p>
+<h3 id="rows-that-do-not-all-carry-the-same-bindings">Rows that do not all carry the same bindings<a class="headerlink" href="#rows-that-do-not-all-carry-the-same-bindings" title="Permanent link">&para;</a></h3>
+<p>One <code>each</code> builds one <em>set of bindings</em>, for the same reason it built one kind of control: <code>messages</code> is written in the template. A generated table runs into this immediately -- there are 128 controller numbers and plugins routinely have more parameters, so a row past the last one has no CC to bind at all.</p>
+<p><strong>A choice can also appear among children or among bindings, and a branch can hold several nodes or none.</strong> So a row says whether a binding is there:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="p">{</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span><span class="nt">&quot;each&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;n&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cutoff&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">  </span><span class="nt">&quot;num&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">74</span><span class="p">},</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;n&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;drive&quot;</span><span class="p">,</span><span class="w">  </span><span class="nt">&quot;cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;num&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">}</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">  </span><span class="p">],</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">  </span><span class="nt">&quot;of&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;fader&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$n&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;osc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/mh/param/$n&quot;</span><span class="p">},</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;case&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$cc&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;when&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;true&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;midi_cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$num&quot;</span><span class="p">}],</span><span class="w"> </span><span class="nt">&quot;false&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]}}</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">  </span><span class="p">]}</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="p">}</span>
+</code></pre></div>
+<p><code>cutoff</code> gets both bindings and <code>drive</code> gets only the OSC one. A branch of <code>[]</code> is how a row says <em>nothing goes here</em>, and a branch holding several nodes splices them all in -- the same "expands in place" rule <code>repeat</code> has, which is what a choice now follows too.</p>
+<p><strong>This is what keeps a mixed table additive rather than multiplicative.</strong> Written as one choice per question -- one for the widget kind, one for whether there is a CC -- three widget kinds and two CC states are five branches. Written as a single table of complete templates they are six, and a third question makes them twelve while the nested form makes them seven.</p>
+<p>Two rules follow from where a choice can now appear:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A branch under a repeat's <code>of</code></td>
+<td>One node. A repeat builds one node per pass, so a list there is refused.</td>
+</tr>
+<tr>
+<td>A branch among children or bindings</td>
+<td>One node, or a list of them, spliced where the choice stood. <code>[]</code> is allowed.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Only the branch a row takes is substituted into, at any depth.</strong> That is what lets rows be ragged: the <code>true</code> branch above reads <code>$num</code>, and the row that does not take it carries no <code>num</code> field at all.</p>
+<p><strong>A choice outside a repeat is refused.</strong> Selecting is something substitution does, and substitution only runs inside a repeat, so a choice written anywhere else would never be chosen from. It says so rather than arriving at the node reader as an object naming no tag.</p>
+<p>This is a schema 3 feature.</p>
 <h3 id="arithmetic-and-what-to-do-instead">Arithmetic, and what to do instead<a class="headerlink" href="#arithmetic-and-what-to-do-instead" title="Permanent link">&para;</a></h3>
 <p>What a repeat still cannot do is arithmetic. There is no <code>$i * 2</code>, and adding one would mean an expression language inside a JSON string, which is a bigger thing than this format is. Two ways round it: <code>from</code> moves where a counter starts, and <code>each</code> puts the number in the data, where a generator or a person can compute whatever they like before writing the file.</p>
 <h2 id="comments">Comments<a class="headerlink" href="#comments" title="Permanent link">&para;</a></h2>
 <p>JSON has no comment, and a description written to be reviewed needs somewhere to say why a number is what it is. <strong>A key beginning with <code>//</code> is ignored</strong>, wherever a key may appear -- the envelope, a node, a binding, a value, and inside <code>props</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">&quot;//&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;front-of-house send, 8 channels to match the desk&quot;</span><span class="p">,</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span><span class="nt">&quot;column&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;fader&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ch$i&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;// cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20 up, leaving 0-19 to the transport&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;from&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">}</span>
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">  </span><span class="p">]</span>
-<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="p">{</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="nt">&quot;//&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;front-of-house send, 8 channels to match the desk&quot;</span><span class="p">,</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">  </span><span class="nt">&quot;column&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">    </span><span class="p">{</span><span class="nt">&quot;fader&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ch$i&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;// cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20 up, leaving 0-19 to the transport&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;from&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">}</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">  </span><span class="p">]</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="p">}</span>
 </code></pre></div>
 <p>More than one to an object, since JSON keys have to be unique: <code>"//"</code>, <code>"// why"</code>, <code>"//left-at-8"</code>. A comment is dropped before anything reads the node, so it never reaches the file, is never mistaken for a custom property, and is not substituted into -- a note about a layout can mention <code>$5</code> inside a repeat without meaning a counter.</p>
 <h2 id="bindings">Bindings<a class="headerlink" href="#bindings" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;osc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/mixer/{name}&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;on&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RISE&quot;</span><span class="p">},</span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;midi_cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;channel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">},</span>
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;midi_note&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">},</span>
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;connect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readout&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">}</span>
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;osc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/mixer/{name}&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;on&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RISE&quot;</span><span class="p">},</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;midi_cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;channel&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">},</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;midi_note&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">},</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;connect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readout&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">}</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="p">]</span>
 </code></pre></div>
 <p><strong>This is the same rule as a node, one level down.</strong> One key names the thing -- <code>osc</code>, <code>midi_cc</code>, <code>midi_note</code> or <code>connect</code>, each the <a href="../../api/ui/">combinator</a> of that name -- its value is that combinator's one positional argument, and the siblings are its keyword arguments. A <a href="#partials">partial</a> is the same shape again, one level below that. Three levels, one rule: if you can read a node you can read a binding, and there is nothing else to learn.</p>
 <p><code>{name}</code> in an OSC address is TouchOSC's own templating, resolved on the device when the message is sent, and it is a different thing from <code>$i</code>, which is resolved here while the file is being read. The two use different syntax precisely so that neither can consume the other.</p>
@@ -2275,16 +2447,16 @@
 </tbody>
 </table>
 <p>Each takes <code>conversion</code> and <code>scale</code> alongside, exactly as <a href="../../api/ui/"><code>ui.value</code></a> and the other three do. A partial goes wherever <code>ui</code> takes one:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;osc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/mix&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;conversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;index&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">}]},</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;midi_note&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;prop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name&quot;</span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;channel&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;index&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">}},</span>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;connect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readout&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;const&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#7&quot;</span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;on&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RISE&quot;</span><span class="p">}</span>
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;osc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/mix&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;conversion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;STRING&quot;</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;index&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">}]},</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;midi_note&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;prop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name&quot;</span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;channel&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;index&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">}},</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;connect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readout&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;const&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#7&quot;</span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;on&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RISE&quot;</span><span class="p">}</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="p">]</span>
 </code></pre></div>
 <p>The second is a keyboard whose buttons name their own notes. The third is a key sending a marked constant into a readout, which is what a numpad does.</p>
 <p><strong>A bare string keeps the meaning <code>ui</code> gives it</strong>: in <code>source</code> and <code>to</code> it names one of the control's <em>values</em>, so <code>"source": "x"</code> is <code>{"value": "x"}</code> written short. That is why a constant has to say so -- <code>"source": "#7"</code> is a binding that reads a value called <code>#7</code>, which nothing has. In <code>args</code>, where the two readings are equally plausible and neither is safe to guess, a bare string is refused and the message names both spellings.</p>
 <p><strong><code>triggers</code> replaces <code>on</code> and <code>var</code> entirely</strong>, for a binding that watches more than one value -- an XY sending on both axes, which is what all 39 multi-trigger messages in the corpus are:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="p">{</span><span class="nt">&quot;osc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/pad&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;triggers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;x&quot;</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;y&quot;</span><span class="p">}]}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="p">{</span><span class="nt">&quot;osc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/pad&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;triggers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;x&quot;</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;y&quot;</span><span class="p">}]}</span>
 </code></pre></div>
 <p>Each is <code>{"var": ..., "on": ...}</code>, defaulting to <code>x</code> and <code>ANY</code>. Nothing in <code>py2tosc.ui</code> is now beyond this dialect.</p>
 <h2 id="sizes-and-the-canvas">Sizes and the canvas<a class="headerlink" href="#sizes-and-the-canvas" title="Permanent link">&para;</a></h2>
@@ -2293,45 +2465,64 @@
 <p>See <a href="../sizes/">Layout sizes</a> for what a canvas is and how to choose one, and <a href="../layouts/">Layouts</a> for what each combinator does with the space it is given.</p>
 <h2 id="shapes-worth-copying">Shapes worth copying<a class="headerlink" href="#shapes-worth-copying" title="Permanent link">&para;</a></h2>
 <p>A pager, one page per section:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="p">{</span><span class="nt">&quot;pager&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;tiles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;button&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pad$i&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="p">}],</span><span class="w"> </span><span class="nt">&quot;columns&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pads&quot;</span><span class="p">},</span>
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;row&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;fader&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ch$i&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">}],</span><span class="w"> </span><span class="nt">&quot;gap&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;faders&quot;</span><span class="p">}</span>
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="p">],</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pages&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;frame&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">568</span><span class="p">,</span><span class="w"> </span><span class="mi">320</span><span class="p">]}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="p">{</span><span class="nt">&quot;pager&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;tiles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;button&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pad$i&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="p">}],</span><span class="w"> </span><span class="nt">&quot;columns&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pads&quot;</span><span class="p">},</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;row&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;fader&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ch$i&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">}],</span><span class="w"> </span><span class="nt">&quot;gap&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;faders&quot;</span><span class="p">}</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="p">],</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pages&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;frame&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">568</span><span class="p">,</span><span class="w"> </span><span class="mi">320</span><span class="p">]}</span>
 </code></pre></div>
 <p>A button with a caption over it, which is what <code>labelled</code> and <code>stack</code> are for:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="p">{</span><span class="nt">&quot;labelled&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;button&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;play&quot;</span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;caption&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Play&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="p">{</span><span class="nt">&quot;labelled&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;button&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;play&quot;</span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;caption&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Play&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">}</span>
 </code></pre></div>
 <p>A bank of encoders, each on its own controller, numbered from 20:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="p">{</span><span class="nt">&quot;tiles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;encoder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enc$i&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;midi_cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$i&quot;</span><span class="p">}],</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;from&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">}</span>
-<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="p">],</span><span class="w"> </span><span class="nt">&quot;columns&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;gap&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;pad&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="p">{</span><span class="nt">&quot;tiles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;encoder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;enc$i&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;midi_cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$i&quot;</span><span class="p">}],</span><span class="w"> </span><span class="nt">&quot;repeat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;from&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">}</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="p">],</span><span class="w"> </span><span class="nt">&quot;columns&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;gap&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;pad&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">}</span>
 </code></pre></div>
 <p>A button that writes into a readout elsewhere in the layout:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="p">{</span><span class="nt">&quot;column&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;button&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;go&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;connect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readout&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">}]},</span>
-<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readout&quot;</span><span class="p">}</span>
-<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="p">]}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="p">{</span><span class="nt">&quot;column&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;button&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;go&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;connect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readout&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">}]},</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="w">  </span><span class="p">{</span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;readout&quot;</span><span class="p">}</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="p">]}</span>
 </code></pre></div>
 <h2 id="when-it-will-not-build">When it will not build<a class="headerlink" href="#when-it-will-not-build" title="Permanent link">&para;</a></h2>
 <p>Every message names the node it gave up on, by the path from the root:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>root.column[0]: unknown key &#39;gpa&#39;; did you mean &#39;pad&#39; or &#39;gap&#39;?
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>root.row[0]#1: unknown key &#39;colour&#39;; did you mean &#39;color&#39;?
-<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>root.column[1]: color: &#39;nope&#39; is not a 6 or 8 digit hex colour
-<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>root.messages[0]: no control is named &#39;readout&#39;
-<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>root: nothing here names a control or a layout; expected one of box, button, ...
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>root.column[0]: unknown key &#39;gpa&#39;; did you mean &#39;pad&#39; or &#39;gap&#39;?
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>root.row[0]#1: unknown key &#39;colour&#39;; did you mean &#39;color&#39;?
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>root.column[1]: color: &#39;nope&#39; is not a 6 or 8 digit hex colour
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>root.messages[0]: no control is named &#39;readout&#39;
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>root: nothing here names a control or a layout; expected one of box, button, ...
 </code></pre></div>
 <p>The <code>#1</code> is which pass of a <code>repeat</code> failed. Every copy is built from one template, so ordinarily they all fail together -- but a counter that lands somewhere only some values are legal will not, and the pass number is what says which. A value the control cannot take names its key as well as its node, because a node can carry twenty properties and only one of them is wrong.</p>
 <p>A description that builds but cannot be divided says that too -- a row whose gaps are wider than its frame, a <code>tiles</code> with no columns. Those are reported once the frames are handed down rather than while the file is read, since a layout only fails against a size, so they name the <em>control</em> rather than the node in the file:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>the layout will not resolve: mixer/faders: a width of 100 cannot hold 2 slots with 50/50 padding and 100 between them
-<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>the layout will not resolve: mixer: column was given 1 sizes for 2 children
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>the layout will not resolve: mixer/faders: a width of 100 cannot hold 2 slots with 50/50 padding and 100 between them
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>the layout will not resolve: mixer: column was given 1 sizes for 2 children
 </code></pre></div>
 <p>The path is the names on the way down, as <a href="../validation/">validation</a> reports them, and a control with no name of its own appears as <code>&lt;GROUP&gt;</code>.</p>
 <p>Reading a file only says it could be built. Whether TouchOSC will accept the result is a separate question, and the answer is <a href="../validation/">validation</a>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>validate<span class="w"> </span>mixer.ui.json
-<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="go">mixer.ui.json: clean</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>validate<span class="w"> </span>mixer.ui.json
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="go">mixer.ui.json: clean</span>
 </code></pre></div>
+<h2 id="checking-a-description-without-py2tosc">Checking a description without py2tosc<a class="headerlink" href="#checking-a-description-without-py2tosc" title="Permanent link">&para;</a></h2>
+<p><code>py2tosc validate</code> is the check when py2tosc is installed. When it is not -- which is the ordinary case for the program <em>writing</em> these files -- <code>scripts/check_json.py</code> in this repository is a single file with no imports beyond the standard library, meant to be copied into that program's own tree:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="gp">$ </span>python<span class="w"> </span>check_json.py<span class="w"> </span>synth.ui.json
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="go">synth.ui.json: warning: &lt;envelope&gt;: the description declares schema 1 and uses schema 2; a release reading only schema 1 will refuse it with a message about a node</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">check_json</span><span class="w"> </span><span class="kn">import</span> <span class="n">check</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="n">problems</span> <span class="o">=</span> <span class="n">check</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="k">assert</span> <span class="ow">not</span> <span class="n">problems</span><span class="p">,</span> <span class="n">problems</span>
+</code></pre></div>
+<p>It reads both dialects, telling them apart by <code>format</code> exactly as <code>py2tosc.load</code> does, and exits <code>0</code>, <code>1</code> and <code>2</code> on the same meanings the <a href="../../cli/#exit-codes">CLI</a> gives them. This is what makes the schema stamp checkable by the only party that can get it right: a generator can assert in its own test suite that the file it wrote is well formed and stamps what it needs, without putting the compiler in its dependency list.</p>
+<p>It is deliberately conservative. Everything it calls an error, py2tosc refuses too, so a false positive would be the failure that matters; the reverse is not promised, because it resolves nothing and so cannot see a layout that will not fit, a <code>sizes</code> that does not match its children, or a property value that will not coerce. What it does see is the failure class the dialect exists to close -- a key nothing reads -- plus a <code>$name</code> no repeat binds, a binding a control cannot carry, and a schema stamped below what the file uses.</p>
+<p>Its tables are generated from py2tosc by <code>scripts/make_check_json.py</code> and compared against the live ones by <code>tests/test_check_json.py</code>, so a copy that has gone stale is a failing test here rather than a wrong answer somewhere else. A description declaring a schema newer than the tables know says so, and says to regenerate.</p>
 <h2 id="stability">Stability<a class="headerlink" href="#stability" title="Permanent link">&para;</a></h2>
-<p>This dialect is a description of what <code>py2tosc.ui</code> does, so it inherits <code>ui</code>'s carve-out from the <a href="../../stability/">stability policy</a>: it may change in a minor release, where the faithful encoding may not. It carries a <code>schema</code> number for the case where a change would stop an already written description from building.</p>
+<p>This dialect is a description of what <code>py2tosc.ui</code> does, so it inherits <code>ui</code>'s carve-out from the <a href="../../stability/">stability policy</a>: it may change in a minor release, where the faithful encoding may not. It carries a <code>schema</code> number of its own for the case where a change would stop an already written description from building, and it is at 3.</p>
+<p><strong>The <code>schema</code> key is the producer's to stamp.</strong> This is the one format here written by something other than py2tosc, and a description carrying no <code>schema</code> means "whatever the reader is" -- harmless in a file a person wrote and opened once, and the ambiguity a version number exists to remove in one a program emits. <code>py2tosc.ui_json.required_schema(data)</code> is the number to stamp -- the lowest schema that builds that description -- so a generator can ask rather than remember. On the reading side, <code>SCHEMAS</code> is every schema the installed release builds and <code>supports(n)</code> asks about one, so a generator can also check that the release it is running against will read what it is about to write. A schema above the range is a <code>SchemaError</code> rather than a bare <code>FormatError</code>, because it is the one reading failure whose remedy is not in the file.</p>
+<p>Understating the stamp is the mistake nothing catches by building, because the reader that could catch it is by definition new enough to build the file -- it is caught by whoever opens it on an older release, and what they see is a message about a node. So <code>py2tosc validate</code> warns on a description that declares less than it uses, or that stamps nothing while using something new:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="gp">$ </span>py2tosc<span class="w"> </span>validate<span class="w"> </span>synth.ui.json
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="go">warning: &lt;envelope&gt;: the description declares schema 1 and uses schema 2; a release reading only schema 1 will refuse it with a message about a node</span>
+</code></pre></div>
+<p>One limit is worth knowing. <code>required_schema</code> detects spellings, not meanings: a schema that changed what an existing spelling <em>does</em> leaves a description textually identical, so it reports the older number and the warning stays quiet. For that class the guard is a file of expected output, not a version number.</p>
 <p>Nothing it produces is unusual. What comes out is an ordinary <code>Control</code> tree, indistinguishable from one built in Python, so if the dialect ever becomes inconvenient the layouts it built remain valid.</p>
 
 

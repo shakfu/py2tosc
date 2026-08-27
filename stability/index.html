@@ -1383,6 +1383,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../api/render/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rendering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../api/surface/" class="md-nav__link">
         
   
@@ -1841,7 +1869,12 @@ provisional.</strong></p>
 <p><code>py2tosc.ui_json</code> is provisional for the same reason and by the same rule. It is
 a JSON description of what the combinators do, so it cannot be steadier than
 what it describes. It carries a <code>schema</code> number of its own for the case where a
-change would stop an already written description from building.</p>
+change would stop an already written description from building; it is at 3: schema 2
+added the choice a repeat makes with <code>case</code> and <code>when</code>, and schema 3 let
+that choice appear among children and bindings too. Because this
+is the one dialect py2tosc reads and never writes, the producer stamps that
+number, and <code>ui_json.SCHEMAS</code> and <code>ui_json.supports</code> are what a producer asks
+before it does.</p>
 <p>Everything <code>ui</code> builds is an ordinary <code>Control</code>, <code>OscMessage</code> or <code>MidiMessage</code>.
 Nothing it produces can reach a file that hand-written code could not. If a
 change to <code>ui</code> is ever inconvenient, the documents it built remain valid and
@@ -1863,7 +1896,9 @@ two exceptions, since it round-trips the model rather than the file: a layout
 written to JSON and read back reproduces the bytes it started as. That encoding
 carries a <code>schema</code> number of its own. A change that would stop an already
 written file from reading gets a new one, and a file declaring an older schema
-keeps reading.</p>
+keeps reading. <code>json_codec.SCHEMAS</code> is every schema a release reads, and one
+above it is refused with a <code>SchemaError</code> -- the only reading failure whose
+remedy is to upgrade py2tosc rather than to fix the file.</p>
 <p><strong>Loading never rejects a layout TouchOSC accepts.</strong> The format permits
 properties nobody has heard of -- that is what makes custom properties useful
 -- so unknown properties are read and written back rather than refused.

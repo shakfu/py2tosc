@@ -1389,6 +1389,28 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#py2tosc.ui_json.required_schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        required_schema
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#py2tosc.ui_json.supports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        supports
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#py2tosc.ui_json.build" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1434,6 +1456,34 @@
     
   
     Generating Python
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../render/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rendering
   
 
     
@@ -1590,6 +1640,28 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#py2tosc.ui_json.required_schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        required_schema
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#py2tosc.ui_json.supports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        supports
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#py2tosc.ui_json.build" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1633,7 +1705,280 @@
 
 <h1 id="layout-descriptions">Layout descriptions<a class="headerlink" href="#layout-descriptions" title="Permanent link">&para;</a></h1>
 <p>Building a layout from JSON that describes it, rather than from JSON that holds it. The format is documented in <a href="../../guide/ui-json/">Describing a layout in JSON</a>, and unlike everything else here it is read only: a resolved layout cannot be turned back into the description that built it.</p>
+<p>The dialect carries a schema number, and it is the producer that stamps it: this is the one format here written by something other than py2tosc, so whatever writes a description is the thing that has to say which schema it wrote. <code>SCHEMAS</code> and <code>supports</code> are how a generator asks what the installed release reads, before it writes a file that release cannot build.</p>
+<p><code>required_schema</code> answers the other half: the lowest schema that builds a given description, which is the number to stamp. Asking rather than remembering is what keeps the key honest, since nothing downstream audits it.</p>
 
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="py2tosc.ui_json.required_schema" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">required_schema</span>
+
+
+<a href="#py2tosc.ui_json.required_schema" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">required_schema</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span>
+</code></pre></div>
+
+    <div class="doc doc-contents first">
+
+        <p>The lowest schema that builds a description.</p>
+<p>What a producer stamps. Asking rather than remembering is what keeps the
+<code>schema</code> key honest: this dialect is read and never written, so the number
+is a claim the writer makes about its own output, and nothing downstream
+audits it. A generated file whose stamp is below what it uses still builds
+on a new enough reader and fails on an older one with a message about a
+node, which is the confusion <code>supports</code> exists to prevent.</p>
+<p>It detects spellings, not meanings. A schema that changed what an existing
+spelling <em>does</em> -- different default sizing, say -- leaves a description
+textually identical, so this returns the older number and says nothing. For
+that class the guard is a golden file, not a version number.</p>
+<p>Nothing here validates. A description this cannot build gets an answer
+anyway, because the question is what spellings it uses rather than whether
+they are used correctly; <code>build</code> is what says no.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>data</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The decoded JSON. The whole envelope, or any part of one.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The lowest schema in <code>SCHEMAS</code> that reads it.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/py2tosc/ui_json.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1125">1125</a></span>
+<span class="normal"><a href="#__codelineno-0-1126">1126</a></span>
+<span class="normal"><a href="#__codelineno-0-1127">1127</a></span>
+<span class="normal"><a href="#__codelineno-0-1128">1128</a></span>
+<span class="normal"><a href="#__codelineno-0-1129">1129</a></span>
+<span class="normal"><a href="#__codelineno-0-1130">1130</a></span>
+<span class="normal"><a href="#__codelineno-0-1131">1131</a></span>
+<span class="normal"><a href="#__codelineno-0-1132">1132</a></span>
+<span class="normal"><a href="#__codelineno-0-1133">1133</a></span>
+<span class="normal"><a href="#__codelineno-0-1134">1134</a></span>
+<span class="normal"><a href="#__codelineno-0-1135">1135</a></span>
+<span class="normal"><a href="#__codelineno-0-1136">1136</a></span>
+<span class="normal"><a href="#__codelineno-0-1137">1137</a></span>
+<span class="normal"><a href="#__codelineno-0-1138">1138</a></span>
+<span class="normal"><a href="#__codelineno-0-1139">1139</a></span>
+<span class="normal"><a href="#__codelineno-0-1140">1140</a></span>
+<span class="normal"><a href="#__codelineno-0-1141">1141</a></span>
+<span class="normal"><a href="#__codelineno-0-1142">1142</a></span>
+<span class="normal"><a href="#__codelineno-0-1143">1143</a></span>
+<span class="normal"><a href="#__codelineno-0-1144">1144</a></span>
+<span class="normal"><a href="#__codelineno-0-1145">1145</a></span>
+<span class="normal"><a href="#__codelineno-0-1146">1146</a></span>
+<span class="normal"><a href="#__codelineno-0-1147">1147</a></span>
+<span class="normal"><a href="#__codelineno-0-1148">1148</a></span>
+<span class="normal"><a href="#__codelineno-0-1149">1149</a></span>
+<span class="normal"><a href="#__codelineno-0-1150">1150</a></span>
+<span class="normal"><a href="#__codelineno-0-1151">1151</a></span>
+<span class="normal"><a href="#__codelineno-0-1152">1152</a></span>
+<span class="normal"><a href="#__codelineno-0-1153">1153</a></span>
+<span class="normal"><a href="#__codelineno-0-1154">1154</a></span>
+<span class="normal"><a href="#__codelineno-0-1155">1155</a></span>
+<span class="normal"><a href="#__codelineno-0-1156">1156</a></span>
+<span class="normal"><a href="#__codelineno-0-1157">1157</a></span>
+<span class="normal"><a href="#__codelineno-0-1158">1158</a></span>
+<span class="normal"><a href="#__codelineno-0-1159">1159</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1125" name="__codelineno-0-1125"></a><span class="k">def</span><span class="w"> </span><span class="nf">required_schema</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<a id="__codelineno-0-1126" name="__codelineno-0-1126"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;The lowest schema that builds a description.</span>
+<a id="__codelineno-0-1127" name="__codelineno-0-1127"></a>
+<a id="__codelineno-0-1128" name="__codelineno-0-1128"></a><span class="sd">    What a producer stamps. Asking rather than remembering is what keeps the</span>
+<a id="__codelineno-0-1129" name="__codelineno-0-1129"></a><span class="sd">    `schema` key honest: this dialect is read and never written, so the number</span>
+<a id="__codelineno-0-1130" name="__codelineno-0-1130"></a><span class="sd">    is a claim the writer makes about its own output, and nothing downstream</span>
+<a id="__codelineno-0-1131" name="__codelineno-0-1131"></a><span class="sd">    audits it. A generated file whose stamp is below what it uses still builds</span>
+<a id="__codelineno-0-1132" name="__codelineno-0-1132"></a><span class="sd">    on a new enough reader and fails on an older one with a message about a</span>
+<a id="__codelineno-0-1133" name="__codelineno-0-1133"></a><span class="sd">    node, which is the confusion `supports` exists to prevent.</span>
+<a id="__codelineno-0-1134" name="__codelineno-0-1134"></a>
+<a id="__codelineno-0-1135" name="__codelineno-0-1135"></a><span class="sd">    It detects spellings, not meanings. A schema that changed what an existing</span>
+<a id="__codelineno-0-1136" name="__codelineno-0-1136"></a><span class="sd">    spelling *does* -- different default sizing, say -- leaves a description</span>
+<a id="__codelineno-0-1137" name="__codelineno-0-1137"></a><span class="sd">    textually identical, so this returns the older number and says nothing. For</span>
+<a id="__codelineno-0-1138" name="__codelineno-0-1138"></a><span class="sd">    that class the guard is a golden file, not a version number.</span>
+<a id="__codelineno-0-1139" name="__codelineno-0-1139"></a>
+<a id="__codelineno-0-1140" name="__codelineno-0-1140"></a><span class="sd">    Nothing here validates. A description this cannot build gets an answer</span>
+<a id="__codelineno-0-1141" name="__codelineno-0-1141"></a><span class="sd">    anyway, because the question is what spellings it uses rather than whether</span>
+<a id="__codelineno-0-1142" name="__codelineno-0-1142"></a><span class="sd">    they are used correctly; `build` is what says no.</span>
+<a id="__codelineno-0-1143" name="__codelineno-0-1143"></a>
+<a id="__codelineno-0-1144" name="__codelineno-0-1144"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-1145" name="__codelineno-0-1145"></a><span class="sd">        data: The decoded JSON. The whole envelope, or any part of one.</span>
+<a id="__codelineno-0-1146" name="__codelineno-0-1146"></a>
+<a id="__codelineno-0-1147" name="__codelineno-0-1147"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-1148" name="__codelineno-0-1148"></a><span class="sd">        The lowest schema in `SCHEMAS` that reads it.</span>
+<a id="__codelineno-0-1149" name="__codelineno-0-1149"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1150" name="__codelineno-0-1150"></a>    <span class="n">needed</span> <span class="o">=</span> <span class="n">SCHEMAS</span><span class="o">.</span><span class="n">start</span>
+<a id="__codelineno-0-1151" name="__codelineno-0-1151"></a>    <span class="n">pending</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
+<a id="__codelineno-0-1152" name="__codelineno-0-1152"></a>    <span class="k">while</span> <span class="n">pending</span><span class="p">:</span>
+<a id="__codelineno-0-1153" name="__codelineno-0-1153"></a>        <span class="n">item</span> <span class="o">=</span> <span class="n">pending</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+<a id="__codelineno-0-1154" name="__codelineno-0-1154"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+<a id="__codelineno-0-1155" name="__codelineno-0-1155"></a>            <span class="n">needed</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">needed</span><span class="p">,</span> <span class="n">_needs</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+<a id="__codelineno-0-1156" name="__codelineno-0-1156"></a>            <span class="n">pending</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<a id="__codelineno-0-1157" name="__codelineno-0-1157"></a>        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+<a id="__codelineno-0-1158" name="__codelineno-0-1158"></a>            <span class="n">pending</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+<a id="__codelineno-0-1159" name="__codelineno-0-1159"></a>    <span class="k">return</span> <span class="n">needed</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="py2tosc.ui_json.supports" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">supports</span>
+
+
+<a href="#py2tosc.ui_json.supports" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">supports</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</code></pre></div>
+
+    <div class="doc doc-contents first">
+
+        <p>Whether this release builds a description declaring that schema.</p>
+<p>The question a generator has before it writes one. Asking here is what lets
+it fail with a sentence naming its own remedy -- this py2tosc reads schemas
+1 to 2, and the generator emits 3 -- rather than with a <code>SchemaError</code> raised
+from inside a file that is not the thing that is wrong.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>schema</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The schema number a description declares or would declare.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True if this release reads it.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/py2tosc/ui_json.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1162">1162</a></span>
+<span class="normal"><a href="#__codelineno-0-1163">1163</a></span>
+<span class="normal"><a href="#__codelineno-0-1164">1164</a></span>
+<span class="normal"><a href="#__codelineno-0-1165">1165</a></span>
+<span class="normal"><a href="#__codelineno-0-1166">1166</a></span>
+<span class="normal"><a href="#__codelineno-0-1167">1167</a></span>
+<span class="normal"><a href="#__codelineno-0-1168">1168</a></span>
+<span class="normal"><a href="#__codelineno-0-1169">1169</a></span>
+<span class="normal"><a href="#__codelineno-0-1170">1170</a></span>
+<span class="normal"><a href="#__codelineno-0-1171">1171</a></span>
+<span class="normal"><a href="#__codelineno-0-1172">1172</a></span>
+<span class="normal"><a href="#__codelineno-0-1173">1173</a></span>
+<span class="normal"><a href="#__codelineno-0-1174">1174</a></span>
+<span class="normal"><a href="#__codelineno-0-1175">1175</a></span>
+<span class="normal"><a href="#__codelineno-0-1176">1176</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1162" name="__codelineno-0-1162"></a><span class="k">def</span><span class="w"> </span><span class="nf">supports</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-1163" name="__codelineno-0-1163"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether this release builds a description declaring that schema.</span>
+<a id="__codelineno-0-1164" name="__codelineno-0-1164"></a>
+<a id="__codelineno-0-1165" name="__codelineno-0-1165"></a><span class="sd">    The question a generator has before it writes one. Asking here is what lets</span>
+<a id="__codelineno-0-1166" name="__codelineno-0-1166"></a><span class="sd">    it fail with a sentence naming its own remedy -- this py2tosc reads schemas</span>
+<a id="__codelineno-0-1167" name="__codelineno-0-1167"></a><span class="sd">    1 to 2, and the generator emits 3 -- rather than with a `SchemaError` raised</span>
+<a id="__codelineno-0-1168" name="__codelineno-0-1168"></a><span class="sd">    from inside a file that is not the thing that is wrong.</span>
+<a id="__codelineno-0-1169" name="__codelineno-0-1169"></a>
+<a id="__codelineno-0-1170" name="__codelineno-0-1170"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-1171" name="__codelineno-0-1171"></a><span class="sd">        schema: The schema number a description declares or would declare.</span>
+<a id="__codelineno-0-1172" name="__codelineno-0-1172"></a>
+<a id="__codelineno-0-1173" name="__codelineno-0-1173"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-1174" name="__codelineno-0-1174"></a><span class="sd">        True if this release reads it.</span>
+<a id="__codelineno-0-1175" name="__codelineno-0-1175"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1176" name="__codelineno-0-1176"></a>    <span class="k">return</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">SCHEMAS</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-function">
 
@@ -1727,9 +2072,19 @@ the whole thing is resolved, so what comes back is sized and ready to save.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the envelope is not this dialect, declares a schema
-this release does not read, or holds a node that cannot be built.
-The message names the node it gave up on.</p>
+                <p>If the envelope is not this dialect, or holds a node that
+cannot be built. The message names the node it gave up on.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="SchemaError (py2tosc.errors.SchemaError)" href="../errors/#py2tosc.SchemaError">SchemaError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the description declares a schema this release does not
+read. <code>supports</code> answers that before a file is written.</p>
               </div>
             </td>
           </tr>
@@ -1739,111 +2094,105 @@ The message names the node it gave up on.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/py2tosc/ui_json.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-876">876</a></span>
-<span class="normal"><a href="#__codelineno-0-877">877</a></span>
-<span class="normal"><a href="#__codelineno-0-878">878</a></span>
-<span class="normal"><a href="#__codelineno-0-879">879</a></span>
-<span class="normal"><a href="#__codelineno-0-880">880</a></span>
-<span class="normal"><a href="#__codelineno-0-881">881</a></span>
-<span class="normal"><a href="#__codelineno-0-882">882</a></span>
-<span class="normal"><a href="#__codelineno-0-883">883</a></span>
-<span class="normal"><a href="#__codelineno-0-884">884</a></span>
-<span class="normal"><a href="#__codelineno-0-885">885</a></span>
-<span class="normal"><a href="#__codelineno-0-886">886</a></span>
-<span class="normal"><a href="#__codelineno-0-887">887</a></span>
-<span class="normal"><a href="#__codelineno-0-888">888</a></span>
-<span class="normal"><a href="#__codelineno-0-889">889</a></span>
-<span class="normal"><a href="#__codelineno-0-890">890</a></span>
-<span class="normal"><a href="#__codelineno-0-891">891</a></span>
-<span class="normal"><a href="#__codelineno-0-892">892</a></span>
-<span class="normal"><a href="#__codelineno-0-893">893</a></span>
-<span class="normal"><a href="#__codelineno-0-894">894</a></span>
-<span class="normal"><a href="#__codelineno-0-895">895</a></span>
-<span class="normal"><a href="#__codelineno-0-896">896</a></span>
-<span class="normal"><a href="#__codelineno-0-897">897</a></span>
-<span class="normal"><a href="#__codelineno-0-898">898</a></span>
-<span class="normal"><a href="#__codelineno-0-899">899</a></span>
-<span class="normal"><a href="#__codelineno-0-900">900</a></span>
-<span class="normal"><a href="#__codelineno-0-901">901</a></span>
-<span class="normal"><a href="#__codelineno-0-902">902</a></span>
-<span class="normal"><a href="#__codelineno-0-903">903</a></span>
-<span class="normal"><a href="#__codelineno-0-904">904</a></span>
-<span class="normal"><a href="#__codelineno-0-905">905</a></span>
-<span class="normal"><a href="#__codelineno-0-906">906</a></span>
-<span class="normal"><a href="#__codelineno-0-907">907</a></span>
-<span class="normal"><a href="#__codelineno-0-908">908</a></span>
-<span class="normal"><a href="#__codelineno-0-909">909</a></span>
-<span class="normal"><a href="#__codelineno-0-910">910</a></span>
-<span class="normal"><a href="#__codelineno-0-911">911</a></span>
-<span class="normal"><a href="#__codelineno-0-912">912</a></span>
-<span class="normal"><a href="#__codelineno-0-913">913</a></span>
-<span class="normal"><a href="#__codelineno-0-914">914</a></span>
-<span class="normal"><a href="#__codelineno-0-915">915</a></span>
-<span class="normal"><a href="#__codelineno-0-916">916</a></span>
-<span class="normal"><a href="#__codelineno-0-917">917</a></span>
-<span class="normal"><a href="#__codelineno-0-918">918</a></span>
-<span class="normal"><a href="#__codelineno-0-919">919</a></span>
-<span class="normal"><a href="#__codelineno-0-920">920</a></span>
-<span class="normal"><a href="#__codelineno-0-921">921</a></span>
-<span class="normal"><a href="#__codelineno-0-922">922</a></span>
-<span class="normal"><a href="#__codelineno-0-923">923</a></span>
-<span class="normal"><a href="#__codelineno-0-924">924</a></span>
-<span class="normal"><a href="#__codelineno-0-925">925</a></span>
-<span class="normal"><a href="#__codelineno-0-926">926</a></span>
-<span class="normal"><a href="#__codelineno-0-927">927</a></span>
-<span class="normal"><a href="#__codelineno-0-928">928</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-876" name="__codelineno-0-876"></a><span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Document</span><span class="p">:</span>
-<a id="__codelineno-0-877" name="__codelineno-0-877"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a layout from already-parsed JSON.</span>
-<a id="__codelineno-0-878" name="__codelineno-0-878"></a>
-<a id="__codelineno-0-879" name="__codelineno-0-879"></a><span class="sd">    The tree is built, every `connect` is pointed at the control it named, and</span>
-<a id="__codelineno-0-880" name="__codelineno-0-880"></a><span class="sd">    the whole thing is resolved, so what comes back is sized and ready to save.</span>
-<a id="__codelineno-0-881" name="__codelineno-0-881"></a>
-<a id="__codelineno-0-882" name="__codelineno-0-882"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-883" name="__codelineno-0-883"></a><span class="sd">        data: The decoded JSON.</span>
-<a id="__codelineno-0-884" name="__codelineno-0-884"></a>
-<a id="__codelineno-0-885" name="__codelineno-0-885"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-886" name="__codelineno-0-886"></a><span class="sd">        The document.</span>
-<a id="__codelineno-0-887" name="__codelineno-0-887"></a>
-<a id="__codelineno-0-888" name="__codelineno-0-888"></a><span class="sd">    Raises:</span>
-<a id="__codelineno-0-889" name="__codelineno-0-889"></a><span class="sd">        FormatError: If the envelope is not this dialect, declares a schema</span>
-<a id="__codelineno-0-890" name="__codelineno-0-890"></a><span class="sd">            this release does not read, or holds a node that cannot be built.</span>
-<a id="__codelineno-0-891" name="__codelineno-0-891"></a><span class="sd">            The message names the node it gave up on.</span>
-<a id="__codelineno-0-892" name="__codelineno-0-892"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-893" name="__codelineno-0-893"></a>    <span class="n">document</span> <span class="o">=</span> <span class="n">_object</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;the layout&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-894" name="__codelineno-0-894"></a>    <span class="n">check_keys</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="n">_ENVELOPE_KEYS</span><span class="p">,</span> <span class="s2">&quot;the layout&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-895" name="__codelineno-0-895"></a>
-<a id="__codelineno-0-896" name="__codelineno-0-896"></a>    <span class="n">declared</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;format&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-897" name="__codelineno-0-897"></a>    <span class="k">if</span> <span class="n">declared</span> <span class="o">!=</span> <span class="n">DIALECT</span><span class="p">:</span>
-<a id="__codelineno-0-898" name="__codelineno-0-898"></a>        <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">declared</span><span class="si">!r}</span><span class="s2"> is not a </span><span class="si">{</span><span class="n">DIALECT</span><span class="si">}</span><span class="s2"> layout&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-899" name="__codelineno-0-899"></a>
-<a id="__codelineno-0-900" name="__codelineno-0-900"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;schema&quot;</span><span class="p">,</span> <span class="n">SCHEMA</span><span class="p">)</span>
-<a id="__codelineno-0-901" name="__codelineno-0-901"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">schema</span> <span class="o">&gt;</span> <span class="n">SCHEMA</span><span class="p">:</span>
-<a id="__codelineno-0-902" name="__codelineno-0-902"></a>        <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span>
-<a id="__codelineno-0-903" name="__codelineno-0-903"></a>            <span class="sa">f</span><span class="s2">&quot;schema </span><span class="si">{</span><span class="n">schema</span><span class="si">!r}</span><span class="s2"> is newer than this release reads (schema </span><span class="si">{</span><span class="n">SCHEMA</span><span class="si">}</span><span class="s2">)&quot;</span>
-<a id="__codelineno-0-904" name="__codelineno-0-904"></a>        <span class="p">)</span>
-<a id="__codelineno-0-905" name="__codelineno-0-905"></a>
-<a id="__codelineno-0-906" name="__codelineno-0-906"></a>    <span class="k">if</span> <span class="s2">&quot;root&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">document</span><span class="p">:</span>
-<a id="__codelineno-0-907" name="__codelineno-0-907"></a>        <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="s2">&quot;the layout holds no root node&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-908" name="__codelineno-0-908"></a>
-<a id="__codelineno-0-909" name="__codelineno-0-909"></a>    <span class="n">version</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lexml&quot;</span><span class="p">,</span> <span class="s2">&quot;6&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-910" name="__codelineno-0-910"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-<a id="__codelineno-0-911" name="__codelineno-0-911"></a>        <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;lexml should be a string, found </span><span class="si">{</span><span class="n">describe</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-912" name="__codelineno-0-912"></a>
-<a id="__codelineno-0-913" name="__codelineno-0-913"></a>    <span class="n">deferred</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">_Deferred</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-914" name="__codelineno-0-914"></a>    <span class="n">described</span> <span class="o">=</span> <span class="n">_object</span><span class="p">(</span><span class="n">document</span><span class="p">[</span><span class="s2">&quot;root&quot;</span><span class="p">],</span> <span class="s2">&quot;root&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-915" name="__codelineno-0-915"></a>    <span class="n">root</span> <span class="o">=</span> <span class="n">_node</span><span class="p">(</span><span class="n">described</span><span class="p">,</span> <span class="s2">&quot;root&quot;</span><span class="p">,</span> <span class="n">deferred</span><span class="p">)</span>
-<a id="__codelineno-0-916" name="__codelineno-0-916"></a>
-<a id="__codelineno-0-917" name="__codelineno-0-917"></a>    <span class="c1"># Every control type defaults a frame, so the root having one says nothing</span>
-<a id="__codelineno-0-918" name="__codelineno-0-918"></a>    <span class="c1"># about whether the layout asked for a canvas. What the file wrote does.</span>
-<a id="__codelineno-0-919" name="__codelineno-0-919"></a>    <span class="n">given</span> <span class="o">=</span> <span class="n">_object</span><span class="p">(</span><span class="n">described</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;props&quot;</span><span class="p">,</span> <span class="p">{}),</span> <span class="s2">&quot;root.props&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-920" name="__codelineno-0-920"></a>    <span class="k">if</span> <span class="s2">&quot;frame&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">described</span> <span class="ow">and</span> <span class="s2">&quot;frame&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">given</span><span class="p">:</span>
-<a id="__codelineno-0-921" name="__codelineno-0-921"></a>        <span class="n">root</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;frame&quot;</span><span class="p">,</span> <span class="n">CANVAS</span><span class="p">)</span>
-<a id="__codelineno-0-922" name="__codelineno-0-922"></a>
-<a id="__codelineno-0-923" name="__codelineno-0-923"></a>    <span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
-<a id="__codelineno-0-924" name="__codelineno-0-924"></a>    <span class="n">_resolve_connections</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">deferred</span><span class="p">)</span>
-<a id="__codelineno-0-925" name="__codelineno-0-925"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-926" name="__codelineno-0-926"></a>        <span class="k">return</span> <span class="n">doc</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-<a id="__codelineno-0-927" name="__codelineno-0-927"></a>    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-<a id="__codelineno-0-928" name="__codelineno-0-928"></a>        <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;the layout will not resolve: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1179">1179</a></span>
+<span class="normal"><a href="#__codelineno-0-1180">1180</a></span>
+<span class="normal"><a href="#__codelineno-0-1181">1181</a></span>
+<span class="normal"><a href="#__codelineno-0-1182">1182</a></span>
+<span class="normal"><a href="#__codelineno-0-1183">1183</a></span>
+<span class="normal"><a href="#__codelineno-0-1184">1184</a></span>
+<span class="normal"><a href="#__codelineno-0-1185">1185</a></span>
+<span class="normal"><a href="#__codelineno-0-1186">1186</a></span>
+<span class="normal"><a href="#__codelineno-0-1187">1187</a></span>
+<span class="normal"><a href="#__codelineno-0-1188">1188</a></span>
+<span class="normal"><a href="#__codelineno-0-1189">1189</a></span>
+<span class="normal"><a href="#__codelineno-0-1190">1190</a></span>
+<span class="normal"><a href="#__codelineno-0-1191">1191</a></span>
+<span class="normal"><a href="#__codelineno-0-1192">1192</a></span>
+<span class="normal"><a href="#__codelineno-0-1193">1193</a></span>
+<span class="normal"><a href="#__codelineno-0-1194">1194</a></span>
+<span class="normal"><a href="#__codelineno-0-1195">1195</a></span>
+<span class="normal"><a href="#__codelineno-0-1196">1196</a></span>
+<span class="normal"><a href="#__codelineno-0-1197">1197</a></span>
+<span class="normal"><a href="#__codelineno-0-1198">1198</a></span>
+<span class="normal"><a href="#__codelineno-0-1199">1199</a></span>
+<span class="normal"><a href="#__codelineno-0-1200">1200</a></span>
+<span class="normal"><a href="#__codelineno-0-1201">1201</a></span>
+<span class="normal"><a href="#__codelineno-0-1202">1202</a></span>
+<span class="normal"><a href="#__codelineno-0-1203">1203</a></span>
+<span class="normal"><a href="#__codelineno-0-1204">1204</a></span>
+<span class="normal"><a href="#__codelineno-0-1205">1205</a></span>
+<span class="normal"><a href="#__codelineno-0-1206">1206</a></span>
+<span class="normal"><a href="#__codelineno-0-1207">1207</a></span>
+<span class="normal"><a href="#__codelineno-0-1208">1208</a></span>
+<span class="normal"><a href="#__codelineno-0-1209">1209</a></span>
+<span class="normal"><a href="#__codelineno-0-1210">1210</a></span>
+<span class="normal"><a href="#__codelineno-0-1211">1211</a></span>
+<span class="normal"><a href="#__codelineno-0-1212">1212</a></span>
+<span class="normal"><a href="#__codelineno-0-1213">1213</a></span>
+<span class="normal"><a href="#__codelineno-0-1214">1214</a></span>
+<span class="normal"><a href="#__codelineno-0-1215">1215</a></span>
+<span class="normal"><a href="#__codelineno-0-1216">1216</a></span>
+<span class="normal"><a href="#__codelineno-0-1217">1217</a></span>
+<span class="normal"><a href="#__codelineno-0-1218">1218</a></span>
+<span class="normal"><a href="#__codelineno-0-1219">1219</a></span>
+<span class="normal"><a href="#__codelineno-0-1220">1220</a></span>
+<span class="normal"><a href="#__codelineno-0-1221">1221</a></span>
+<span class="normal"><a href="#__codelineno-0-1222">1222</a></span>
+<span class="normal"><a href="#__codelineno-0-1223">1223</a></span>
+<span class="normal"><a href="#__codelineno-0-1224">1224</a></span>
+<span class="normal"><a href="#__codelineno-0-1225">1225</a></span>
+<span class="normal"><a href="#__codelineno-0-1226">1226</a></span>
+<span class="normal"><a href="#__codelineno-0-1227">1227</a></span>
+<span class="normal"><a href="#__codelineno-0-1228">1228</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1179" name="__codelineno-0-1179"></a><span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Document</span><span class="p">:</span>
+<a id="__codelineno-0-1180" name="__codelineno-0-1180"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a layout from already-parsed JSON.</span>
+<a id="__codelineno-0-1181" name="__codelineno-0-1181"></a>
+<a id="__codelineno-0-1182" name="__codelineno-0-1182"></a><span class="sd">    The tree is built, every `connect` is pointed at the control it named, and</span>
+<a id="__codelineno-0-1183" name="__codelineno-0-1183"></a><span class="sd">    the whole thing is resolved, so what comes back is sized and ready to save.</span>
+<a id="__codelineno-0-1184" name="__codelineno-0-1184"></a>
+<a id="__codelineno-0-1185" name="__codelineno-0-1185"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-1186" name="__codelineno-0-1186"></a><span class="sd">        data: The decoded JSON.</span>
+<a id="__codelineno-0-1187" name="__codelineno-0-1187"></a>
+<a id="__codelineno-0-1188" name="__codelineno-0-1188"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-1189" name="__codelineno-0-1189"></a><span class="sd">        The document.</span>
+<a id="__codelineno-0-1190" name="__codelineno-0-1190"></a>
+<a id="__codelineno-0-1191" name="__codelineno-0-1191"></a><span class="sd">    Raises:</span>
+<a id="__codelineno-0-1192" name="__codelineno-0-1192"></a><span class="sd">        FormatError: If the envelope is not this dialect, or holds a node that</span>
+<a id="__codelineno-0-1193" name="__codelineno-0-1193"></a><span class="sd">            cannot be built. The message names the node it gave up on.</span>
+<a id="__codelineno-0-1194" name="__codelineno-0-1194"></a><span class="sd">        SchemaError: If the description declares a schema this release does not</span>
+<a id="__codelineno-0-1195" name="__codelineno-0-1195"></a><span class="sd">            read. `supports` answers that before a file is written.</span>
+<a id="__codelineno-0-1196" name="__codelineno-0-1196"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1197" name="__codelineno-0-1197"></a>    <span class="n">document</span> <span class="o">=</span> <span class="n">_object</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;the layout&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-1198" name="__codelineno-0-1198"></a>    <span class="n">check_keys</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="n">_ENVELOPE_KEYS</span><span class="p">,</span> <span class="s2">&quot;the layout&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-1199" name="__codelineno-0-1199"></a>
+<a id="__codelineno-0-1200" name="__codelineno-0-1200"></a>    <span class="n">declared</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;format&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-1201" name="__codelineno-0-1201"></a>    <span class="k">if</span> <span class="n">declared</span> <span class="o">!=</span> <span class="n">DIALECT</span><span class="p">:</span>
+<a id="__codelineno-0-1202" name="__codelineno-0-1202"></a>        <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">declared</span><span class="si">!r}</span><span class="s2"> is not a </span><span class="si">{</span><span class="n">DIALECT</span><span class="si">}</span><span class="s2"> layout&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-1203" name="__codelineno-0-1203"></a>
+<a id="__codelineno-0-1204" name="__codelineno-0-1204"></a>    <span class="n">read_schema</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="n">SCHEMAS</span><span class="p">,</span> <span class="n">DIALECT</span><span class="p">)</span>
+<a id="__codelineno-0-1205" name="__codelineno-0-1205"></a>
+<a id="__codelineno-0-1206" name="__codelineno-0-1206"></a>    <span class="k">if</span> <span class="s2">&quot;root&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">document</span><span class="p">:</span>
+<a id="__codelineno-0-1207" name="__codelineno-0-1207"></a>        <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="s2">&quot;the layout holds no root node&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-1208" name="__codelineno-0-1208"></a>
+<a id="__codelineno-0-1209" name="__codelineno-0-1209"></a>    <span class="n">version</span> <span class="o">=</span> <span class="n">document</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lexml&quot;</span><span class="p">,</span> <span class="s2">&quot;6&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-1210" name="__codelineno-0-1210"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+<a id="__codelineno-0-1211" name="__codelineno-0-1211"></a>        <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;lexml should be a string, found </span><span class="si">{</span><span class="n">describe</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-1212" name="__codelineno-0-1212"></a>
+<a id="__codelineno-0-1213" name="__codelineno-0-1213"></a>    <span class="n">deferred</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">_Deferred</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-1214" name="__codelineno-0-1214"></a>    <span class="n">described</span> <span class="o">=</span> <span class="n">_object</span><span class="p">(</span><span class="n">document</span><span class="p">[</span><span class="s2">&quot;root&quot;</span><span class="p">],</span> <span class="s2">&quot;root&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-1215" name="__codelineno-0-1215"></a>    <span class="n">root</span> <span class="o">=</span> <span class="n">_node</span><span class="p">(</span><span class="n">described</span><span class="p">,</span> <span class="s2">&quot;root&quot;</span><span class="p">,</span> <span class="n">deferred</span><span class="p">)</span>
+<a id="__codelineno-0-1216" name="__codelineno-0-1216"></a>
+<a id="__codelineno-0-1217" name="__codelineno-0-1217"></a>    <span class="c1"># Every control type defaults a frame, so the root having one says nothing</span>
+<a id="__codelineno-0-1218" name="__codelineno-0-1218"></a>    <span class="c1"># about whether the layout asked for a canvas. What the file wrote does.</span>
+<a id="__codelineno-0-1219" name="__codelineno-0-1219"></a>    <span class="n">given</span> <span class="o">=</span> <span class="n">_object</span><span class="p">(</span><span class="n">described</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;props&quot;</span><span class="p">,</span> <span class="p">{}),</span> <span class="s2">&quot;root.props&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-1220" name="__codelineno-0-1220"></a>    <span class="k">if</span> <span class="s2">&quot;frame&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">described</span> <span class="ow">and</span> <span class="s2">&quot;frame&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">given</span><span class="p">:</span>
+<a id="__codelineno-0-1221" name="__codelineno-0-1221"></a>        <span class="n">root</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;frame&quot;</span><span class="p">,</span> <span class="n">CANVAS</span><span class="p">)</span>
+<a id="__codelineno-0-1222" name="__codelineno-0-1222"></a>
+<a id="__codelineno-0-1223" name="__codelineno-0-1223"></a>    <span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
+<a id="__codelineno-0-1224" name="__codelineno-0-1224"></a>    <span class="n">_resolve_connections</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">deferred</span><span class="p">)</span>
+<a id="__codelineno-0-1225" name="__codelineno-0-1225"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-1226" name="__codelineno-0-1226"></a>        <span class="k">return</span> <span class="n">doc</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<a id="__codelineno-0-1227" name="__codelineno-0-1227"></a>    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+<a id="__codelineno-0-1228" name="__codelineno-0-1228"></a>        <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;the layout will not resolve: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -1945,45 +2294,57 @@ build.</p>
               </div>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="SchemaError (py2tosc.errors.SchemaError)" href="../errors/#py2tosc.SchemaError">SchemaError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If it declares a schema this release does not read.</p>
+              </div>
+            </td>
+          </tr>
       </tbody>
     </table>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/py2tosc/ui_json.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-931">931</a></span>
-<span class="normal"><a href="#__codelineno-0-932">932</a></span>
-<span class="normal"><a href="#__codelineno-0-933">933</a></span>
-<span class="normal"><a href="#__codelineno-0-934">934</a></span>
-<span class="normal"><a href="#__codelineno-0-935">935</a></span>
-<span class="normal"><a href="#__codelineno-0-936">936</a></span>
-<span class="normal"><a href="#__codelineno-0-937">937</a></span>
-<span class="normal"><a href="#__codelineno-0-938">938</a></span>
-<span class="normal"><a href="#__codelineno-0-939">939</a></span>
-<span class="normal"><a href="#__codelineno-0-940">940</a></span>
-<span class="normal"><a href="#__codelineno-0-941">941</a></span>
-<span class="normal"><a href="#__codelineno-0-942">942</a></span>
-<span class="normal"><a href="#__codelineno-0-943">943</a></span>
-<span class="normal"><a href="#__codelineno-0-944">944</a></span>
-<span class="normal"><a href="#__codelineno-0-945">945</a></span>
-<span class="normal"><a href="#__codelineno-0-946">946</a></span>
-<span class="normal"><a href="#__codelineno-0-947">947</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-931" name="__codelineno-0-931"></a><span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Document</span><span class="p">:</span>
-<a id="__codelineno-0-932" name="__codelineno-0-932"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a layout from JSON text.</span>
-<a id="__codelineno-0-933" name="__codelineno-0-933"></a>
-<a id="__codelineno-0-934" name="__codelineno-0-934"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-935" name="__codelineno-0-935"></a><span class="sd">        source: The description, as text or UTF-8 bytes.</span>
-<a id="__codelineno-0-936" name="__codelineno-0-936"></a>
-<a id="__codelineno-0-937" name="__codelineno-0-937"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-938" name="__codelineno-0-938"></a><span class="sd">        The document, built and resolved.</span>
-<a id="__codelineno-0-939" name="__codelineno-0-939"></a>
-<a id="__codelineno-0-940" name="__codelineno-0-940"></a><span class="sd">    Raises:</span>
-<a id="__codelineno-0-941" name="__codelineno-0-941"></a><span class="sd">        FormatError: If the source is not JSON, or is not a layout this can</span>
-<a id="__codelineno-0-942" name="__codelineno-0-942"></a><span class="sd">            build.</span>
-<a id="__codelineno-0-943" name="__codelineno-0-943"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-944" name="__codelineno-0-944"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-945" name="__codelineno-0-945"></a>        <span class="k">return</span> <span class="n">build</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
-<a id="__codelineno-0-946" name="__codelineno-0-946"></a>    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-<a id="__codelineno-0-947" name="__codelineno-0-947"></a>        <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;not valid JSON: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1231">1231</a></span>
+<span class="normal"><a href="#__codelineno-0-1232">1232</a></span>
+<span class="normal"><a href="#__codelineno-0-1233">1233</a></span>
+<span class="normal"><a href="#__codelineno-0-1234">1234</a></span>
+<span class="normal"><a href="#__codelineno-0-1235">1235</a></span>
+<span class="normal"><a href="#__codelineno-0-1236">1236</a></span>
+<span class="normal"><a href="#__codelineno-0-1237">1237</a></span>
+<span class="normal"><a href="#__codelineno-0-1238">1238</a></span>
+<span class="normal"><a href="#__codelineno-0-1239">1239</a></span>
+<span class="normal"><a href="#__codelineno-0-1240">1240</a></span>
+<span class="normal"><a href="#__codelineno-0-1241">1241</a></span>
+<span class="normal"><a href="#__codelineno-0-1242">1242</a></span>
+<span class="normal"><a href="#__codelineno-0-1243">1243</a></span>
+<span class="normal"><a href="#__codelineno-0-1244">1244</a></span>
+<span class="normal"><a href="#__codelineno-0-1245">1245</a></span>
+<span class="normal"><a href="#__codelineno-0-1246">1246</a></span>
+<span class="normal"><a href="#__codelineno-0-1247">1247</a></span>
+<span class="normal"><a href="#__codelineno-0-1248">1248</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1231" name="__codelineno-0-1231"></a><span class="k">def</span><span class="w"> </span><span class="nf">from_json</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Document</span><span class="p">:</span>
+<a id="__codelineno-0-1232" name="__codelineno-0-1232"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a layout from JSON text.</span>
+<a id="__codelineno-0-1233" name="__codelineno-0-1233"></a>
+<a id="__codelineno-0-1234" name="__codelineno-0-1234"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-1235" name="__codelineno-0-1235"></a><span class="sd">        source: The description, as text or UTF-8 bytes.</span>
+<a id="__codelineno-0-1236" name="__codelineno-0-1236"></a>
+<a id="__codelineno-0-1237" name="__codelineno-0-1237"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-1238" name="__codelineno-0-1238"></a><span class="sd">        The document, built and resolved.</span>
+<a id="__codelineno-0-1239" name="__codelineno-0-1239"></a>
+<a id="__codelineno-0-1240" name="__codelineno-0-1240"></a><span class="sd">    Raises:</span>
+<a id="__codelineno-0-1241" name="__codelineno-0-1241"></a><span class="sd">        FormatError: If the source is not JSON, or is not a layout this can</span>
+<a id="__codelineno-0-1242" name="__codelineno-0-1242"></a><span class="sd">            build.</span>
+<a id="__codelineno-0-1243" name="__codelineno-0-1243"></a><span class="sd">        SchemaError: If it declares a schema this release does not read.</span>
+<a id="__codelineno-0-1244" name="__codelineno-0-1244"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-1245" name="__codelineno-0-1245"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-1246" name="__codelineno-0-1246"></a>        <span class="k">return</span> <span class="n">build</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+<a id="__codelineno-0-1247" name="__codelineno-0-1247"></a>    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+<a id="__codelineno-0-1248" name="__codelineno-0-1248"></a>        <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;not valid JSON: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

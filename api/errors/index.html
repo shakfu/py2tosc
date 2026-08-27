@@ -1355,6 +1355,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#py2tosc.SchemaError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SchemaError
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#py2tosc.ValidationError" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1445,6 +1456,34 @@
     
   
     Generating Python
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../render/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rendering
   
 
     
@@ -1623,6 +1662,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#py2tosc.SchemaError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SchemaError
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#py2tosc.ValidationError" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1665,6 +1715,11 @@ ordinary Python harder to read without telling the caller anything new.</p>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">except</span> <span class="n">py2tosc</span><span class="o">.</span><span class="n">FormatError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">: not a layout (</span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
 </code></pre></div>
+<p>One failure is separated out because its remedy is: a file declaring a schema
+newer than the installed release reads is a <code>SchemaError</code>, where the
+description is fine and the reader is old. A generator can ask before it writes
+instead -- <code>py2tosc.ui_json.supports(3)</code> and <code>py2tosc.ui_json.SCHEMAS</code> answer
+the same question without a file to raise about.</p>
 
 
 <div class="doc doc-object doc-class">
@@ -1782,6 +1837,74 @@ working, and code that wants the narrower type can ask for it.</p>
 <a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="sd">    documented themselves as raising. Code written against that contract keeps</span>
 <a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="sd">    working, and code that wants the narrower type can ask for it.</span>
 <a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="sd">    &quot;&quot;&quot;</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="py2tosc.SchemaError" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">SchemaError</span>
+
+
+<a href="#py2tosc.SchemaError" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="FormatError (py2tosc.errors.FormatError)" href="#py2tosc.FormatError">FormatError</a></code></p>
+
+
+
+        <p>Raised when a JSON dialect is handed a schema newer than it reads.</p>
+<p>Both dialects carry a schema number, and both refuse one above their own
+rather than guess at what a key they have never seen was meant to do. That
+failure is a <code>FormatError</code> like any other, but its remedy is the only one
+of them that has nothing to do with the file: the description is fine and
+the reader is old. Separating it lets a caller say so.</p>
+<p><code>SCHEMAS</code> and <code>supports</code> on either dialect answer the same question before
+a file is written, which is the better place for a generator to ask it.
+Catching this is for the callers that would rather try.</p>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>src/py2tosc/errors.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-41">41</a></span>
+<span class="normal"><a href="#__codelineno-0-42">42</a></span>
+<span class="normal"><a href="#__codelineno-0-43">43</a></span>
+<span class="normal"><a href="#__codelineno-0-44">44</a></span>
+<span class="normal"><a href="#__codelineno-0-45">45</a></span>
+<span class="normal"><a href="#__codelineno-0-46">46</a></span>
+<span class="normal"><a href="#__codelineno-0-47">47</a></span>
+<span class="normal"><a href="#__codelineno-0-48">48</a></span>
+<span class="normal"><a href="#__codelineno-0-49">49</a></span>
+<span class="normal"><a href="#__codelineno-0-50">50</a></span>
+<span class="normal"><a href="#__codelineno-0-51">51</a></span>
+<span class="normal"><a href="#__codelineno-0-52">52</a></span>
+<span class="normal"><a href="#__codelineno-0-53">53</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="k">class</span><span class="w"> </span><span class="nc">SchemaError</span><span class="p">(</span><span class="n">FormatError</span><span class="p">):</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when a JSON dialect is handed a schema newer than it reads.</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43"></a>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">    Both dialects carry a schema number, and both refuse one above their own</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">    rather than guess at what a key they have never seen was meant to do. That</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">    failure is a `FormatError` like any other, but its remedy is the only one</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">    of them that has nothing to do with the file: the description is fine and</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">    the reader is old. Separating it lets a caller say so.</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">    `SCHEMAS` and `supports` on either dialect answer the same question before</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">    a file is written, which is the better place for a generator to ask it.</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a><span class="sd">    Catching this is for the callers that would rather try.</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">    &quot;&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
               </details>
 

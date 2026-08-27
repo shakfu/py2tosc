@@ -1542,6 +1542,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/render/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rendering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/surface/" class="md-nav__link">
         
   
@@ -1889,7 +1917,7 @@
 </tr>
 <tr>
 <td><code>schema</code></td>
-<td>The envelope version, currently <code>1</code>. A reader refuses a file that declares a higher one rather than guessing at it.</td>
+<td>The envelope version, currently <code>1</code>. A reader refuses a file that declares a higher one rather than guessing at it, and says so with a <code>SchemaError</code>. <code>py2tosc.json_codec.SCHEMAS</code> and <code>supports(n)</code> answer the same question without a file, for a program deciding what to write.</td>
 </tr>
 <tr>
 <td><code>lexml</code></td>

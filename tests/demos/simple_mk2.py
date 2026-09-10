@@ -69,7 +69,7 @@ def readout(
 ) -> Control:
     """A label a control writes its value into.
 
-    `interactive=False` is the load-bearing property. These sit on top of the
+    `interactive=False` is the structural property. These sit on top of the
     control they caption, and a label that stays interactive takes the touch
     instead of letting it through -- which leaves the fader underneath looking
     broken while nothing at all is wrong with its bindings.

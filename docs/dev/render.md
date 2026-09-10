@@ -4,7 +4,7 @@ Status: scope, nothing implemented. Written before the code so the decisions
 are arguable here rather than discovered halfway through, which is the shape
 minihost's `docs/dev/osc_and_touch.md` uses for the same reason.
 
-Goal: turn a resolved `Document` into a picture, with the seam for driving it
+Goal: turn a resolved `Document` into a picture, with the layer for driving it
 from live values decided now and built later.
 
 
@@ -248,7 +248,7 @@ What the suite can hold:
 
 ## 7. What interactive adds later, and where it attaches
 
-Recorded so the seam is deliberate, not so it gets built.
+Recorded so the layer is deliberate, not so it gets built.
 
 A live page needs three things this does not have: pointer handling that turns
 a drag into a value, a transport carrying that value somewhere, and feedback
